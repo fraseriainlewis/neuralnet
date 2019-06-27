@@ -1,9 +1,8 @@
 # neuralnet
-Examples of installing [mlpack](http://www.mlpack.org) from source and using via C++ to build and fit neural networks. 
+A compilation of simple examples of using C++ to build, optimize and fit different formulations of neural networks to data sets using the [mlpack](http://mlpack.org) library. 
 
-The installation example uses a Linux docker image [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) and [mlpack version 3.1.1](https://www.mlpack.org/files/mlpack-3.1.1.tar.gz). It is assumed docker is installed on the host OS (in this case macOS Mojave 10.14.5 and Docker Desktop Community edition 2.0.0.3, but this should work on any host system with a docker installation. It has also been tested on CentOS).  
-
-## in
+## Installation of MLPACK 
+We install [mlpack](http://mlpack.org) from source. Additional instructions are available on the [mlpack](http://mlpack.org) website. The steps given here are self-contained and based on some trial and error and in particular install [mlpack](http://mlpack.org) into a stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu). This is to allow full repeatability of the [mlpack](http://mlpack.org) installation independent of the local configuration of the host. It is assumed docker is installed on the host OS (in this case macOS Mojave 10.14.5 and Docker Desktop Community edition 2.0.0.3, but this should work on any host system with a docker installation. It has also been tested on Linux CentOS).  
 
 ```c++
 require 'redcarpet'
