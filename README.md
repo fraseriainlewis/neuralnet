@@ -1,7 +1,12 @@
 <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
 ## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and fit different formulations of neural networks to data
 
-## 1. Installation of [mlpack 3.1.1](http://mlpack.org)
+1. [Setup](#setup)
+2. [First example - linear regression](#lr)
+
+<a name="setup"></a>
+# 1. Setup
+## 1.1 Installation of [mlpack 3.1.1](http://mlpack.org)
 We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
 The code below assumes the top-level folder where [mlpack](http://mlpack.org) will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one where we will run commands on the host (e.g. macOS) and a second where we will run commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
@@ -38,7 +43,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 mlpack_random_forest --help
 # if this works then the installation was successful
 ```
-## 2. Clone this reposoitory 
+## 1.2 Clone this reposoitory 
 ```bash
 # open up a terminal on the host (e.g macOS) and navigate to where you want the repo to be located
 # e.g. $HOME/myrepos
@@ -46,7 +51,7 @@ mlpack_random_forest --help
 git clone https://github.com/fraseriainlewis/neuralnet.git
 ```
 
-## 3. Test compilation of a neural network C++ program 
+## 1.3 Test compilation of a neural network C++ program 
 ```bash
 # in the bash terminal in the guest (Ubuntu OS)
 cd /files/neuralnet
@@ -69,6 +74,8 @@ c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -l
 # if the above was successful then we can compile and run neural networks using mlpack
 ```
 
+<a name="lr"></a>
+# 2. First example - linear regression 
 
 ```c++
 require 'redcarpet'
