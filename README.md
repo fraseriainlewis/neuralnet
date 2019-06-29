@@ -1,7 +1,7 @@
 <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## A tutorial in using C++ [mlpack](http://mlpack.org) to build, optimize and fit different formulations of neural networks to data
+## A tutorial using C++ [mlpack](http://mlpack.org) to build, optimize and fit different formulations of neural networks to data
 
-## Installation of MLPACK 3.1.1
+## 1. Installation of MLPACK 3.1.1
 We install [mlpack](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS (in this case macOS Mojave 10.14.5 and [Docker Desktop Community edition 2.0.0.3](https://www.docker.com/products/docker-desktop), but this should work on any host system with a docker installation. It has also been tested on Linux CentOS).  
 
 The code snippet below assumes the top-level folder where mlpack will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one which runs commands on the host (e.g. macOS) and a second which runs commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
@@ -38,7 +38,7 @@ mlpack_random_forest --help
 # if this works then the installation was successful
 ```
 
-## Compiled a neural network C++ program 
+## 2. Compiled a neural network C++ program 
 ```bash
 # open up a terminal on the host (e.g macOS) and navigate to where
 # you want the repo to be located, e.g. $HOME/myrepos
