@@ -1,4 +1,4 @@
-# neuralnet
+# neuralnet <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
 A compilation of simple examples of using C++ to build, optimize and fit different formulations of neural networks to data sets using the [mlpack](http://mlpack.org) library. 
 
 ## Installation of MLPACK 3.1.1
