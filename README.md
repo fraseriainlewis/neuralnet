@@ -77,6 +77,7 @@ c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -l
 
 <a name="lr"></a>
 # 2. First example - linear regression 
+Linear regression is a simple special case of a neural network comprising of only one layer and an identity activation function. This is a useful starting point with mlpack, not only as the results can easily be compared with those from [R](http://www.r-project.org) but also it is 
 
 ```c++
 require 'redcarpet'
