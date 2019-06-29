@@ -5,12 +5,8 @@
 #include <ensmallen.hpp>
 #include <mlpack/prereqs.hpp>
 
-//#define private public 
-//model.network.[1].Parameters()
-
 using namespace mlpack;
 using namespace mlpack::ann;
-//using namespace mlpack::optimization;
 using namespace arma;
 using namespace std;
 
