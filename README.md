@@ -1,6 +1,7 @@
 <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and fit different formulations of neural networks to data
+## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and assess different formulations of neural networks
 
+**Table of contents**
 1. [Setup](#setup)
 2. [First example - linear regression](#lr)
 
