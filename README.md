@@ -152,7 +152,9 @@ model1.Train(trainData, trainLabels,opt);// this is the line which fits the mode
 arma::cout<<"-------final params------------------------"<<arma::endl;
 arma::cout << model1.Parameters() << arma::endl;
 ```
-``` bash
+output from the terminal is below. The first call to model1.Parameters() is empty as the parameters are initialized as part of the later call in model1.Train(). The second call to model1.Parameters() is after model1.Train() and prints the final estimated point estimates after the training has completed using RMSprop optimizer opt(). The last estimate - 0.4506 is the bias (i.e. intercept).   
+
+```bash
 -------empty params------------------------
 [matrix size: 0x0]
 
@@ -168,5 +170,33 @@ arma::cout << model1.Parameters() << arma::endl;
   -0.0009
    0.4506
 ```   
+If we now fit the same model using [R](https://www.r-project.org) 
+```R
+setwd("~/myrepos/neuralnet")
+features<-read.csv("trainfeatures.csv",header=FALSE)
+labels<-read.csv("trainlabels.csv",header=FALSE)
+dat<-data.frame(v0=labels$V1,features)
+summary(m1<-lm(v0~.,data=dat))
+```
+we get the following output
+```R
+Coefficients:
+  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  0.4505660  0.0005254 857.532  < 2e-16 ***
+  V1          -0.0101349  0.0009971 -10.164  < 2e-16 ***
+  V2          -0.0017885  0.0007453  -2.400   0.0166 *  
+  V3           0.0035829  0.0008267   4.334 1.60e-05 ***
+  V4           0.0086919  0.0006017  14.445  < 2e-16 ***
+  V5           0.0043800  0.0008810   4.972 7.75e-07 ***
+  V6          -0.0044441  0.0006237  -7.126 1.92e-12 ***
+  V7          -0.0035639  0.0006712  -5.309 1.34e-07 ***
+  V8          -0.0045785  0.0006028  -7.596 6.76e-14 ***
+  V9          -0.0008069  0.0007316  -1.103   0.2704    
+---
+  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-
+Residual standard error: 0.01711 on 1050 degrees of freedom
+Multiple R-squared:  0.6097,	Adjusted R-squared:  0.6064 
+F-statistic: 182.3 on 9 and 1050 DF,  p-value: < 2.2e-16
+```
+The point estimates from R are almost identical to those from mlpack as should be the case. They will not be identical as different optimizers are used (with different error tolerances and parameters).
