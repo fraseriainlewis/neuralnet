@@ -123,5 +123,22 @@ Define a simple linear regression model as an instance of the class FNN - (FNN=F
 FFN<MeanSquaredError<>,ConstInitialization> model1(MeanSquaredError<>(),ConstInitialization(0.9));
 // build layers - one linear layer and then the identity activation.
 model1.Add<Linear<> >(trainData.n_rows,1);// trainData.n_rows is the no. of variables in the regression
+// note mlpack matrices (armadillo library) are column major -> rows are variables, cases are columns 
 model1.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
+```
+
+We have defined the model we now define the optimizer to be used to fit the model to the data. The [ensmallen](https://www.ensmallen.org) library is used and the documentation of options can be found there. The options chosen here, for example shuffle=false and restartPolicy=true are explained later and changed in later examples.
+
+```c++
+// set up optimizer - we create an object called opt of class RMSProp
+// doc at https://ensmallen.org/docs.html#rmsprop
+ens::RMSProp opt(0.01, trainData.n_cols, 0.99, 1e-8, 0, 1e-8,false,true); 
+                 // 1st stepSize = default
+                 // 2nd batch size = all data points at once (so no batching)
+                 // 3rd alpha, smoothing constant = default
+                 // 4th epsilon, initialise the mean squared gradient parameter = default
+                 // 5th max iterations (0 = no limit) 
+                 // 6th max absolute tolerance to terminate algorithm.
+                 // 7th function order of evaluation is shuffled (diff separable functions) = false 
+                 // 8th resetPolicy if true parameters are reset on each call to opt() = false
 ```
