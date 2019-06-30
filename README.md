@@ -3,7 +3,7 @@
 
 **Table of contents**
 1. [Setup](#setup)
-2. [First example - linear regression](#lr)
+2. [Example 1 - linear regression](#lr)
 
 <a name="setup"></a>
 # 1. Setup
@@ -76,19 +76,20 @@ c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -l
 ```
 
 <a name="lr"></a>
-# 2. First example - linear regression 
-Linear regression is a simple special case of a neural network comprising of only one layer and an identity activation function. This is a useful starting point with mlpack because rather than focus on the model structure we can learn and test how the functions with fit the model operate without being concerned that difficult behaviour is due complexity numerical behaviour of the model.
+# 2. Example 1 - linear regression 
+Linear regression is a simple special case of a neural network comprising of only one layer and an identity activation function. This is a useful starting point for learning mlpack because rather than focus on the model structure we can learn and test how the functions which fit the model operate, without being concerned about complex numerical behaviour from the model. This example fits a single model to data and focuses on the optimizer options and how to ensure we have repeatable results.
 
-* **Optimizer results** 
+* **Optimizer configuration** Many different options
 
-   *Parameter estimates* (weights) - can easily be compared with those from [R](http://www.r-project.org) as a check that the neural network is designed as expected.  
-   *Optimizer options* such as what starting conditions are possible and how to set them 
+   *Parameter estimates* (weights) -  for linear regression these can easily be compared with those from [R](http://www.r-project.org) as a check that the optimization is operating as expected.  
+   *Optimizer options* - such as type of optimizer, error tolerances and start/re-start conditions
 
-* **Repeatability** 
+* **Repeatability** It is essential to be able to repeat analyses exactly
 
-   It is important to be able to repeat analyses exactly, for example when initial starting values for weights are set randomly and when the
-   such as what starting conditions are possible and how to set them 
-* df
+   *Initial estimates/conditions* - for example initial starting values for weights may be set randomly or can be user-specified 
+   
+   *Additional iterations* - controlling what happens with future calls to the optimizer, e.g. does it start from current best estimates or else re-start from fresh estimates. 
+  
 
 ```c++
 require 'redcarpet'
