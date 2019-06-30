@@ -127,7 +127,7 @@ model1.Add<Linear<> >(trainData.n_rows,1);// trainData.n_rows is the no. of vari
 model1.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 ```
 
-We have defined the model we now define the optimizer to be used to fit the model to the data. The [ensmallen](https://www.ensmallen.org) library is used and the documentation of options can be found there. The options chosen here, for example shuffle=false and restartPolicy=true are explained later and changed in later examples.
+We have defined the model, we now define the optimizer to be used to fit the model to the data. The [ensmallen](https://www.ensmallen.org) library is used and the documentation of options can be found there. The options chosen here, for example shuffle=false and restartPolicy=true are explained later and changed in later examples.
 
 ```c++
 // set up optimizer - we create an object called opt of class RMSProp
@@ -142,3 +142,31 @@ ens::RMSProp opt(0.01, trainData.n_cols, 0.99, 1e-8, 0, 1e-8,false,true);
                  // 7th function order of evaluation is shuffled (diff separable functions) = false 
                  // 8th resetPolicy if true parameters are reset on each call to opt() = false
 ```
+Now fit the model and example output - the estimated regression parameters
+``` c++
+arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
+arma::cout << model1.Parameters() << arma::endl;
+
+model1.Train(trainData, trainLabels,opt);// this is the line which fits the model
+
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+```
+``` bash
+-------empty params------------------------
+[matrix size: 0x0]
+
+-------final params------------------------
+  -0.0096
+  -0.0018
+   0.0039
+   0.0086
+   0.0046
+  -0.0045
+  -0.0035
+  -0.0047
+  -0.0009
+   0.4506
+```   
+
+
