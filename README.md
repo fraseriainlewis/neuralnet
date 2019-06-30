@@ -90,9 +90,38 @@ Linear regression is a simple special case of a neural network comprising of onl
    
    *Additional iterations* - controlling what happens with future calls to the optimizer, e.g. does it start from current best estimates or else re-start from fresh estimates. 
   
+## 2.1 Code
+This example uses **linReg_ex1.cpp** which is in the repo, only relevant snippets are given below.
 
 ```c++
-require 'redcarpet'
-markdown = Redcarpet.new("Hello World!")
-puts markdown.to_html
+#include <mlpack/methods/ann/layer/layer.hpp>
+#include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
+#include <mlpack/methods/ann/init_rules/const_init.hpp>
+#include <mlpack/methods/ann/ffn.hpp>
+#include <ensmallen.hpp>
+#include <mlpack/prereqs.hpp>
+
+using namespace mlpack;
+using namespace mlpack::ann;
+using namespace arma;
+using namespace std;
+
+int main()
+{
+// set the random number seed - e.g. for random starting points in optimizer or shuffling data points
+arma::arma_rng::set_seed(100); // hard code the seed for repeatability of random numbers
+//arma::arma_rng::set_seed_random(); // uncomment to allow new random stream on each run of the program
+```
+
+Define a simple linear regression model as an instance of the class FNN - (FNN=Forward Feed Neural Network). This class belongs inside the ANN namespace in mlpack (ANN=Artificial Neural Network). 
+
+```c++
+/*************************************************************************************************/
+/* Loss criteria used is mean squared error(MSE) - a regression problem,                         */
+/* and the weights are initialized all to constant=0.9.                                          */
+/*************************************************************************************************/
+FFN<MeanSquaredError<>,ConstInitialization> model1(MeanSquaredError<>(),ConstInitialization(0.9));
+// build layers - one linear layer and then the identity activation.
+model1.Add<Linear<> >(trainData.n_rows,1);// trainData.n_rows is the no. of variables in the regression
+model1.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 ```
