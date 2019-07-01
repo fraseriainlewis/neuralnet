@@ -55,7 +55,7 @@ FFN<MeanSquaredError<>,ConstInitialization> model1(MeanSquaredError<>(),ConstIni
 model1.Add<Linear<> >(trainData.n_rows,1);
 model1.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 // set up optimizer 
-ens::RMSProp opt(0.01, 1060, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::RMSProp opt(0.01, trainData.n_cols, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
                  // 2nd arg is batch size,
                  // 5th arg is max iterations (0=no limit) 
                  // 6th is tolerance 
@@ -122,7 +122,7 @@ ens::RMSProp opt3(0.01, 1060, 0.99, 1e-8, 10000,1e-8,false,true); //https://ensm
                  // 7th shuffle = false
                  // 8th clean re-start policy = true
 
-arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
+arma::cout<<"-------empty (use random starts) params------------------------"<<arma::endl;//empty params as not yet allocated
 arma::cout << model3.Parameters() << arma::endl;
 model3.Train(trainData, trainLabels,opt3);
 arma::cout<<"-------final params------------------------"<<arma::endl;
@@ -131,7 +131,7 @@ arma::cout << model3.Parameters() << arma::endl;
 arma::arma_rng::set_seed(100);
 model3.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
                          // to continue with optim from previous solution use clean re-start policy = false and do not reset
-arma::cout<<"-------re-start params------------------------"<<arma::endl;
+arma::cout<<"-------re-start params random start------------------------"<<arma::endl;
 arma::cout << model3.Parameters() << arma::endl;
 model3.Train(trainData, trainLabels,opt3);
 arma::cout<<"-------re-start final params------------------------"<<arma::endl;
@@ -140,7 +140,7 @@ arma::cout << model3.Parameters() << arma::endl;
 arma::arma_rng::set_seed(100);
 model3.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
                          // to continue with optim from previous solution use clean re-start policy = false and do not reset
-arma::cout<<"-------re-start params------------------------"<<arma::endl;
+arma::cout<<"-------re-start params random start------------------------"<<arma::endl;
 arma::cout << model3.Parameters() << arma::endl;
 model3.Train(trainData, trainLabels,opt3);
 arma::cout<<"-------re-start final params------------------------"<<arma::endl;
