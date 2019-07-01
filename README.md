@@ -90,7 +90,7 @@ Linear regression is a simple special case of a neural network comprising of onl
    
    *Additional iterations* - controlling what happens with future calls to the optimizer, e.g. does it start from current best estimates or else re-start from fresh estimates. 
   
-## 2.1 Code
+## 2.1 Code run through and check with R
 This example uses **linReg_ex1.cpp** which is in the repo, only relevant snippets are given below.
 
 ```c++
@@ -199,4 +199,205 @@ Residual standard error: 0.01711 on 1050 degrees of freedom
 Multiple R-squared:  0.6097,	Adjusted R-squared:  0.6064 
 F-statistic: 182.3 on 9 and 1050 DF,  p-value: < 2.2e-16
 ```
-The point estimates from R are almost identical to those from mlpack as should be the case. They will not be identical as different optimizers are used (with different error tolerances and parameters).
+The point estimates from R are almost identical to those from mlpack. They will not be identical as different optimizers are used (with different error tolerances and parameters) in addition to the usual caveats of comparing floating point estimates between programs and architectures. 
+
+As a final part of the above code if we want to repeat the same model fitting - exactly - from same initial starting conditions as above then we need to reset the model parameters to the same initial condition rule *ConstInitialization(0.9)* and we must ensure that the resetPolicy argument in the call to the *ens::RMSProp* object opt() is set to true (it is in the above code). 
+
+``` c++
+model1.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
+                         // to continue with optim from previous solution use clean re-start policy = false and do not reset
+arma::cout<<"-------re-start params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+model1.Train(trainData, trainLabels,opt);
+arma::cout<<"-------re-start final params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+```
+which gives output identical to above but this time we also see the initialize parameters before fitting
+```bash
+-------re-start params------------------------
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+   0.9000
+
+-------re-start final params------------------------
+  -0.0096
+  -0.0018
+   0.0039
+   0.0086
+   0.0046
+  -0.0045
+  -0.0035
+  -0.0047
+  -0.0009
+   0.4506
+```
+
+## 2.2 Start model fit optimization from matrix of parameters
+This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. A key part in the snipper below is the *model2.Evaluate(trainData, trainLabels)* which allocates a matrix of initial values which can then be over-written with new custom value before any training commences.  
+
+``` c++
+// PART 2 - manually starting set weights
+std::cout<<"----- PART 2 ------"<<std::endl;
+// initialise weights to a constant and use MSE as the loss function
+FFN<MeanSquaredError<>,ConstInitialization> model2(MeanSquaredError<>(),ConstInitialization(0.9));
+// build layers
+Linear<>* linearModule = new Linear<>(trainData.n_rows,1);
+model2.Add(linearModule);
+model2.Add<IdentityLayer<> >();
+
+model2.Evaluate(trainData, trainLabels);// allocated matrix which can then be updated with custom starting values
+arma::mat inits(trainData.n_rows+1,1);
+for(i=0;i<10;i++){inits(i,0)=0.05;} //create starting values for the weights, could be all different
+
+linearModule->Parameters() = std::move(inits); //using move to avoid memory waste
+
+arma::cout<<"-------manual set init params------------------------"<<arma::endl;//empty params as not yet allocated
+arma::cout << model2.Parameters() << arma::endl;
+
+// set up optimizer 
+ens::RMSProp opt2(0.01, 1060, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+                 
+model2.Train(trainData, trainLabels,opt2);
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model2.Parameters() << arma::endl;
+```
+Which gives output
+```bash
+-------manual set init params------------------------
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+   0.0500
+
+-------final params------------------------
+  -0.0098
+  -0.0018
+   0.0037
+   0.0087
+   0.0047
+  -0.0044
+  -0.0036
+  -0.0046
+  -0.0008
+   0.4506
+```
+The final solution is similar but not absolutely identical to above, rounding errors.
+
+## 2.3 Start model fit optimization from random parameters
+This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. This uses a different initialization rule when creating the FNN object, and uses a seed reset to show how to get repeatable results
+
+```c++
+// PART 3 - random starting weights
+std::cout<<"----- PART 3 ------"<<std::endl;
+// initialise weights to a constant and use MSE as the loss function
+FFN<MeanSquaredError<>,RandomInitialization> model3(MeanSquaredError<>(),RandomInitialization(-1.0,1.0));
+// build layers
+model3.Add<Linear<> >(trainData.n_rows,1);
+model3.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
+// set up optimizer 
+ens::RMSProp opt3(0.01, 1060, 0.99, 1e-8, 10000,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+
+arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
+arma::cout << model3.Parameters() << arma::endl;
+model3.Train(trainData, trainLabels,opt3);
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model3.Parameters() << arma::endl;
+
+arma::arma_rng::set_seed(100);
+model3.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
+                         // to continue with optim from previous solution use clean re-start policy = false and do not reset
+arma::cout<<"-------re-start params------------------------"<<arma::endl;
+arma::cout << model3.Parameters() << arma::endl;
+model3.Train(trainData, trainLabels,opt3);
+arma::cout<<"-------re-start final params------------------------"<<arma::endl;
+arma::cout << model3.Parameters() << arma::endl;
+
+arma::arma_rng::set_seed(100);
+model3.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
+                         // to continue with optim from previous solution use clean re-start policy = false and do not reset
+arma::cout<<"-------re-start params------------------------"<<arma::endl;
+arma::cout << model3.Parameters() << arma::endl;
+model3.Train(trainData, trainLabels,opt3);
+arma::cout<<"-------re-start final params------------------------"<<arma::endl;
+arma::cout << model3.Parameters() << arma::endl;
+```
+Which produces output
+
+```bash
+----- PART 3 ------
+-------empty (use random starts) params------------------------
+[matrix size: 0x0]
+
+-------final params------------------------
+   0.6245
+  -0.0483
+   0.6581
+  -0.3430
+   0.5716
+  -0.2199
+   0.5118
+  -0.0134
+   0.3289
+   0.4951
+
+-------re-start params random start------------------------
+   0.9233
+  -0.3528
+   0.9464
+  -0.7423
+   0.8032
+  -0.0079
+   0.9113
+   0.3833
+   0.7071
+   0.8185
+
+-------re-start final params------------------------
+   0.6245
+  -0.0483
+   0.6581
+  -0.3430
+   0.5716
+  -0.2199
+   0.5118
+  -0.0134
+   0.3289
+   0.4951
+
+-------re-start params random start------------------------
+   0.9233
+  -0.3528
+   0.9464
+  -0.7423
+   0.8032
+  -0.0079
+   0.9113
+   0.3833
+   0.7071
+   0.8185
+
+-------re-start final params------------------------
+   0.6245
+  -0.0483
+   0.6581
+  -0.3430
+   0.5716
+  -0.2199
+   0.5118
+  -0.0134
+   0.3289
+   0.4951
+```
