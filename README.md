@@ -3,7 +3,13 @@
 
 **Table of contents**
 1. [Setup](#setup)
-2. [Example 1 - linear regression comparison with R](#lr)   
+2. [Example 1 - Linear Regression](#lr) 
+
+   2.1 [Comparison with R](#lr1) 
+   
+   2.2 [Set custom initial conditions](#lr2) 
+   
+   2.3 [Set random initial conditions](#lr3)
 
 <a name="setup"></a>
 # 1. Setup
@@ -89,7 +95,7 @@ Linear regression is a simple special case of a neural network comprising of onl
    *Initial estimates/conditions* - for example initial starting values for weights may be set randomly or can be user-specified 
    
    *Additional iterations* - controlling what happens with future calls to the optimizer, e.g. does it start from current best estimates or else re-start from fresh estimates. 
-  
+<a name="lr1"></a>  
 ## 2.1 Code run through and check with R
 This example uses **linReg_ex1.cpp** which is in the repo, only relevant snippets are given below.
 
@@ -238,7 +244,7 @@ which gives output identical to above but this time we also see the initialize p
   -0.0009
    0.4506
 ```
-
+<a name="lr2"></a> 
 ## 2.2 Start model fit optimization from matrix of parameters
 This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. A key part in the snipper below is the *model2.Evaluate(trainData, trainLabels)* which allocates a matrix of initial values which can then be over-written with new custom value before any training commences.  
 
@@ -295,7 +301,7 @@ Which gives output
    0.4506
 ```
 The final solution is similar but not absolutely identical to above, rounding errors.
-
+<a name="lr3"></a> 
 ## 2.3 Start model fit optimization from random parameters
 This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. This uses a different initialization rule when creating the FNN object, and uses a seed reset to show how to get repeatable results
 
