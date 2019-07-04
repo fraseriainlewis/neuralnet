@@ -3,12 +3,7 @@
 
 **Table of contents**
 1. [Setup](#setup)
-2 Example 1 - linear regression comparison with R   
-
-...Results Comparison with R 
-
-2.2 [Set custom initial weights](#lr2) 
-2.3 [Set random weights](#lr3)
+2. [Example 1 - linear regression comparison with R](#lr)   
 
 <a name="setup"></a>
 # 1. Setup
