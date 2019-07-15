@@ -7,9 +7,9 @@
 
    2.1 [Comparison with R](#lr1) 
    
-   2.2 [Set custom initial conditions](#lr2) 
+   2.2 [with custom initial weights ](#lr2) 
    
-   2.3 [Set random initial conditions](#lr3)
+   2.3 [with random initial weights](#lr3)
 
 <a name="setup"></a>
 # 1. Setup
