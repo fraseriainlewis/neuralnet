@@ -205,7 +205,7 @@ Residual standard error: 0.9758 on 990 degrees of freedom
 Multiple R-squared:  0.9978,	Adjusted R-squared:  0.9978 
 F-statistic: 5.035e+04 on 9 and 990 DF,  p-value: < 2.2e-16
 ```
-The point estimates from R are almost identical to those from mlpack. They will not be identical as different optimizers are used (with different error tolerances and parameters) in addition to the usual caveats of comparing floating point estimates between programs and architectures. 
+The point estimates from R are almost identical to those from mlpack. They will not be identical as different optimizers are used (with different error tolerances and parameters) in addition to the usual caveats of comparing floating point estimates between programs and architectures. The R-squared is very high because this is simulated data and the additive model used here is the true generating model. 
 
 As a final part of the above code if we want to repeat the same model fitting - exactly - from same initial starting conditions as above then we need to reset the model parameters to the same initial condition rule *ConstInitialization(0.9)* and we must ensure that the resetPolicy argument in the call to the *ens::RMSProp* object opt() is set to true (it is in the above code). 
 
