@@ -22,12 +22,12 @@ arma::arma_rng::set_seed(100);
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
 int i=0;
-data::Load("trainfeatures.csv", trainData, true);
-data::Load("trainlabels.csv", trainLabels, true);// regression response
+data::Load("features.csv", trainData, true);
+data::Load("labelsL1.csv", trainLabels, true);// regression response
 
 // print out to check the data is read in correctly
-arma::cout << "n rows="<<trainData.n_rows <<"n cols="<< trainData.n_cols << arma::endl;
-arma::cout << "n rows="<< trainLabels.n_rows <<"n cols"<< trainLabels.n_cols << arma::endl;
+arma::cout << "n rows="<<trainData.n_rows <<" n cols="<< trainData.n_cols << arma::endl;
+arma::cout << "n rows="<< trainLabels.n_rows <<" n cols"<< trainLabels.n_cols << arma::endl;
 
 std::cout<<"First 10 Labels:"<<std::endl;
 for(i=0;i<10;i++){
