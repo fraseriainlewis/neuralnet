@@ -62,22 +62,22 @@ git clone https://github.com/fraseriainlewis/neuralnet.git
 ```bash
 # in the bash terminal in the guest (Ubuntu OS)
 cd /files/neuralnet
-c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -lmlpack
+c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp
 # this should create executable linReg1 with no errors or warnings
 ./linReg_ex1
-# which should print output to the terminal.
+# which should print output to the terminal and the last part should be as below
 ....
 -------re-start final params------------------------
-   0.6245
-  -0.0483
-   0.6581
-  -0.3430
-   0.5716
-  -0.2199
-   0.5118
-  -0.0134
-   0.3289
-   0.4951
+   0.4838
+  -0.8266
+   1.4217
+  -0.2708
+   0.3052
+  -0.0655
+   1.4153
+  -0.0805
+   0.4420
+   1.2825
 # if the above was successful then we can compile and run neural networks using mlpack
 ```
 
@@ -158,52 +158,52 @@ model1.Train(trainData, trainLabels,opt);// this is the line which fits the mode
 arma::cout<<"-------final params------------------------"<<arma::endl;
 arma::cout << model1.Parameters() << arma::endl;
 ```
-output from the terminal is below. The first call to model1.Parameters() is empty as the parameters are initialized as part of the later call in model1.Train(). The second call to model1.Parameters() is after model1.Train() and prints the final estimated point estimates after the training has completed using RMSprop optimizer opt(). The last estimate - 0.4506 is the bias (i.e. intercept).   
+output from the terminal is below. The first call to model1.Parameters() is empty as the parameters are initialized as part of the later call in model1.Train(). The second call to model1.Parameters() is after model1.Train() and prints the final estimated point estimates after the training has completed using RMSprop optimizer opt(). The last estimate - 2.1024 is the bias (i.e. intercept).   
 
 ```bash
 -------empty params------------------------
 [matrix size: 0x0]
 
 -------final params------------------------
-  -0.0096
-  -0.0018
-   0.0039
-   0.0086
-   0.0046
-  -0.0045
-  -0.0035
-  -0.0047
-  -0.0009
-   0.4506
+    1.0222
+   -2.5820
+    2.9369
+    0.5715
+   -5.8861
+   -0.8739
+   20.1051
+   -1.5223
+    0.3459
+    2.1024
 ```   
 If we now fit the same model using [R](https://www.r-project.org) 
 ```R
 setwd("~/myrepos/neuralnet")
-features<-read.csv("trainfeatures.csv",header=FALSE)
-labels<-read.csv("trainlabels.csv",header=FALSE)
+features<-read.csv("features.csv",header=FALSE)
+labels<-read.csv("labelsL1.csv",header=FALSE)
 dat<-data.frame(v0=labels$V1,features)
 summary(m1<-lm(v0~.,data=dat))
 ```
 we get the following output
 ```R
 Coefficients:
-  Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  0.4505660  0.0005254 857.532  < 2e-16 ***
-  V1          -0.0101349  0.0009971 -10.164  < 2e-16 ***
-  V2          -0.0017885  0.0007453  -2.400   0.0166 *  
-  V3           0.0035829  0.0008267   4.334 1.60e-05 ***
-  V4           0.0086919  0.0006017  14.445  < 2e-16 ***
-  V5           0.0043800  0.0008810   4.972 7.75e-07 ***
-  V6          -0.0044441  0.0006237  -7.126 1.92e-12 ***
-  V7          -0.0035639  0.0006712  -5.309 1.34e-07 ***
-  V8          -0.0045785  0.0006028  -7.596 6.76e-14 ***
-  V9          -0.0008069  0.0007316  -1.103   0.2704    
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  2.10739    0.03086   68.29   <2e-16 ***
+V1           1.02055    0.03102   32.90   <2e-16 ***
+V2          -2.58056    0.03100  -83.24   <2e-16 ***
+V3           2.93324    0.03100   94.61   <2e-16 ***
+V4           0.57531    0.03098   18.57   <2e-16 ***
+V5          -5.88210    0.03098 -189.89   <2e-16 ***
+V6          -0.86965    0.03101  -28.05   <2e-16 ***
+V7          20.10959    0.03106  647.39   <2e-16 ***
+V8          -1.51738    0.03101  -48.93   <2e-16 ***
+V9           0.34401    0.03108   11.07   <2e-16 ***
 ---
-  Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 0.01711 on 1050 degrees of freedom
-Multiple R-squared:  0.6097,	Adjusted R-squared:  0.6064 
-F-statistic: 182.3 on 9 and 1050 DF,  p-value: < 2.2e-16
+Residual standard error: 0.9758 on 990 degrees of freedom
+Multiple R-squared:  0.9978,	Adjusted R-squared:  0.9978 
+F-statistic: 5.035e+04 on 9 and 990 DF,  p-value: < 2.2e-16
 ```
 The point estimates from R are almost identical to those from mlpack. They will not be identical as different optimizers are used (with different error tolerances and parameters) in addition to the usual caveats of comparing floating point estimates between programs and architectures. 
 
@@ -233,16 +233,16 @@ which gives output identical to above but this time we also see the initialize p
    0.9000
 
 -------re-start final params------------------------
-  -0.0096
-  -0.0018
-   0.0039
-   0.0086
-   0.0046
-  -0.0045
-  -0.0035
-  -0.0047
-  -0.0009
-   0.4506
+    1.0222
+   -2.5820
+    2.9369
+    0.5715
+   -5.8861
+   -0.8739
+   20.1051
+   -1.5223
+    0.3459
+    2.1024
 ```
 <a name="lr2"></a> 
 ## 2.2 Start model fit optimization from matrix of parameters
@@ -289,16 +289,16 @@ Which gives output
    0.0500
 
 -------final params------------------------
-  -0.0098
-  -0.0018
-   0.0037
-   0.0087
-   0.0047
-  -0.0044
-  -0.0036
-  -0.0046
-  -0.0008
-   0.4506
+    1.0157
+   -2.5864
+    2.9313
+    0.5778
+   -5.8802
+   -0.8699
+   20.1108
+   -1.5202
+    0.3399
+    2.1024
 ```
 The final solution is similar but not absolutely identical to above, rounding errors.
 <a name="lr3"></a> 
@@ -348,16 +348,16 @@ Which produces output
 [matrix size: 0x0]
 
 -------final params------------------------
-   0.6245
-  -0.0483
-   0.6581
-  -0.3430
-   0.5716
-  -0.2199
-   0.5118
-  -0.0134
-   0.3289
-   0.4951
+   0.4838
+  -0.8266
+   1.4217
+  -0.2708
+   0.3052
+  -0.0655
+   1.4153
+  -0.0805
+   0.4420
+   1.2825
 
 -------re-start params random start------------------------
    0.9233
@@ -372,16 +372,16 @@ Which produces output
    0.8185
 
 -------re-start final params------------------------
-   0.6245
-  -0.0483
-   0.6581
-  -0.3430
-   0.5716
-  -0.2199
-   0.5118
-  -0.0134
-   0.3289
-   0.4951
+   0.4838
+  -0.8266
+   1.4217
+  -0.2708
+   0.3052
+  -0.0655
+   1.4153
+  -0.0805
+   0.4420
+   1.2825
 
 -------re-start params random start------------------------
    0.9233
@@ -396,14 +396,14 @@ Which produces output
    0.8185
 
 -------re-start final params------------------------
-   0.6245
-  -0.0483
-   0.6581
-  -0.3430
-   0.5716
-  -0.2199
-   0.5118
-  -0.0134
-   0.3289
-   0.4951
+   0.4838
+  -0.8266
+   1.4217
+  -0.2708
+   0.3052
+  -0.0655
+   1.4153
+  -0.0805
+   0.4420
+   1.2825
 ```
