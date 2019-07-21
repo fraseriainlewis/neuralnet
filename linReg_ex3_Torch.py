@@ -18,9 +18,9 @@ labels=pd.read_csv("labelsL1.csv",delimiter=",",header=None)
 labelsnp=(labels.to_numpy())
 y = torch.from_numpy(labelsnp).double()
 
-#my_x1 = utils.TensorDataset(x1) # create your datset
+my_dataset = utils.TensorDataset(x,y) # create your datset
 
-#my_dataloader = utils.DataLoader(my_dataset) # create your dataloader
+dataset = utils.DataLoader(my_dataset,batch_size=50) # create your dataloader
 
 #x = utils.DataLoader(x1, batch_size=32, shuffle=False)
 
@@ -54,38 +54,22 @@ abserror=1e-05
 maxiters=500
 
 for t in range(maxiters):
-    for input, targets in zip(x.split(32),
-                              y.split(32)):
-        # Forward pass: compute predicted y by passing x to the model.
-        y_pred = model(input)
-        # Compute and print loss.
-        loss = loss_fn(y_pred, targets)
-
-        #if np.absolute(curloss-loss.item()) <abserror:
-        # have good enough solution so stop
-        #    print("iter=",t," ","loss=",loss.item(),"\n")
-        #    break
-        #else: 
-        #    curloss=loss.item() # copy loss
-
-        #if ((t%100)==0):
-        #    print(t, loss.item())
-
-        # Before the backward pass, use the optimizer object to zero all of the
-        # gradients for the variables it will update (which are the learnable
-        # weights of the model). This is because by default, gradients are
-        # accumulated in buffers( i.e, not overwritten) whenever .backward()
-        # is called. Checkout docs of torch.autograd.backward for more details.
+    running_loss=0.0
+    i=0
+    for input, target in dataset:
         optimizer.zero_grad()
-
-        # Backward pass: compute gradient of the loss with respect to model
-        # parameters
+        output = model(input)
+        loss = loss_fn(output, target)
         loss.backward()
-
-        # Calling the step function on an Optimizer makes an update to its
-        # parameters
         optimizer.step()
-    print("loss=",loss.item(),"\n")
+        # print statistics
+        running_loss += loss.item()
+        if i % 20 == (20-1):    # print every 10 mini-batches
+            print('[%d, %5d] loss: %.3f' %
+                  (t + 1, i + 1, running_loss))
+            running_loss = 0.0
+        i=i+1  
+
 
 # print out parameters
 print("---PARAMETERS-----\n")
