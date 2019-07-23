@@ -14,13 +14,13 @@ features=pd.read_csv("features.csv",delimiter=",",header=None)
 featuresnp=(features.to_numpy())
 x = torch.from_numpy(featuresnp).double() # the cast to double is needed
 
-labels=pd.read_csv("labelsL1.csv",delimiter=",",header=None)
+labels=pd.read_csv("labelsNL1.csv",delimiter=",",header=None)
 labelsnp=(labels.to_numpy())
 y = torch.from_numpy(labelsnp).double()
 
 my_dataset = utils.TensorDataset(x,y) # create your datset
 
-dataset = utils.DataLoader(my_dataset,batch_size=50) # create your dataloader
+dataset = utils.DataLoader(my_dataset,batch_size=32) # create your dataloader
 
 #x = utils.DataLoader(x1, batch_size=32, shuffle=False)
 
@@ -36,8 +36,8 @@ D_in, H, D_out = 9, 1, 1
 # Use the nn package to define our model and loss function.
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
-    #torch.nn.Sigmoid(),
-    #torch.nn.Linear(H, D_out)
+    torch.nn.Sigmoid(),
+    torch.nn.Linear(H, D_out)
 )
 loss_fn = torch.nn.MSELoss(reduction='sum')
 
@@ -47,11 +47,11 @@ model=model.double()
 # the model for us. Here we will use Adam; the optim package contains many other
 # optimization algoriths. The first argument to the Adam constructor tells the
 # optimizer which Tensors it should update.
-learning_rate = 1e-2
+learning_rate = 1e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 curloss=1e+300
-abserror=1e-05
-maxiters=500
+abserror=1e-07
+maxiters=10000
 
 for t in range(maxiters):
     running_loss=0.0
@@ -64,11 +64,21 @@ for t in range(maxiters):
         optimizer.step()
         # print statistics
         running_loss += loss.item()
-        if i % 20 == (20-1):    # print every 10 mini-batches
-            print('[%d, %5d] loss: %.3f' %
-                  (t + 1, i + 1, running_loss))
-            running_loss = 0.0
+        #if i % 25 == (25-1):    # print every 25 mini-batches
+        #    print('[%d, %5d] loss: %.3f' %
+        #          (t + 1, i + 1, running_loss))
+        #    #running_loss = 0.0
         i=i+1  
+    #print("t=",t," ",i," ",running_loss)
+    if np.absolute(running_loss-curloss) <abserror:
+        # have good enough solution so stop
+        print("BREAK: iter=",t," ","loss=",running_loss,"\n")
+        break
+    else: 
+        curloss=running_loss # copy loss
+
+    if ((t%100)==0):
+        print(t, curloss)
 
 
 # print out parameters

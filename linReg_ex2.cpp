@@ -54,7 +54,7 @@ std::cout<<"----- PART 1 ------"<<std::endl;
 FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
 // build layers
 const size_t outputSize=1;
-const size_t hiddenLayerSize=2;
+const size_t hiddenLayerSize=1;
 
 model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize);
 model1.Add<SigmoidLayer<> >();
