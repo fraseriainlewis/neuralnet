@@ -503,7 +503,7 @@ The parameters are all the weights and biases from each of the hidden and output
 ## 3.2 PyTorch version
 This example uses **ffn_ex1_torch.py** to repeat the same neural network as in Section 3.1 but using PyTorch. The complete code listing is given below. The optimizer used is Adam, same as in 3.1, and in particular this using batching of results and batch size=32. Implementing batching requires some care and the *DataLoader* class was used. Agruably the simplest option for reading in data from csv is to use pandas, then coerce to numpy array then coerce into a PyTorch tensor, as functions exist for each of these coercions. The disadvantage of this approach is that the assumptions then used by PyTorch as to batch size, specifically how many data points are processed in a batch and therefore how much data is used to do weight updating during the optimization/training stage is implicity and unclear. Using *DataLoader* allows a specific batch size to be specified. 
 
-One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. Note this code takes quite some minutes to run. 
+One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. The parameters in the Adam optimizer are the same as those used in mlpack but with different starting conditions for the weights, each are started randomly with a fixed seed. Note this code takes quite some minutes to run. 
 
 ```python
 # -*- coding: utf-8 -*-
@@ -575,10 +575,6 @@ for t in range(maxiters): # for each epoch - all training data run through once
         optimizer.step()
         # print statistics
         running_loss += loss.item()
-        #if i % 25 == (25-1):    # print every 25 mini-batches
-        #    print('[%d, %5d] loss: %.3f' %
-        #          (t + 1, i + 1, running_loss))
-        #    #running_loss = 0.0
         i=i+1  
     #print("t=",t," ",i," ",running_loss)
     if np.absolute(running_loss-curloss) <abserror:
