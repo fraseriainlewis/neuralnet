@@ -53,6 +53,7 @@ std::cout<<"----- PART 1 ------"<<std::endl;
 // initialise weights to a constant and use MSE as the loss function
 FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
 // build layers
+const size_t inputSize=trainData.n_rows;// 9 
 const size_t outputSize=1;
 const size_t hiddenLayerSize=2;
 
