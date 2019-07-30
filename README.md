@@ -429,8 +429,8 @@ Which produces output
 <a name="fnn1"></a>
 # 3. Example 2 - Two-layer forward feed network
 We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
-<a name="lr3"></a> 
 
+<a name="fnn11"></a> 
 ## 3.1 mlpack version
 This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. The code snippet below shows the model definition.
 
@@ -498,3 +498,104 @@ MSE(sum)=683.55
 n rows=1 n cols=1000
 ```
 The parameters are all the weights and biases from each of the hidden and output layers. These are not so easy to assign to specific place in the network structure. See next example using Torch which allocated parameters into tensors and we can compare back with these. 
+
+<a name="fnn12"></a> 
+## 3.2 PyTorch version
+This example uses **ffn_ex1_torch.py** to repeat the same neural network as in Section 3.1 but using PyTorch. The complete code listing is given below. The optimizer used is Adam, same as in 3.1, and in particular this using batching of results and batch size=32. Implementing batching requires some care and the *DataLoader* class was used. Agruably the simplest option for reading in data from csv is to use pandas, then coerce to numpy array then coerce into a PyTorch tensor, as functions exist for each of these coercions. The disadvantage of this approach is that the assumptions then used by PyTorch as to batch size, specifically how many data points are processed in a batch and therefore how much data is used to do weight updating during the optimization/training stage is implicity and unclear. Using *DataLoader* allows a specific batch size to be specified. 
+
+One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. Note this code takes quite some minutes to run. 
+
+```python
+# -*- coding: utf-8 -*-
+import torch
+import torch.utils.data as utils
+
+# general helper libraries
+import pathlib
+import os
+import pandas as pd
+import numpy as np
+from numpy.random import seed # numpy random number set function
+
+np.random.seed(999)
+torch.manual_seed(999)
+
+# read the data - note read in using pandas then convert from dataframe to numpy array then torch tensor
+features=pd.read_csv("features.csv",delimiter=",",header=None)
+featuresnp=(features.to_numpy())
+x = torch.from_numpy(featuresnp).double() # the cast to double is needed
+
+labels=pd.read_csv("labelsNL1.csv",delimiter=",",header=None)
+labelsnp=(labels.to_numpy())
+y = torch.from_numpy(labelsnp).double()
+
+my_dataset = utils.TensorDataset(x,y) # create your datset
+
+dataset = utils.DataLoader(my_dataset,batch_size=32) # create your dataloader
+
+#x = utils.DataLoader(x1, batch_size=32, shuffle=False)
+
+#y = utils.DataLoader(y1, batch_size=32, shuffle=False)
+
+#print(x.shape)
+
+# N is batch size; D_in is input dimension;
+# H is hidden dimension; D_out is output dimension.
+D_in, H, D_out = 9, 2, 1
+
+
+# Use the nn package to define our model and loss function.
+model = torch.nn.Sequential(
+    torch.nn.Linear(D_in, H),
+    torch.nn.Sigmoid(),
+    torch.nn.Linear(H, D_out)
+)
+loss_fn = torch.nn.MSELoss(reduction='sum')
+
+model=model.double()
+
+# Use the optim package to define an Optimizer that will update the weights of
+# the model for us. Here we will use Adam; the optim package contains many other
+# optimization algoriths. The first argument to the Adam constructor tells the
+# optimizer which Tensors it should update.
+learning_rate = 1e-3
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+curloss=1e+300
+abserror=1e-05
+maxiters=30000
+
+for t in range(maxiters): # for each epoch - all training data run through once
+    running_loss=0.0
+    i=0
+    for input, target in dataset: # for each batch of training data update the current weights
+        optimizer.zero_grad()
+        output = model(input)
+        loss = loss_fn(output, target)
+        loss.backward()
+        optimizer.step()
+        # print statistics
+        running_loss += loss.item()
+        #if i % 25 == (25-1):    # print every 25 mini-batches
+        #    print('[%d, %5d] loss: %.3f' %
+        #          (t + 1, i + 1, running_loss))
+        #    #running_loss = 0.0
+        i=i+1  
+    #print("t=",t," ",i," ",running_loss)
+    if np.absolute(running_loss-curloss) <abserror:
+        # have good enough solution so stop
+        print("BREAK: iter=",t," ","loss=",running_loss,"\n")
+        break
+    else: 
+        curloss=running_loss # copy loss
+
+    if ((t%100)==0):
+        print(t, curloss)
+
+
+# print out parameters
+print("---PARAMETERS-----\n")
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print (name, param.data)
+```
+
