@@ -435,15 +435,16 @@ We fit a simple neural network comprising on one hidden layer with two nodes, an
 This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. The code snippet below shows the model definition.
 
 ```c++
+// code above this is similar to linear reg example and reads in the raw data etc
 FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
 // build layers
 const size_t inputSize=trainData.n_rows;// 9 
 const size_t outputSize=1;
 const size_t hiddenLayerSize=2;
 
-model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize);
-model1.Add<SigmoidLayer<> >();
-model1.Add<Linear<> >(hiddenLayerSize, outputSize);
+model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize); //hidden layer
+model1.Add<SigmoidLayer<> >(); //activation in hidden layer
+model1.Add<Linear<> >(hiddenLayerSize, outputSize); // output - layer - sum to single value plus bias
 
 // set up optimizer - use Adam optimizer t
 ens::Adam opt(0.001, 32, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); 
@@ -457,13 +458,43 @@ arma::cout << model1.Parameters() << arma::endl;
 arma::mat assignments;
 model1.Predict(trainData, assignments);
 
-// print out to check the data is read in correctly
+// print out the goodness of fit. Note Total error not mean error
 double loss=0;
 for(i=0;i<assignments.n_cols;i++){
         loss+= (assignments(0,i)-trainLabels(0,i))*(assignments(0,i)-trainLabels(0,i));
 }
 //loss=loss/ (double)assignments.n_cols;
-arma::cout<<"MSE="<<loss<<arma::endl;
+arma::cout<<"MSE(sum)="<<loss<<arma::endl;// note. sum of error not divided by sample size 
 arma::cout << "n rows="<<assignments.n_rows <<" n cols="<< assignments.n_cols << arma::endl;
 ```
+The output in the terminal should end as below:
+```bash
+-------final params------------------------
+   -0.2245
+   -0.1361
+    0.6666
+    0.2905
+   -0.7597
+   -0.3231
+   -0.1226
+   -0.0571
+    1.5225
+    0.6417
+    0.2516
+    0.0757
+   -5.0853
+   -2.2369
+    0.4244
+    0.1586
+   -0.0464
+   -0.0471
+   -3.0177
+   -4.2481
+   15.3691
+   42.9384
+   -0.3416
 
+MSE(sum)=683.55
+n rows=1 n cols=1000
+```
+The parameters are all the weights and biases from each of the hidden and output layers. These are not so easy to assign to specific place in the network structure. See next example using Torch which allocated parameters into tensors and we can compare back with these. 
