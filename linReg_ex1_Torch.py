@@ -38,13 +38,24 @@ model=model.double()
 # optimizer which Tensors it should update.
 learning_rate = 1e-2
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+curloss=1e+300
+abserror=1e-03
+
 for t in range(5001):
     # Forward pass: compute predicted y by passing x to the model.
     y_pred = model(x)
 
     # Compute and print loss.
     loss = loss_fn(y_pred, y)
-    if ((t%1000)==0):
+    
+    if np.absolute(curloss-loss.item()) <abserror:
+        # have good enough solution so stop
+        print("iter=",t," ","loss=",loss.item(),"\n")
+        break
+    else: 
+        curloss=loss.item() # copy loss
+
+    if ((t%100)==0):
         print(t, loss.item())
 
     # Before the backward pass, use the optimizer object to zero all of the
@@ -61,6 +72,7 @@ for t in range(5001):
     # Calling the step function on an Optimizer makes an update to its
     # parameters
     optimizer.step()
+    
 
 # print out parameters
 print("---PARAMETERS-----\n")
