@@ -432,6 +432,38 @@ We fit a simple neural network comprising on one hidden layer with two nodes, an
 <a name="lr3"></a> 
 
 ## 3.1 mlpack version
-This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. 
+This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. The code snippet below shows the model definition.
 
+```c++
+FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
+// build layers
+const size_t inputSize=trainData.n_rows;// 9 
+const size_t outputSize=1;
+const size_t hiddenLayerSize=2;
+
+model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize);
+model1.Add<SigmoidLayer<> >();
+model1.Add<Linear<> >(hiddenLayerSize, outputSize);
+
+// set up optimizer - use Adam optimizer t
+ens::Adam opt(0.001, 32, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); 
+                 // see https://ensmallen.org/docs.html#adam - these are largely defaults and similar to pyTorch
+
+model1.Train(trainData, trainLabels,opt);
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+
+// Use the Predict method to get the assignments.
+arma::mat assignments;
+model1.Predict(trainData, assignments);
+
+// print out to check the data is read in correctly
+double loss=0;
+for(i=0;i<assignments.n_cols;i++){
+        loss+= (assignments(0,i)-trainLabels(0,i))*(assignments(0,i)-trainLabels(0,i));
+}
+//loss=loss/ (double)assignments.n_cols;
+arma::cout<<"MSE="<<loss<<arma::endl;
+arma::cout << "n rows="<<assignments.n_rows <<" n cols="<< assignments.n_cols << arma::endl;
+```
 
