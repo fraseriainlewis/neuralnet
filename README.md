@@ -594,4 +594,60 @@ for name, param in model.named_parameters():
     if param.requires_grad:
         print (name, param.data)
 ```
+The last part of the output at the terminal from **ffn_ex1_torch.py** is 
+```bash
+30400 688.9507893603051
+30500 688.9496733402435
+30600 688.9485942419802
+30700 688.9475507906353
+BREAK: iter= 30778   loss= 688.94676085179 
 
+---PARAMETERS-----
+
+0.weight tensor([[-0.1345,  0.2795, -0.3171, -0.0566,  0.6329,  0.0782, -2.1893,  0.1507,
+         -0.0526],
+        [-0.2268,  0.6850, -0.7754, -0.1326,  1.5481,  0.2504, -5.1859,  0.4391,
+         -0.0410]], dtype=torch.float64)
+0.bias tensor([-4.1436, -3.0621], dtype=torch.float64)
+2.weight tensor([[43.5959, 14.9405]], dtype=torch.float64)
+2.bias tensor([-0.3613], dtype=torch.float64)
+```
+The loss in the PyTorch run is close but not identical to that from mlpack (689 v 683) and the parameter estimates are all very similar but are outputted in a diffferent order in each program. To see the similarity, note that mlpack is column major. The output below compares the results from mlpack and matches these to those from PyTorch. The results are very similar, and we would not expect them to be identical, and they are close enough to confirm the same formulation of neural network model is being fitted in each case. 
+
+```bash
+   -0.2245 0.weight tensor, first col read from the bottom up - entries [1,0] and [0,0] 
+   -0.1361 
+
+    0.6666 0.weight tensor, 2nd col read from the bottom up - entries [1,1] and [0,1] 
+    0.2905
+
+   -0.7597 0.weight tensor, 3rd col read from the bottom up - entries [1,2] and [0,2] 
+   -0.3231
+
+   -0.1226 0.weight tensor, 4th col read from the bottom up - entries [1,3] and [0,3]
+   -0.0571
+
+    1.5226 0.weight tensor, 5th col read from the bottom up - entries [1,4] and [0,4]
+    0.6417
+
+    0.2516 0.weight tensor, 6th col read from the bottom up - entries [1,5] and [0,5]
+    0.0757
+
+   -5.0853 0.weight tensor, 7th col read from the bottom up - entries [1,6] and [0,6]
+   -2.2369
+
+    0.4244 0.weight tensor, 8th col read from the bottom up - entries [1,7] and [0,7]
+    0.1586
+
+   -0.0464 0.weight tensor, 9th col read from the bottom up - entries [1,8] and [0,8]
+   -0.0471
+   
+   -3.0177 0.bias
+   -4.2481 
+
+   15.3691 2.weight
+   42.9384 2.weight
+
+   -0.3416 2.bias tensor
+   
+```
