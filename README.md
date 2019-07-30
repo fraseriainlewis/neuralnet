@@ -1,5 +1,6 @@
 <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and assess different formulations of neural networks
+## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and assess different formulations of neural networks. 
+Selected results compared with [R](https://r-project.org) and [PyTorch](https://pytorch.org). 
 
 **Table of contents**
 1. [Setup](#setup)
@@ -10,10 +11,16 @@
    2.2 [with custom initial weights ](#lr2) 
    
    2.3 [with random initial weights](#lr3)
+   
+3. [Example 2 - Two-layer forward feed network](#ffn1) 
+
+   3.1 [mlpack code](#ffn11) 
+   
+   3.2 [comparison with PyTorch](#ffn12)   
 
 <a name="setup"></a>
 # 1. Setup
-## 1.1 Installation of [mlpack 3.1.1](http://mlpack.org)
+## 1.1.1 Installation of [mlpack 3.1.1](http://mlpack.org)
 We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
 The code below assumes the top-level folder where [mlpack](http://mlpack.org) will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one where we will run commands on the host (e.g. macOS) and a second where we will run commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
@@ -50,6 +57,18 @@ export LD_LIBRARY_PATH=/usr/local/lib
 mlpack_random_forest --help
 # if this works then the installation was successful
 ```
+## 1.1.2 Installation of [PyTorch](https://pytorch.org)
+[PyTorch](https://pytorch.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
+```bash
+# at a terminal prompt on the host (e.g. macOS)
+docker run -it -v ~/myrepos:/files ubuntu:18.04 # only do this if installing into new docker container
+apt update
+apt install python3-pip
+pip3 install https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
+pip3 install https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
+pip3 install pandas
+```
+
 ## 1.2 Clone this reposoitory 
 ```bash
 # open up a terminal on the host (e.g macOS) and navigate to where you want the repo to be located
@@ -406,4 +425,229 @@ Which produces output
   -0.0805
    0.4420
    1.2825
+```
+<a name="fnn1"></a>
+# 3. Example 2 - Two-layer forward feed network
+We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
+
+<a name="fnn11"></a> 
+## 3.1 mlpack version
+This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. The code snippet below shows the model definition.
+
+```c++
+// code above this is similar to linear reg example and reads in the raw data etc
+FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
+// build layers
+const size_t inputSize=trainData.n_rows;// 9 
+const size_t outputSize=1;
+const size_t hiddenLayerSize=2;
+
+model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize); //hidden layer
+model1.Add<SigmoidLayer<> >(); //activation in hidden layer
+model1.Add<Linear<> >(hiddenLayerSize, outputSize); // output - layer - sum to single value plus bias
+
+// set up optimizer - use Adam optimizer t
+ens::Adam opt(0.001, 32, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); 
+                 // see https://ensmallen.org/docs.html#adam - these are largely defaults and similar to pyTorch
+
+model1.Train(trainData, trainLabels,opt);
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+
+// Use the Predict method to get the assignments.
+arma::mat assignments;
+model1.Predict(trainData, assignments);
+
+// print out the goodness of fit. Note Total error not mean error
+double loss=0;
+for(i=0;i<assignments.n_cols;i++){
+        loss+= (assignments(0,i)-trainLabels(0,i))*(assignments(0,i)-trainLabels(0,i));
+}
+//loss=loss/ (double)assignments.n_cols;
+arma::cout<<"MSE(sum)="<<loss<<arma::endl;// note. sum of error not divided by sample size 
+arma::cout << "n rows="<<assignments.n_rows <<" n cols="<< assignments.n_cols << arma::endl;
+```
+The output in the terminal should end as below:
+```bash
+-------final params------------------------
+   -0.2245
+   -0.1361
+    0.6666
+    0.2905
+   -0.7597
+   -0.3231
+   -0.1226
+   -0.0571
+    1.5225
+    0.6417
+    0.2516
+    0.0757
+   -5.0853
+   -2.2369
+    0.4244
+    0.1586
+   -0.0464
+   -0.0471
+   -3.0177
+   -4.2481
+   15.3691
+   42.9384
+   -0.3416
+
+MSE(sum)=683.55
+n rows=1 n cols=1000
+```
+The parameters are all the weights and biases from each of the hidden and output layers. These are not so easy to assign to specific place in the network structure. See next example using Torch which allocated parameters into tensors and we can compare back with these. 
+
+<a name="fnn12"></a> 
+## 3.2 PyTorch version
+This example uses **ffn_ex1_torch.py** to repeat the same neural network as in Section 3.1 but using PyTorch. The complete code listing is given below. The optimizer used is Adam, same as in 3.1, and in particular this using batching of results and batch size=32. Implementing batching requires some care and the *DataLoader* class was used. Agruably the simplest option for reading in data from csv is to use pandas, then coerce to numpy array then coerce into a PyTorch tensor, as functions exist for each of these coercions. The disadvantage of this approach is that the assumptions then used by PyTorch as to batch size, specifically how many data points are processed in a batch and therefore how much data is used to do weight updating during the optimization/training stage is implicity and unclear. Using *DataLoader* allows a specific batch size to be specified. 
+
+One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. The parameters in the Adam optimizer are the same as those used in mlpack but with different starting conditions for the weights, each are started randomly with a fixed seed. Note this code takes quite some minutes to run. 
+
+```python
+# -*- coding: utf-8 -*-
+import torch
+import torch.utils.data as utils
+
+# general helper libraries
+import pathlib
+import os
+import pandas as pd
+import numpy as np
+from numpy.random import seed # numpy random number set function
+
+np.random.seed(999)
+torch.manual_seed(999)
+
+# read the data - note read in using pandas then convert from dataframe to numpy array then torch tensor
+features=pd.read_csv("features.csv",delimiter=",",header=None)
+featuresnp=(features.to_numpy())
+x = torch.from_numpy(featuresnp).double() # the cast to double is needed
+
+labels=pd.read_csv("labelsNL1.csv",delimiter=",",header=None)
+labelsnp=(labels.to_numpy())
+y = torch.from_numpy(labelsnp).double()
+
+my_dataset = utils.TensorDataset(x,y) # create your datset
+
+dataset = utils.DataLoader(my_dataset,batch_size=32) # create your dataloader
+
+#x = utils.DataLoader(x1, batch_size=32, shuffle=False)
+
+#y = utils.DataLoader(y1, batch_size=32, shuffle=False)
+
+#print(x.shape)
+
+# N is batch size; D_in is input dimension;
+# H is hidden dimension; D_out is output dimension.
+D_in, H, D_out = 9, 2, 1
+
+
+# Use the nn package to define our model and loss function.
+model = torch.nn.Sequential(
+    torch.nn.Linear(D_in, H),
+    torch.nn.Sigmoid(),
+    torch.nn.Linear(H, D_out)
+)
+loss_fn = torch.nn.MSELoss(reduction='sum')
+
+model=model.double()
+
+# Use the optim package to define an Optimizer that will update the weights of
+# the model for us. Here we will use Adam; the optim package contains many other
+# optimization algoriths. The first argument to the Adam constructor tells the
+# optimizer which Tensors it should update.
+learning_rate = 1e-3
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+curloss=1e+300
+abserror=1e-05
+maxiters=30000
+
+for t in range(maxiters): # for each epoch - all training data run through once
+    running_loss=0.0
+    i=0
+    for input, target in dataset: # for each batch of training data update the current weights
+        optimizer.zero_grad()
+        output = model(input)
+        loss = loss_fn(output, target)
+        loss.backward()
+        optimizer.step()
+        # print statistics
+        running_loss += loss.item()
+        i=i+1  
+    #print("t=",t," ",i," ",running_loss)
+    if np.absolute(running_loss-curloss) <abserror:
+        # have good enough solution so stop
+        print("BREAK: iter=",t," ","loss=",running_loss,"\n")
+        break
+    else: 
+        curloss=running_loss # copy loss
+
+    if ((t%100)==0):
+        print(t, curloss)
+
+
+# print out parameters
+print("---PARAMETERS-----\n")
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print (name, param.data)
+```
+The last part of the output at the terminal from **ffn_ex1_torch.py** is 
+```bash
+30400 688.9507893603051
+30500 688.9496733402435
+30600 688.9485942419802
+30700 688.9475507906353
+BREAK: iter= 30778   loss= 688.94676085179 
+
+---PARAMETERS-----
+
+0.weight tensor([[-0.1345,  0.2795, -0.3171, -0.0566,  0.6329,  0.0782, -2.1893,  0.1507,
+         -0.0526],
+        [-0.2268,  0.6850, -0.7754, -0.1326,  1.5481,  0.2504, -5.1859,  0.4391,
+         -0.0410]], dtype=torch.float64)
+0.bias tensor([-4.1436, -3.0621], dtype=torch.float64)
+2.weight tensor([[43.5959, 14.9405]], dtype=torch.float64)
+2.bias tensor([-0.3613], dtype=torch.float64)
+```
+The loss in the PyTorch run is close but not identical to that from mlpack (689 v 683) and the parameter estimates are all very similar but are outputted in a diffferent order in each program. To see the similarity, note that mlpack is column major. The output below compares the results from mlpack and matches these to those from PyTorch. The results are very similar, and we would not expect them to be identical, and they are close enough to confirm the same formulation of neural network model is being fitted in each case. 
+
+```bash
+   -0.2245 0.weight tensor, first col read from the bottom up - entries [1,0] and [0,0] 
+   -0.1361 
+
+    0.6666 0.weight tensor, 2nd col read from the bottom up - entries [1,1] and [0,1] 
+    0.2905
+
+   -0.7597 0.weight tensor, 3rd col read from the bottom up - entries [1,2] and [0,2] 
+   -0.3231
+
+   -0.1226 0.weight tensor, 4th col read from the bottom up - entries [1,3] and [0,3]
+   -0.0571
+
+    1.5226 0.weight tensor, 5th col read from the bottom up - entries [1,4] and [0,4]
+    0.6417
+
+    0.2516 0.weight tensor, 6th col read from the bottom up - entries [1,5] and [0,5]
+    0.0757
+
+   -5.0853 0.weight tensor, 7th col read from the bottom up - entries [1,6] and [0,6]
+   -2.2369
+
+    0.4244 0.weight tensor, 8th col read from the bottom up - entries [1,7] and [0,7]
+    0.1586
+
+   -0.0464 0.weight tensor, 9th col read from the bottom up - entries [1,8] and [0,8]
+   -0.0471
+   
+   -3.0177 0.bias
+   -4.2481 
+
+   15.3691 2.weight
+   42.9384 2.weight
+
+   -0.3416 2.bias tensor
+   
 ```
