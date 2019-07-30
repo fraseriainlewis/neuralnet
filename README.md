@@ -11,6 +11,12 @@ Selected results compared with [R](https://r-project.org) and [PyTorch](https://
    2.2 [with custom initial weights ](#lr2) 
    
    2.3 [with random initial weights](#lr3)
+   
+3. [Example 2 - Two-layer forward feed network](#ffn1) 
+
+   3.1 [mlpack code](#ffn11) 
+   
+   3.2 [comparison with PyTorch](#ffn12)   
 
 <a name="setup"></a>
 # 1. Setup
@@ -52,8 +58,10 @@ mlpack_random_forest --help
 # if this works then the installation was successful
 ```
 ## 1.1.2 Installation of [PyTorch](https://pytorch.org)
-We install [PyTorch](https://pytorch.org) into the same docker image as [mlpack](http://mlpack.org). The additional installation commands needed are:
+[PyTorch](https://pytorch.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
 ```bash
+# at a terminal prompt on the host (e.g. macOS)
+docker run -it -v ~/myrepos:/files ubuntu:18.04 # only do this if installing into new docker container
 apt update
 apt install python3-pip
 pip3 install https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
@@ -418,3 +426,12 @@ Which produces output
    0.4420
    1.2825
 ```
+<a name="fnn1"></a>
+# 3. Example 2 - Two-layer forward feed network
+We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
+<a name="lr3"></a> 
+
+## 3.1 mlpack version
+This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. 
+
+
