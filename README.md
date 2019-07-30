@@ -646,7 +646,7 @@ The loss in the PyTorch run is close but not identical to that from mlpack (689 
    -4.2481 
 
    15.3691 2.weight
-   42.9384 2.weight
+   42.9384 
 
    -0.3416 2.bias tensor
    
