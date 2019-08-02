@@ -3,20 +3,20 @@
 This vignette contains complete and fully documented code examples detailing the basic and essential tasks needed to robustly fit and assess neural networks applied to data. Selected results are compared with [R](https://r-project.org) and [PyTorch](https://pytorch.org). 
 
 **Table of contents**
-1. [Setup](#setup)
-2. [Example 1 - Linear Regression](#lr) 
+1. **[Setup](#setup)**
+2. **[Example 1 - Linear Regression](#lr)** 
 
-   2.1 [Comparison with R](#lr1) 
+   2.1 **[Comparison with R](#lr1)** 
    
-   2.2 [with custom initial weights ](#lr2) 
+   2.2 **[with custom initial weights ](#lr2)** 
    
-   2.3 [with random initial weights](#lr3)
+   2.3 **[with random initial weights](#lr3)**
    
-3. [Example 2 - Two-layer forward feed network](#ffn1) 
+3. **[Example 2 - Two-layer forward feed network](#ffn1)** 
 
-   3.1 [mlpack code](#ffn11) 
+   3.1 **[mlpack code](#ffn11)** 
    
-   3.2 [comparison with PyTorch](#ffn12)   
+   3.2 **[comparison with PyTorch](#ffn12)**   
 
 <a name="setup"></a>
 # 1. Setup
