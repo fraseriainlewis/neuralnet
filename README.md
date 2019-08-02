@@ -1,5 +1,5 @@
 <img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## A tutorial using C++ library [mlpack](http://mlpack.org) to build, optimize and assess different formulations of neural networks. 
+## Using C++ library [mlpack](http://mlpack.org) to build, optimize and assess different formulations of neural networks: an introductory vignette 
 Selected results compared with [R](https://r-project.org) and [PyTorch](https://pytorch.org). 
 
 **Table of contents**
