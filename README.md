@@ -1,3 +1,6 @@
+<img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain1.png" alt="drawing" width="200"/>
+<img src="https://github.com/fraseriainlewis/neuralnet/blob/master/neural_network_brain1.png" alt="drawing" width="200"/>
+
 ![](neural_network_brain1.png)
 ![](neural_network_brain2.png)
 ![](neural_network_brain3.png)
