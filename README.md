@@ -165,7 +165,7 @@ ens::RMSProp opt(0.01, trainData.n_cols, 0.99, 1e-8, 0, 1e-8,false,true);
                  // 5th max iterations (0 = no limit) 
                  // 6th max absolute tolerance to terminate algorithm.
                  // 7th function order of evaluation is shuffled (diff separable functions) = false 
-                 // 8th resetPolicy if true parameters are reset on each call to opt() = false
+                 // 8th resetPolicy if true parameters are reset on each call to opt() = true
 ```
 Now fit the model and example output - the estimated regression parameters
 ``` c++
