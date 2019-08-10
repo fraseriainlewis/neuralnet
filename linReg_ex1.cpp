@@ -21,7 +21,7 @@ arma::arma_rng::set_seed(100);
 /** Load the training set - separate files for features and lables (regression) **/
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
-int i=0;
+unsigned int i,j;
 data::Load("data/features.csv", trainData, true);
 data::Load("data/labelsL1.csv", trainLabels, true);// regression response
 
@@ -34,7 +34,7 @@ for(i=0;i<10;i++){
  arma::cout << trainLabels(0,i) << arma::endl;
 }
 
-int j=0;
+j=0;
 std::cout<<"Features for observation: "<<j<<std::endl;
 for(i=0;i<trainData.n_rows;i++){
  arma::cout << trainData(i,j) << arma::endl;
@@ -68,15 +68,11 @@ model1.Train(trainData, trainLabels,opt);
 arma::cout<<"-------final params------------------------"<<arma::endl;
 arma::cout << model1.Parameters() << arma::endl;
 
-arma::mat assignments;
-model1.Predict(trainData, assignments);
+//arma::mat assignments;
+//model1.Predict(trainData, assignments);
 
-cout<<"Predictions    : "<<assignments<<endl;
-cout<<"Correct Labels : "<<trainLabels<<endl;
-
-
-data::Save("model.xml", "model", model1, false);
-
+//cout<<"Predictions    : "<<assignments<<endl;
+//cout<<"Correct Labels : "<<trainLabels<<endl;
 
 
 model1.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
@@ -106,7 +102,7 @@ arma::cout<<"-------manual set init params------------------------"<<arma::endl;
 arma::cout << model2.Parameters() << arma::endl;
 
 // set up optimizer 
-ens::RMSProp opt2(0.01, 1060, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::RMSProp opt2(0.01, trainLabels.n_cols, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
                  // 2nd arg is batch size,
                  // 5th arg is max iterations (0=no limit) 
                  // 6th is tolerance 
@@ -126,7 +122,7 @@ FFN<MeanSquaredError<>,RandomInitialization> model3(MeanSquaredError<>(),RandomI
 model3.Add<Linear<> >(trainData.n_rows,1);
 model3.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 // set up optimizer 
-ens::RMSProp opt3(0.01, 1060, 0.99, 1e-8, 10000,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::RMSProp opt3(0.01, trainLabels.n_cols, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
                  // 2nd arg is batch size,
                  // 5th arg is max iterations (0=no limit) 
                  // 6th is tolerance 

@@ -7,11 +7,12 @@
 #include <ensmallen.hpp>
 #include <mlpack/prereqs.hpp>
 
+#include "cv_helper.hpp"
+
 using namespace mlpack;
 using namespace mlpack::ann;
 using namespace arma;
 using namespace std;
-
 
 
 /***********************************************************************************************************/
@@ -40,7 +41,10 @@ data::Load("data/features0.csv", featureData, true);// last arg is transpose - n
 data::Load("data/labelsBNL10.csv", labels01, true);// 
 
 const arma::mat labels = labels01.row(0) + 1;// add +1 to all response values, mapping from 0-1 to 1-2
-                                                 // NegativeLogLikelihood needs 1...number of classes                                            
+                                                 // NegativeLogLikelihood needs 1...number of classes
+uword totalDataPts=featureData.n_cols;//total data set size as read in from disk
+uword nFolds=10;                                                 
+                                                 
 
 if(checkCSV){
 	std::cout<<"#-------------------------------------------------------------------------#"<<std::endl;
@@ -80,12 +84,12 @@ FFN<NegativeLogLikelihood<>,RandomInitialization> model1(NegativeLogLikelihood<>
 
 // build layers
 const size_t inputSize=featureData.n_rows;// e.g. 8 
-//const size_t outputSize=1;
 const size_t hiddenLayerSize=2;
 
 model1.Add<Linear<> >(inputSize, hiddenLayerSize);
 model1.Add<LogSoftMax<> >();
 
+//model1.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 /**************************************************************************************************/
 /************************END MODEL DEFN************************************************************/
 /**************************************************************************************************/
@@ -103,6 +107,7 @@ model1.Add<LogSoftMax<> >();
 
 ens::Adam opt(0.01, featureData.n_cols, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); //https://ensmallen.org/docs.html#rmsprop.
 
+// Run the model fitting on the entire available data
 double lossAuto=1e+300;
 arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
 arma::cout << model1.Parameters() << arma::endl;
@@ -113,7 +118,9 @@ arma::cout << model1.Parameters() << arma::endl;
 
 // Use the Predict method to get the assignments.
 arma::mat assignments;
-model1.Predict(featureData, assignments);
+model1.Predict(featureData, assignments);//tech remark - assignments is used later with different sizes
+                                        // so some relloc or resizing is happening somewhere
+std::cout<<"SIZE 1st="<<assignments.n_cols<<std::endl;
 
 if(checkPredict){
   std::cout<<"#-------------------------------------------------------------------------#"<<std::endl;
@@ -169,7 +176,7 @@ for(i=0;i<assignments.n_cols;i++){
                                            TN++;//increment count of true negative FN
        }
        }
-                
+       //std::cout<<trainData.n_cols<<" "<<batchsize<<"  "<<std::setprecision(5)<<fixed<<b<<" "<<std::setprecision(2)<<fixed<<2211.0/32.0<<std::endl;          
 }
 sen=(double)TP/(double)P;
 spec=(double)TN/(double)N;
@@ -179,7 +186,76 @@ std::cout<<"NLL (from Evaluate()) on full data set="<<lossAuto<<std::endl;
 std::cout<<"NLL manual - and correct - on full data set="<<lossManual<<std::endl;
 std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
 std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
+// these are identical if batch size is set to full data set size - or change to false to true for randomize at each batch
+//exit(0);
 
+// repeat above with clean start
 
+/**************************************************************************************************/
+/** we now reset the model parameters and use 10-fold cross validation to estimate the out of    **/
+/** sample accuracy                                                                              **/
+/*******************************CV folds **********************************************************/
+/**************************************************************************************************/
+uvec foldinfo;
+umat indexes;
+uword verbose=0;
+setupFolds(totalDataPts,nFolds,&foldinfo,&indexes,verbose);// pass pointers as call constructor in function
+
+uvec trainIdx,testIdx;
+uword curFold;
+
+//curFold=2;//1-based
+//arma::mat assignments2;
+for(curFold=1;curFold<=nFolds;curFold++){
+  std::cout<<"Processing fold "<<curFold<<" of "<<nFolds<<std::endl;
+  getFold(nFolds,curFold,indexes,foldinfo,&trainIdx,&testIdx,verbose);// note references and pointers, refs for
+
+  model1.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
+  arma::cout<<"-------re-start empty params------------------------"<<arma::endl;//empty params as not yet allocated
+  arma::cout << model1.Parameters() << arma::endl;
+  model1.Train(featureData.cols(trainIdx), labels.cols(trainIdx),opt);
+  arma::cout<<"-------re-start final params------------------------"<<arma::endl;
+  arma::cout << model1.Parameters() << arma::endl;
+
+  // Use the Predict method to get the assignments.
+  //arma::mat assignments2;
+  model1.Predict(featureData.cols(testIdx), assignments);
+  std::cout<<"SIZE="<<assignments.n_cols<<std::endl;
+  
+  P=0;
+  N=0;
+  TP=0;
+  TN=0;
+  sen=0.0;spec=0.0;acc=0.0;
+  // compute the negative log like loss manually 
+  lossManual=0.0;
+  for(i=0;i<assignments.n_cols;i++){
+    predp2=assignments(1,i);//log prob of being in class 2
+    predp1=assignments(0,i);//log prob of being in class 1
+    
+    if(labels(0,testIdx(i))==2){//truth is class 2 - positives
+      P++;//count number of class 2
+      if(predp2>=predp1){//truth is class 2 and predict class 2
+        TP++;//increment count of true positives TP
+      }
+    } //end of count positives
+    
+    if(labels(0,testIdx(i))==1){//truth is class 1
+      N++;// count number of class 1 - negatives
+      if(predp1>=predp2){//truth is class 1 and predict class 1
+        TN++;//increment count of true negative FN
+      }
+    }
+    
+      }
+
+  sen=(double)TP/(double)P;
+  spec=(double)TN/(double)N;
+  acc=((double)TP+(double)TN)/((double)P+(double)N);//overall accuracy
+  
+  std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
+  std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
+
+  } //end of fold loop
 
 }

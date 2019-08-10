@@ -9,8 +9,8 @@ import pandas as pd
 import numpy as np
 from numpy.random import seed # numpy random number set function
 
-np.random.seed(999)
-torch.manual_seed(999)
+np.random.seed(9999)
+torch.manual_seed(9999)
 
 # read the data - note read in using pandas then convert from dataframe to numpy array then torch tensor
 features=pd.read_csv("data/features.csv",delimiter=",",header=None)
@@ -23,7 +23,7 @@ y = torch.from_numpy(labelsnp).double()
 
 my_dataset = utils.TensorDataset(x,y) # create your datset
 
-dataset = utils.DataLoader(my_dataset,batch_size=32) # create your dataloader
+dataset = utils.DataLoader(my_dataset,batch_size=1000) # create your dataloader
 
 #x = utils.DataLoader(x1, batch_size=32, shuffle=False)
 
@@ -50,10 +50,10 @@ model=model.double()
 # the model for us. Here we will use Adam; the optim package contains many other
 # optimization algoriths. The first argument to the Adam constructor tells the
 # optimizer which Tensors it should update. 
-learning_rate = 1e-3
+learning_rate = 1e-2
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 curloss=1e+300
-abserror=1e-05
+abserror=1e-08
 maxiters=100000
 
 for t in range(maxiters): # for each epoch - all training data run through once
@@ -89,3 +89,22 @@ print("---PARAMETERS-----\n")
 for name, param in model.named_parameters():
     if param.requires_grad:
         print (name, param.data)
+
+
+
+preds = model(x)
+print(preds.shape)
+prednp=preds.detach().numpy()
+print("first 10 and last 10 probabilities output from model\n")
+print(prednp[0:10:1,:])
+print("---")
+print(prednp[990:1000:1,:])
+
+nrows=prednp.shape[0]
+myloss=0.0
+for i in range(nrows):
+    myloss+= (prednp[i]-labelsnp[i])*(prednp[i]-labelsnp[i])
+
+
+print("MSE on full data set=",myloss,"\n")
+

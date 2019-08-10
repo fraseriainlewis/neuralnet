@@ -23,7 +23,7 @@ dat<-data.frame(y,ynl1=log(1+exp(-y)),ynl2=sin(y),X);
 # standardize X variables to mean=0 sd=1 
 for(i in 4:ncol(dat)){dat[,i]<-(dat[,i]-mean(dat[,i]))/sd(dat[,i]);}
 
-summary(lm(y~1+X1+X2+X3+X4+X5+X6+X7+X8+X9+X10+X11+X12+X13,data=dat)) # linear response
+summary(lm(y~1+X1+X2+X3+X4+X5+X6+X7+X8+X9,data=dat)) # linear response
 
 summary(lm(ynl1~1+X1+X2+X3+X4+X5+X6+X7+X8+X9,data=dat)) # linear fit to non-linear response1
 

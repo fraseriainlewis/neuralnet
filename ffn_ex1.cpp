@@ -15,7 +15,7 @@ int main()
 {
 
 // set the random number seed - e.g. shuffling or random starting points in optim
-arma::arma_rng::set_seed(100);
+arma::arma_rng::set_seed(1000);
 //arma::arma_rng::set_seed_random();
 
 /**************************************************************************************************/
@@ -65,7 +65,7 @@ model1.Add<Linear<> >(hiddenLayerSize, outputSize);
 //Adam optimizer(0.001, 32, 0.9, 0.999, 1e-8, 100000, 1e-5, false,true);
 
 // set up optimizer 
-ens::Adam opt(0.001, 32, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::Adam opt(0.01,trainData.n_cols, 0.9, 0.999, 1e-8, 0, 1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
                  // 2nd arg is batch size,
                  // 5th arg is max iterations (0=no limit) 
                  // 6th is tolerance 
