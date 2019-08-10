@@ -9,23 +9,23 @@ This repository contains introductory step-by-step examples detailing the basic 
 
 1. **[Example 1. Linear Regression](#lr)** 
 
-   1.1 **[Comparison with R](#lr1)** 
+   1.1 *[Comparison with R](#lr1)* 
    
-   1.2 **[with custom initial weights ](#lr2)** 
+   1.2 *[with custom initial weights ](#lr2)* 
    
-   1.3 **[with random initial weights](#lr3)**
+   1.3 *[with random initial weights](#lr3)*
    
 2. **[Example 2. Two-layer forward feed network - Continuous response, MSE Loss](#ffn1)** 
 
-   2.1 **[mlpack code](#ffn11)** 
+   2.1 *[mlpack code](#ffn11)*
    
-   2.2 **[comparison with PyTorch](#ffn12)**  
+   2.2 *[comparison with PyTorch](#ffn12)*  
    
 3. **[Example 3. Two-layer forward feed network - Categorical response, NegLogLike Loss](#ffn2)** 
 
-   3.1 **[mlpack code](#ffn21)** 
+   3.1 *[mlpack code](#ffn21)* 
    
-   3.2 **[comparison with PyTorch](#ffn22)**  
+   3.2 *[comparison with PyTorch](#ffn22)*  
 
 <a name="setup"></a>
 ## Setup
