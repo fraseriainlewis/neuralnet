@@ -436,7 +436,10 @@ Which produces output
    1.2825
 ```
 <a name="ffn1"></a>
-# 2. Example 2. Two-layer forward feed network - Continuous response, MSE Loss
+# 2. Example 2. Two-layer forward feed network
+
+**Continuous response, MSE Loss**
+
 We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
 
 <a name="ffn11"></a> 
@@ -663,7 +666,9 @@ compare results below with the torch tensor outputs above:
 ```
 
 <a name="ffn2"></a>
-# 3. Example 3. Two-layer forward feed network - Categorical response, NegLogLike Loss
+# 3. Example 3. Two-layer forward feed network
+**Categorical response, NegLogLike Loss**
+
 We fit a linear layer with two nodes (corresponding to an output/response with two levels, i.e. binary) and a LogSoftMax activation function which maps the input values to log probabilities denoting the prediction of the input case being in output class 1 or 2. The loss function used is negative log likelihood. 
 
 <a name="ffn21"></a> 
@@ -800,10 +805,11 @@ sensitivity = 0.90931 specificity = 0.94492 accuracy= 0.93000
 
 <a name="ffn32"></a> 
 ## 3.2 PyTorch version
-This example uses **ffn_ex2_bin_torch.py** and fits the same model as in **ffn_ex2_bin.cpp** although without the extra code to compute accuracy measures. 
+This example uses **ffn_ex2_bin_torch.py** and fits the same model as in **ffn_ex2_bin.cpp** although without the extra code to compute accuracy measures. This example uses an Adam() optimizer with default parameters, and the mlpack version uses the same type of optimizer and parameters (although the starting conditions are different between these two versions as randomly set within each of C++ and python). 
 
 ```python
-# snippet for the model definition, linear layer with two nodes and LogSoftMax activation to produce log probs
+# snippet for the model definition, linear layer with two nodes and LogSoftMax 
+# activation to produce log probs
 
 model = torch.nn.Sequential(
     torch.nn.Linear(D_in, H),
@@ -820,7 +826,7 @@ This gives the following output:
 2700 138.49194628939256
 2800 138.48913947560112
 2900 138.48744828558551
-BREAK: iter= 2947   current loss= 138.48691488261667 	 previous 138.4869248666776 	 -9.98406093799531e-06 
+BREAK: iter= 2947   current loss= 138.48691488261667 	 previous 138.4869248666776  
 
 ---PARAMETERS-----
 
@@ -857,3 +863,5 @@ first 10 and last 10 probabilities output from model
 NLL on full data set= [138.48690495] 
 
 ```
+
+The predicted probabilites and negloglik values produced by mlpack and pytorch are almost identical.  
