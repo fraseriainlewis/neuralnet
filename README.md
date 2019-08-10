@@ -803,7 +803,7 @@ sensitivity = 0.90931 specificity = 0.94492 accuracy= 0.93000
 
 
 
-<a name="ffn32"></a> 
+<a name="ffn22"></a> 
 ## 3.2 PyTorch version
 This example uses **ffn_ex2_bin_torch.py** and fits the same model as in **ffn_ex2_bin.cpp** although without the extra code to compute accuracy measures. This example uses an Adam() optimizer with default parameters, and the mlpack version uses the same type of optimizer and parameters (although the starting conditions are different between these two versions as randomly set within each of C++ and python). 
 
