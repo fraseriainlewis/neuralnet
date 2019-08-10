@@ -615,7 +615,7 @@ BREAK: iter= 30778   loss= 688.94676085179
 The loss in the PyTorch run is close but not identical to that from mlpack (689 v 683) and the parameter estimates are all very similar but are outputted in a diffferent order in each program. To see the similarity, note that mlpack is column major. The output below compares the results from mlpack and matches these to those from PyTorch. The results are very similar, and we would not expect them to be identical, and they are close enough to confirm the same formulation of neural network model is being fitted in each case. 
 
 ```bash
-   -0.2245 0.weight tensor, first col read from the bottom up - entries [1,0] and [0,0] 
+   -0.2245 0.weight tensor, first col read from the bottom up in torch ouput above - entries [1,0] and [0,0] 
    -0.1361 
 
     0.6666 0.weight tensor, 2nd col read from the bottom up - entries [1,1] and [0,1] 
