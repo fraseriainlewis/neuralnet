@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## Data Analyses with Neural Networks using [mlpack](http://mlpack.org) 
-This vignette contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data. The focus is on [mlpack](http://mlpack.org) with [pytorch](https://pytorch.org) used for selected comparisons. 
+## Data Analyses with Neural Networks
+This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org) and [pytorch](https://pytorch.org) used for selected comparisons. 
 
 
  ## **[Setup and installation](#setup)**
