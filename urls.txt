@@ -1,4 +1,5 @@
 https://github.com/mlpack/models/blob/master/Kaggle/DigitRecognizer/src/DigitRecognizer.cpp
+<<<<<<< HEAD
 
 https://github.com/mlpack/models/blob/master/vae/vae_mnist/src/vae.cpp
 
