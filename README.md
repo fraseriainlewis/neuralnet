@@ -800,8 +800,60 @@ sensitivity = 0.90931 specificity = 0.94492 accuracy= 0.93000
 
 <a name="ffn32"></a> 
 ## 3.2 PyTorch version
-This example uses **ffn_ex2_torch.py** to
+This example uses **ffn_ex2_bin_torch.py** and fits the same model as in **ffn_ex2_bin.cpp** although without the extra code to compute accuracy measures. 
 
 ```python
+# snippet for the model definition, linear layer with two nodes and LogSoftMax activation to produce log probs
+
+model = torch.nn.Sequential(
+    torch.nn.Linear(D_in, H),
+    torch.nn.LogSoftmax(dim=1) 
+    )
+loss_fn = torch.nn.NLLLoss() # neg log like loss
+
+model=model.double()
+```
+This gives the following output:
+
+```bash
+2600 138.4964831651668
+2700 138.49194628939256
+2800 138.48913947560112
+2900 138.48744828558551
+BREAK: iter= 2947   current loss= 138.48691488261667 	 previous 138.4869248666776 	 -9.98406093799531e-06 
+
+---PARAMETERS-----
+
+0.weight tensor([[-1.2315e+00, -1.2979e-01,  4.2458e+00, -3.5071e-01, -9.1897e-02,
+         -7.4486e-04,  1.5494e-01, -2.5916e-02,  1.5279e-01],
+        [ 1.3023e+00,  3.3805e-01, -4.2129e+00,  1.7719e-01, -3.4586e-01,
+         -2.1554e-01, -5.9367e-02, -1.4222e-01,  2.0074e-01]],
+       dtype=torch.float64)
+0.bias tensor([ 1.1435, -0.9950], dtype=torch.float64)
+torch.Size([1000, 2])
+first 10 and last 10 probabilities output from model
+
+[[-2.58633893e-04 -8.26022635e+00]
+ [-9.55498697e-05 -9.25591003e+00]
+ [-2.97088629e-05 -1.04240800e+01]
+ [-1.10340875e+01 -1.61421062e-05]
+ [-5.97058091e-02 -2.84803034e+00]
+ [-2.95487716e+00 -5.34905048e-02]
+ [-2.72809440e-01 -1.43228735e+00]
+ [-1.01250811e+00 -4.51467092e-01]
+ [-3.05603134e-08 -1.73035636e+01]
+ [-6.45924837e-04 -7.34515036e+00]]
+---
+[[-6.86800010e-01 -6.99534895e-01]
+ [-1.47285295e-01 -1.98812273e+00]
+ [-1.82633813e-05 -1.09106217e+01]
+ [-3.83790538e+00 -2.17740121e-02]
+ [-2.66330828e-01 -1.45322768e+00]
+ [-8.83961060e-03 -4.73292900e+00]
+ [-1.00143687e+01 -4.47532593e-05]
+ [-2.39585089e-05 -1.06391990e+01]
+ [-1.69524888e-07 -1.55902662e+01]
+ [-4.27402402e+00 -1.40235045e-02]]
+NLL on full data set= [138.48690495] 
 
 ```
