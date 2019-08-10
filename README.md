@@ -3,24 +3,31 @@
 This vignette contains documented code examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data. The focus is on [mlpack](http://mlpack.org) with [pytorch](https://pytorch.org) used for selected comparisons. 
 
 **Table of contents**
-1. **[Setup](#setup)**
-2. **[Example 1 - Linear Regression](#lr)** 
+0. **[Setup](#setup)**
 
-   2.1 **[Comparison with R](#lr1)** 
-   
-   2.2 **[with custom initial weights ](#lr2)** 
-   
-   2.3 **[with random initial weights](#lr3)**
-   
-3. **[Example 2 - Two-layer forward feed network](#ffn1)** 
+1. **[Linear Regression - Example 1.](#lr)** 
 
-   3.1 **[mlpack code](#ffn11)** 
+   1.1 **[Comparison with R](#lr1)** 
    
-   3.2 **[comparison with PyTorch](#ffn12)**   
+   1.2 **[with custom initial weights ](#lr2)** 
+   
+   1.3 **[with random initial weights](#lr3)**
+   
+2. **[Two-layer forward feed network - Example 2. Continuous response, MSE Loss](#ffn1)** 
+
+   2.1 **[mlpack code](#ffn11)** 
+   
+   2.2 **[comparison with PyTorch](#ffn12)**  
+   
+3. **[Two-layer forward feed network - Example 3. Categorical response, NegLogLike Loss](#ffn2)** 
+
+   3.1 **[mlpack code](#ffn21)** 
+   
+   3.2 **[comparison with PyTorch](#ffn22)**  
 
 <a name="setup"></a>
-# 1. Setup
-## 1.1.1 Installation of [mlpack 3.1.1](http://mlpack.org)
+# 0. Setup
+## 0.1 Installation of [mlpack 3.1.1](http://mlpack.org)
 We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
 The code below assumes the top-level folder where [mlpack](http://mlpack.org) will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one where we will run commands on the host (e.g. macOS) and a second where we will run commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
@@ -57,7 +64,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 mlpack_random_forest --help
 # if this works then the installation was successful
 ```
-## 1.1.2 Installation of [PyTorch](https://pytorch.org)
+## 0.2 Installation of [PyTorch](https://pytorch.org)
 [PyTorch](https://pytorch.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
 ```bash
 # at a terminal prompt on the host (e.g. macOS)
@@ -69,7 +76,7 @@ pip3 install https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-l
 pip3 install pandas
 ```
 
-## 1.2 Clone this reposoitory 
+## 0.3 Clone this reposoitory 
 ```bash
 # open up a terminal on the host (e.g macOS) and navigate to where you want the repo to be located
 # e.g. $HOME/myrepos
@@ -77,7 +84,7 @@ pip3 install pandas
 git clone https://github.com/fraseriainlewis/neuralnet.git
 ```
 
-## 1.3 Test compilation of a neural network C++ program 
+## 0.4 Test compilation of a neural network C++ program 
 ```bash
 # in the bash terminal in the guest (Ubuntu OS)
 cd /files/neuralnet
@@ -101,7 +108,7 @@ c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -l
 ```
 
 <a name="lr"></a>
-# 2. Example 1 - linear regression 
+# 1. Linear regression - Example 1
 Linear regression is a simple special case of a neural network comprising of only one layer and an identity activation function. This is a useful starting point for learning mlpack because rather than focus on the model structure we can learn and test how the functions which fit the model operate, without being concerned about complex numerical behaviour from the model. This example fits a single model to data and focuses on the optimizer options and how to ensure we have repeatable results.
 
 * **Optimizer configuration** Many different options
@@ -115,7 +122,7 @@ Linear regression is a simple special case of a neural network comprising of onl
    
    *Additional iterations* - controlling what happens with future calls to the optimizer, e.g. does it start from current best estimates or else re-start from fresh estimates. 
 <a name="lr1"></a>  
-## 2.1 Code run through and check with R
+## 1.1 Code run through and check with R
 This example uses **linReg_ex1.cpp** which is in the repo, only relevant snippets are given below.
 
 ```c++
@@ -264,7 +271,7 @@ which gives output identical to above but this time we also see the initialize p
     2.1024
 ```
 <a name="lr2"></a> 
-## 2.2 Start model fit optimization from matrix of parameters
+## 1.2 Start model fit optimization from matrix of parameters
 This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. A key part in the snipper below is the *model2.Evaluate(trainData, trainLabels)* which allocates a matrix of initial values which can then be over-written with new custom value before any training commences.  
 
 ``` c++
@@ -321,7 +328,7 @@ Which gives output
 ```
 The final solution is similar but not absolutely identical to above, rounding errors.
 <a name="lr3"></a> 
-## 2.3 Start model fit optimization from random parameters
+## 1.3 Start model fit optimization from random parameters
 This example again uses **linReg_ex1.cpp** same as above only relevant snippets are given below. This uses a different initialization rule when creating the FNN object, and uses a seed reset to show how to get repeatable results
 
 ```c++
@@ -427,11 +434,11 @@ Which produces output
    1.2825
 ```
 <a name="ffn1"></a>
-# 3. Example 2 - Two-layer forward feed network
+# 2. Two-layer forward feed network - Example 2. Continuous response, MSE Loss
 We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
 
 <a name="ffn11"></a> 
-## 3.1 mlpack version
+## 2.1 mlpack version
 This example uses **ffn_ex1.cpp** which is broadly similar to **linReg_ex1.cpp** but with slight changes to the model definition - to give a hidden layer - rather than linear regression, and the additional code to provide repeated results using different starting weights has been removed. This would work exactly as in the linear regression case. The code snippet below shows the model definition.
 
 ```c++
@@ -500,7 +507,7 @@ n rows=1 n cols=1000
 The parameters are all the weights and biases from each of the hidden and output layers. These are not so easy to assign to specific place in the network structure. See next example using Torch which allocated parameters into tensors and we can compare back with these. 
 
 <a name="ffn12"></a> 
-## 3.2 PyTorch version
+## 2.2 PyTorch version
 This example uses **ffn_ex1_torch.py** to repeat the same neural network as in Section 3.1 but using PyTorch. The complete code listing is given below. The optimizer used is Adam, same as in 3.1, and in particular this using batching of results and batch size=32. Implementing batching requires some care and the *DataLoader* class was used. Agruably the simplest option for reading in data from csv is to use pandas, then coerce to numpy array then coerce into a PyTorch tensor, as functions exist for each of these coercions. The disadvantage of this approach is that the assumptions then used by PyTorch as to batch size, specifically how many data points are processed in a batch and therefore how much data is used to do weight updating during the optimization/training stage is implicity and unclear. Using *DataLoader* allows a specific batch size to be specified. 
 
 One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. The parameters in the Adam optimizer are the same as those used in mlpack but with different starting conditions for the weights, each are started randomly with a fixed seed. Note this code takes quite some minutes to run. 
@@ -651,4 +658,85 @@ compare results below with the torch tensor outputs above:
 
    -0.3416 2.bias tensor
    
+```
+
+<a name="ffn2"></a>
+# 3. Two-layer forward feed network - Example 3. Categorical response, NegLogLike Loss
+We fit a linear layer with two nodes (corresponding to an output/response with two levels, i.e. binary) and a LogSoftMax activation function which maps the input values to log probabilities denoting the prediction of the input case being in output class 1 or 2. The loss function used is negative log likelihood. 
+
+<a name="ffn21"></a> 
+## 3.1 mlpack version
+This example uses **ffn_ex2_bin.cpp**. Note that mlpack expects the categorical output (labels) to be coded from 1 through to N, where N is the number of unique classes. The C++ code also manually computes accuracy metrics, *sensitivity* (proportion of true positives), *specificity* (proportion of true negatives) and the overall *accuracy* (proportion of correctly predicted cases). Note as with above examples, these metrics are *not* out of sample (they use all the data, not split into training and test sets), and so not meaningful other than for comparison with the PyTorch example output below. Later examples use cross-validation. 
+
+```c++
+// snippets - with gaps see full source file - of differences from above mlpack examples
+
+data::Load("features.csv", featureData, true);// last arg is transpose - needed as col major
+data::Load("labelsBNL1.csv", labels01, true);// NOTE: these are coded 0/1
+
+const arma::mat labels = labels01.row(0) + 1;// add +1 to all response values, mapping from 0-1 to 1-2
+                                             // NegativeLogLikelihood needs 1...number of classes                                            
+// Model definition
+FFN<NegativeLogLikelihood<>,RandomInitialization> model1(NegativeLogLikelihood<>(),RandomInitialization(-1,1));//default
+
+// build layers
+const size_t inputSize=featureData.n_rows;// number of predictors
+const size_t hiddenLayerSize=2;// 2 as binary outcome and this is the last layer fed into LogSoftMax
+
+model1.Add<Linear<> >(inputSize, hiddenLayerSize);
+model1.Add<LogSoftMax<> >();//output
+
+// fit model
+model1.Train(featureData, labels,opt);
+lossAuto=model1.Evaluate(featureData, labels);// lossAuto is neg log like
+
+// compute predictions = log probabilities for each input case
+model1.Predict(featureData, assignments);
+
+// compute the negative log like loss manually and also the Se, Sp, Acc
+double lossManual=0;
+double predp2,predp1,sen,spec,acc;
+uword P,N,TP,TN;
+P=0;
+N=0;
+TP=0;
+TN=0;
+for(i=0;i<assignments.n_cols;i++){
+       lossManual+= -(assignments(labels(0,i)-1,i));// -1 as maps from 1,2 to 0,1 indexes
+
+       predp2=assignments(1,i);//log prob of being in class 2
+       predp1=assignments(0,i);//log prob of being in class 1
+       
+       if(labels(0,i)==2){//truth is class 2 - positives
+         P++;//count number of class 2
+         if(predp2>=predp1){//truth is class 2 and predict class 2
+                                           TP++;//increment count of true positives TP
+            }
+         } //end of count positives
+       if(labels(0,i)==1){//truth is class 1
+         N++;// count number of class 1 - negatives
+         if(predp1>=predp2){//truth is class 1 and predict class 1
+                                           TN++;//increment count of true negative FN
+       }
+       }
+                
+}
+sen=(double)TP/(double)P;
+spec=(double)TN/(double)N;
+acc=((double)TP+(double)TN)/((double)P+(double)N);//overall accuracy
+  
+std::cout<<"NLL (from Evaluate()) on full data set="<<lossAuto<<std::endl;
+std::cout<<"NLL manual - and correct - on full data set="<<lossManual<<std::endl;
+std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
+std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
+
+
+```
+
+<a name="ffn32"></a> 
+## 3.2 PyTorch version
+This example uses **ffn_ex2_torch.py** to
+
+```python
+
 ```
