@@ -3,11 +3,11 @@
 This vignette contains documented code examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data. The focus is on [mlpack](http://mlpack.org) with [pytorch](https://pytorch.org) used for selected comparisons. 
 
 
- ## **[Setup/installation](#setup)**
+ ## **[Setup and installation](#setup)**
  
  ## Examples 
 
-1. **[Linear Regression - Example 1.](#lr)** 
+1. **[Example 1. Linear Regression](#lr)** 
 
    1.1 **[Comparison with R](#lr1)** 
    
@@ -15,20 +15,20 @@ This vignette contains documented code examples detailing the basic and essentia
    
    1.3 **[with random initial weights](#lr3)**
    
-2. **[Two-layer forward feed network - Example 2. Continuous response, MSE Loss](#ffn1)** 
+2. **[Example 2. Two-layer forward feed network - Continuous response, MSE Loss](#ffn1)** 
 
    2.1 **[mlpack code](#ffn11)** 
    
    2.2 **[comparison with PyTorch](#ffn12)**  
    
-3. **[Two-layer forward feed network - Example 3. Categorical response, NegLogLike Loss](#ffn2)** 
+3. **[Example 3. Two-layer forward feed network - Categorical response, NegLogLike Loss](#ffn2)** 
 
    3.1 **[mlpack code](#ffn21)** 
    
    3.2 **[comparison with PyTorch](#ffn22)**  
 
 <a name="setup"></a>
-# Setup
+## Setup
 ## Installation of [mlpack 3.1.1](http://mlpack.org)
 We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
@@ -110,7 +110,7 @@ c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -l
 ```
 
 <a name="lr"></a>
-# 1. Linear regression - Example 1
+# 1. Example 1 - Linear regression 
 Linear regression is a simple special case of a neural network comprising of only one layer and an identity activation function. This is a useful starting point for learning mlpack because rather than focus on the model structure we can learn and test how the functions which fit the model operate, without being concerned about complex numerical behaviour from the model. This example fits a single model to data and focuses on the optimizer options and how to ensure we have repeatable results.
 
 * **Optimizer configuration** Many different options
@@ -436,7 +436,7 @@ Which produces output
    1.2825
 ```
 <a name="ffn1"></a>
-# 2. Two-layer forward feed network - Example 2. Continuous response, MSE Loss
+# 2. Example 2. Two-layer forward feed network - Continuous response, MSE Loss
 We fit a simple neural network comprising on one hidden layer with two nodes, and a sigmoid activation function. The code here is to give a simple template for a forward feed network and compares the results between mlpack and PyTorch. 
 
 <a name="ffn11"></a> 
@@ -663,7 +663,7 @@ compare results below with the torch tensor outputs above:
 ```
 
 <a name="ffn2"></a>
-# 3. Two-layer forward feed network - Example 3. Categorical response, NegLogLike Loss
+# 3. Example 3. Two-layer forward feed network - Categorical response, NegLogLike Loss
 We fit a linear layer with two nodes (corresponding to an output/response with two levels, i.e. binary) and a LogSoftMax activation function which maps the input values to log probabilities denoting the prediction of the input case being in output class 1 or 2. The loss function used is negative log likelihood. 
 
 <a name="ffn21"></a> 
@@ -732,8 +732,71 @@ std::cout<<"NLL manual - and correct - on full data set="<<lossManual<<std::endl
 std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
 std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
 
-
 ```
+This gives the following output:
+
+```bash
+#-------------------------------------------------------------------------#
+#--------- log probabilities debugging on --------------------------------#
+#-------------------------------------------------------------------------#
+
+Predictions shape rows  : 2
+Predictions shape cols : 1000
+
+	1. selected output records, first 10 records
+	0	[-0.000267637,-8.25953]
+	1	[-0.000100894,-9.2551]
+	2	[-3.23961e-05,-10.424]
+	3	[-11.0338,-1.79943e-05]
+	4	[-0.0597317,-2.84787]
+	5	[-2.95479,-0.0535124]
+	6	[-0.272727,-1.43255]
+	7	[-1.01258,-0.451426]
+	8	[0,-17.3028]
+	9	[-0.00065943,-7.3449]
+
+	2. selected output records, first 10 records which correspond to true label
+	0	[-0.000267637]
+	1	[-0.000100894]
+	2	[-3.23961e-05]
+	3	[-1.79943e-05]
+	4	[-0.0597317]
+	5	[-0.0535124]
+	6	[-1.43255]
+	7	[-1.01258]
+	8	[0]
+	9	[-0.00065943]
+
+	3. selected output records, last 10 records
+	990	[-0.68687,-0.699464]
+	991	[-0.147277,-1.98821]
+	992	[-2.02707e-05,-10.91]
+	993	[-3.83821,-0.0217917]
+	994	[-0.26634,-1.4532]
+	995	[-0.00886764,-4.73271]
+	996	[-10.0142,-4.81877e-05]
+	997	[-2.63317e-05,-10.6386]
+	998	[0,-15.5898]
+	999	[-4.2746,-0.0140414]
+
+	4. selected output records, last 10 records which correspond to true label
+	990	[-0.699464]
+	991	[-0.147277]
+	992	[-2.02707e-05]
+	993	[-0.0217917]
+	994	[-0.26634]
+	995	[-0.00886764]
+	996	[-4.81877e-05]
+	997	[-2.63317e-05]
+	998	[0]
+	999	[-0.0140414]
+NLL (from Evaluate()) on full data set=138.496
+NLL manual - and correct - on full data set=138.496
+P= 419  TP=381  N= 581  TN= 549
+sensitivity = 0.90931 specificity = 0.94492 accuracy= 0.93000
+```
+
+
 
 <a name="ffn32"></a> 
 ## 3.2 PyTorch version
