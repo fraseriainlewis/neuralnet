@@ -22,7 +22,7 @@ arma::arma_rng::set_seed(100);
 /** Load the training set - separate files for features and lables (regression) **/
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
-int i=0;
+uword i,j;
 data::Load("features.csv", trainData, true);
 data::Load("labelsNL1.csv", trainLabels, true);// regression response
 
@@ -35,7 +35,7 @@ for(i=0;i<10;i++){
  arma::cout << trainLabels(0,i) << arma::endl;
 }
 
-int j=0;
+j=0;
 std::cout<<"Features for observation: "<<j<<std::endl;
 for(i=0;i<trainData.n_rows;i++){
  arma::cout << trainData(i,j) << arma::endl;
@@ -57,7 +57,7 @@ const size_t inputSize=trainData.n_rows;// 9
 const size_t outputSize=1;
 const size_t hiddenLayerSize=2;
 
-model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize);
+model1.Add<Linear<> >(inputSize, hiddenLayerSize);
 model1.Add<SigmoidLayer<> >();
 model1.Add<Linear<> >(hiddenLayerSize, outputSize);
 //model1.Add<IdentityLayer<> >();
