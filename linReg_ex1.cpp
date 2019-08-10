@@ -22,8 +22,8 @@ arma::arma_rng::set_seed(100);
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
 int i=0;
-data::Load("features.csv", trainData, true);
-data::Load("labelsL1.csv", trainLabels, true);// regression response
+data::Load("data/features.csv", trainData, true);
+data::Load("data/labelsL1.csv", trainLabels, true);// regression response
 
 // print out to check the data is read in correctly
 arma::cout << "n rows="<<trainData.n_rows <<" n cols="<< trainData.n_cols << arma::endl;
@@ -67,6 +67,17 @@ arma::cout << model1.Parameters() << arma::endl;
 model1.Train(trainData, trainLabels,opt);
 arma::cout<<"-------final params------------------------"<<arma::endl;
 arma::cout << model1.Parameters() << arma::endl;
+
+arma::mat assignments;
+model1.Predict(trainData, assignments);
+
+cout<<"Predictions    : "<<assignments<<endl;
+cout<<"Correct Labels : "<<trainLabels<<endl;
+
+
+data::Save("model.xml", "model", model1, false);
+
+
 
 model1.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
                          // to continue with optim from previous solution use clean re-start policy = false and do not reset

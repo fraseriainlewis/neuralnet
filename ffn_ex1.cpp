@@ -23,8 +23,8 @@ arma::arma_rng::set_seed(100);
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
 uword i,j;
-data::Load("features.csv", trainData, true);
-data::Load("labelsNL1.csv", trainLabels, true);// regression response
+data::Load("data/features.csv", trainData, true);
+data::Load("data/labelsNL1.csv", trainLabels, true);// regression response
 
 // print out to check the data is read in correctly
 arma::cout << "n rows="<<trainData.n_rows <<" n cols="<< trainData.n_cols << arma::endl;

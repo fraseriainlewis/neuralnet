@@ -6,6 +6,7 @@
 #------------------------------------------------------------------------------------------------------------#
 setwd("/Users/fraser/myrepos/neuralnet");
 library(MASS)
+library(readr)
 set.seed(1000)
 # create Xs as from multi-normal for ease, also each are indep of each other 
 Sigma <- matrix(data=rep(0,(9+4)*(9+4)),ncol=9+4,byrow=TRUE)
@@ -29,7 +30,8 @@ summary(lm(ynl1~1+X1+X2+X3+X4+X5+X6+X7+X8+X9,data=dat)) # linear fit to non-line
 summary(lm(ynl2~1+X1+X2+X3+X4+X5+X6+X7+X8+X9,data=dat)) # linear fit to non-linear response1
 
 ## create CSV files
-write.csv(dat[,c("X1","X2","X3","X4","X5","X6","X7","X8","X9")],file="features.csv",row.names=FALSE)
+if(FALSE){
+  write.csv(dat[,c("X1","X2","X3","X4","X5","X6","X7","X8","X9")],file="features.csv",row.names=FALSE)
 write.csv(dat[,"y"],file="labelsL1.csv",row.names=FALSE)
 write.csv(dat[,"ynl1"],file="labelsNL1.csv",row.names=FALSE)
 write.csv(dat[,"ynl2"],file="labelsNL2.csv",row.names=FALSE)
@@ -37,11 +39,14 @@ write.csv(dat[,"ynl2"],file="labelsNL2.csv",row.names=FALSE)
 write.csv(ifelse(dat[,"y"]>median(dat[,"y"]),1,0),file="labelsBL1.csv",row.names=FALSE)
 write.csv(ifelse(dat[,"ynl1"]>median(dat[,"y"]),1,0),file="labelsBNL1.csv",row.names=FALSE)
 write.csv(ifelse(dat[,"ynl2"]>median(dat[,"y"]),1,0),file="labelsBNL2.csv",row.names=FALSE)
+}
+# use readr as drops header row
+write_csv(x=dat[,c("X1","X2","X3","X4","X5","X6","X7","X8","X9")],path="data/features.csv",col_names=FALSE)
+write_csv(x=as.data.frame(dat[,"y"]),path="data/labelsL1.csv",col_names=FALSE)
+write_csv(x=as.data.frame(dat[,"ynl1"]),path="data/labelsNL1.csv",col_names=FALSE)
+write_csv(x=as.data.frame(dat[,"ynl2"]),path="data/labelsNL2.csv",col_names=FALSE)
 
+write_csv(x=as.data.frame(ifelse(dat[,"y"]>median(dat[,"y"]),1,0)),path="data/labelsBL1.csv",col_names=FALSE)
+write_csv(x=as.data.frame(ifelse(dat[,"ynl1"]>median(dat[,"y"]),1,0)),path="data/labelsBNL1.csv",col_names=FALSE)
+write_csv(x=as.data.frame(ifelse(dat[,"ynl2"]>median(dat[,"y"]),1,0)),path="data/labelsBNL2.csv",col_names=FALSE)
 
-y<-as.matrix(dat$y);
-x<-as.matrix(dat[,-grep("y",names(dat))])
-library(lars);
-
-m1<-lars(x=x,y=y,type="lasso")
-cv.lars(x=x,y=y,type="lasso",trace=TRUE)

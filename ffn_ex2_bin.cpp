@@ -36,8 +36,8 @@ arma::arma_rng::set_seed(100);
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat featureData, labels01;
 unsigned int i,j;
-data::Load("features.csv", featureData, true);// last arg is transpose - needed as boost is col major
-data::Load("labelsBNL1.csv", labels01, true);// 
+data::Load("data/features.csv", featureData, true);// last arg is transpose - needed as boost is col major
+data::Load("data/labelsBNL1.csv", labels01, true);// 
 
 const arma::mat labels = labels01.row(0) + 1;// add +1 to all response values, mapping from 0-1 to 1-2
                                                  // NegativeLogLikelihood needs 1...number of classes                                            

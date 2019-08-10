@@ -13,11 +13,11 @@ np.random.seed(999)
 torch.manual_seed(999)
 
 # read the data - note read in using pandas then convert from dataframe to numpy array then torch tensor
-features=pd.read_csv("features.csv",delimiter=",",header=None)
+features=pd.read_csv("data/features.csv",delimiter=",",header=None)
 featuresnp=(features.to_numpy())
 x = torch.from_numpy(featuresnp).double() # the cast to double is needed
 
-labels=pd.read_csv("labelsNL1.csv",delimiter=",",header=None)
+labels=pd.read_csv("data/labelsNL1.csv",delimiter=",",header=None)
 labelsnp=(labels.to_numpy())
 y = torch.from_numpy(labelsnp).double()
 
