@@ -13,19 +13,19 @@ np.random.seed(9999)
 torch.manual_seed(9999)
 
 # read the data - note read in using pandas then convert from dataframe to numpy array then torch tensor
-features=pd.read_csv("s_features8.csv",delimiter=",",header=None)
+features=pd.read_csv("features.csv",delimiter=",",header=None)
 featuresnp=(features.to_numpy())
 x = torch.from_numpy(featuresnp).double() # the cast to double is needed
 
-labels=pd.read_csv("s_labelsB.csv",delimiter=",",header=None)
+labels=pd.read_csv("labelsBNL1.csv",delimiter=",",header=None)
 labelsnp=(labels.to_numpy())
 y = torch.from_numpy(labelsnp).double()
 
-print(y)
+#print(y)
 
 my_dataset = utils.TensorDataset(x,y) # create your datset
 
-dataset = utils.DataLoader(my_dataset,batch_size=2211) # create your dataloader
+dataset = utils.DataLoader(my_dataset,batch_size=1000) # create your dataloader
 
 #x = utils.DataLoader(x1, batch_size=32, shuffle=False)
 
@@ -35,7 +35,7 @@ dataset = utils.DataLoader(my_dataset,batch_size=2211) # create your dataloader
 
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
-D_in, H, D_out = 8, 2, 1
+D_in, H, D_out = 9, 2, 1
 
 
 # Use the nn package to define our model and loss function.
@@ -57,7 +57,7 @@ learning_rate = 1e-2
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 #RMSprop(params, lr=0.01, alpha=0.99, eps=1e-08, weight_decay=0, momentum=0, centered=False)
 curloss=1e+300
-abserror=1e-04
+abserror=1e-05
 maxiters=100000
 
 #data   = Variable(data,requires_grad=False)
@@ -78,7 +78,7 @@ for t in range(maxiters): # for each epoch - all training data run through once
         loss.backward()
         optimizer.step()
         # print statistics
-        running_loss += loss.item()*2211
+        running_loss += loss.item()*1000 # data set size
         #if i % 25 == (25-1):    # print every 25 mini-batches
         #    print('[%d, %5d] loss: %.3f' %
         #          (t + 1, i + 1, running_loss))
@@ -113,7 +113,7 @@ prednp=preds.detach().numpy()
 print("first 10 and last 10 probabilities output from model\n")
 print(prednp[0:10:1,:])
 print("---")
-print(prednp[2201:2211:1,:])
+print(prednp[990:1000:1,:])
 
 nrows=prednp.shape[0]
 myloss=0.0
