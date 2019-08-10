@@ -2,8 +2,10 @@
 ## Using C++ library [mlpack](http://mlpack.org)  and Python library [pytorch](https://pytorch.org) to build, optimize and assess different formulations of neural networks. 
 This vignette contains documented code examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data. The focus is on [mlpack](http://mlpack.org) with [pytorch](https://pytorch.org) used for selected comparisons. 
 
-**Table of contents**
-0. **[Setup](#setup)**
+
+ ## **[Setup/installation](#setup)**
+ 
+ ## Examples 
 
 1. **[Linear Regression - Example 1.](#lr)** 
 
@@ -26,8 +28,8 @@ This vignette contains documented code examples detailing the basic and essentia
    3.2 **[comparison with PyTorch](#ffn22)**  
 
 <a name="setup"></a>
-# 0. Setup
-## 0.1 Installation of [mlpack 3.1.1](http://mlpack.org)
+# Setup
+## Installation of [mlpack 3.1.1](http://mlpack.org)
 We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
 The code below assumes the top-level folder where [mlpack](http://mlpack.org) will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one where we will run commands on the host (e.g. macOS) and a second where we will run commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
@@ -64,7 +66,7 @@ export LD_LIBRARY_PATH=/usr/local/lib
 mlpack_random_forest --help
 # if this works then the installation was successful
 ```
-## 0.2 Installation of [PyTorch](https://pytorch.org)
+## Installation of [PyTorch](https://pytorch.org)
 [PyTorch](https://pytorch.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
 ```bash
 # at a terminal prompt on the host (e.g. macOS)
@@ -76,7 +78,7 @@ pip3 install https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-l
 pip3 install pandas
 ```
 
-## 0.3 Clone this reposoitory 
+## Clone this reposoitory 
 ```bash
 # open up a terminal on the host (e.g macOS) and navigate to where you want the repo to be located
 # e.g. $HOME/myrepos
@@ -84,7 +86,7 @@ pip3 install pandas
 git clone https://github.com/fraseriainlewis/neuralnet.git
 ```
 
-## 0.4 Test compilation of a neural network C++ program 
+## Test compilation of a neural network C++ program 
 ```bash
 # in the bash terminal in the guest (Ubuntu OS)
 cd /files/neuralnet
