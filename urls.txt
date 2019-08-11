@@ -5,3 +5,4 @@ https://github.com/mlpack/models/blob/master/vae/vae_mnist/src/vae.cpp
 
 https://github.com/mlpack/models/blob/master/vae/vae_cnn_mnist/src/vae_cnn.cpp
 
+https://github.com/mlpack/mlpack/blob/master/src/mlpack/tests/feedforward_network_test.cpp
