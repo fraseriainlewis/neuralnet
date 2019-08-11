@@ -25,7 +25,9 @@ This repository contains introductory step-by-step examples detailing the basic 
 
    3.1 *[mlpack code](#ffn21)* 
    
-   3.2 *[comparison with PyTorch](#ffn22)*  
+   3.2 *[comparison with PyTorch](#ffn22)*
+   
+   3.3 *[k-fold cross-validation with mlpack](#ffn23)*
 
 <a name="setup"></a>
 ## Setup
@@ -649,7 +651,7 @@ compare results below with the torch tensor outputs above:
 # 3. Example 3. Two-layer forward feed network
 **Categorical response, NegLogLike Loss**
 
-We fit a linear layer with two nodes (corresponding to an output/response with two levels, i.e. binary) and a LogSoftMax activation function which maps the input values to log probabilities denoting the prediction of the input case being in output class 1 or 2. The loss function used is negative log likelihood. 
+We fit a linear layer with two nodes (corresponding to an output/response with two levels, i.e. binary) and a LogSoftMax activation function which maps the input values to log probabilities denoting the prediction of the input case being in output class 1 or 2. The loss function used is negative log likelihood. Note that the predicted outcome class is taken to be that with the higher probability of the two, i.e. an implicit cut-off of 0.5, with real data this could potentially be tuned using ROC etc. 
 
 <a name="ffn21"></a> 
 ## 3.1 mlpack version
@@ -841,5 +843,156 @@ first 10 and last 10 probabilities output from model
 NLL on full data set= [138.48690495] 
 
 ```
-
 The predicted probabilites and negloglik values produced by mlpack and pytorch are almost identical.  
+
+<a name="ffn23"></a> 
+## 3.3 k-fold cross-validation with mlpack
+This example uses **ffn_ex3_cv_bin.cpp** and uses several custom functions defined and implemented in **cv_header.hpp**. This examples repeats the example in 3.1 but additionally compute k-fold cross-validation estimates of *sensitivity*, *specificity* and *accuracy*. The example uses 10 folds. The CV code simply partitions the total data set into k-folds, and if the total data set size is not a multiple of k then the last fold is ragged (e.g. n=105 will have 9 folds of size 10 and 1 fold of 15). the snippet below contains some of the key new lines. We do some setup for the k-fold data and then loop through, grabbing a matrix view of the features and a vector view of the labels, associated with each fold.   
+
+```c++
+...
+/**************************************************************************************************/
+/** we now reset the model parameters and use 10-fold cross validation to estimate the out of    **/
+/** sample accuracy                                                                              **/
+/*******************************CV folds **********************************************************/
+/**************************************************************************************************/
+uvec foldinfo;
+umat indexes;
+uword verbose=0;
+setupFolds(totalDataPts,nFolds,&foldinfo,&indexes,verbose);// pass pointers as call constructor in function
+
+uvec trainIdx,testIdx;
+uword curFold;
+
+//curFold=2;//1-based
+//arma::mat assignments2;
+for(curFold=1;curFold<=nFolds;curFold++){
+  std::cout<<"Processing fold "<<curFold<<" of "<<nFolds<<std::endl;
+  getFold(nFolds,curFold,indexes,foldinfo,&trainIdx,&testIdx,verbose);// note references and pointers, refs for
+
+  model1.ResetParameters();// reset parameters to their initial values - should be used with clean re-start policy = true
+  arma::cout<<"-------re-start empty params------------------------"<<arma::endl;//empty params as not yet allocated
+  arma::cout << model1.Parameters() << arma::endl;
+  model1.Train(featureData.cols(trainIdx), labels.cols(trainIdx),opt);
+  arma::cout<<"-------re-start final params------------------------"<<arma::endl;
+  arma::cout << model1.Parameters() << arma::endl;
+
+  // Use the Predict method to get the assignments.
+  //arma::mat assignments2;
+  model1.Predict(featureData.cols(testIdx), assignments);
+
+...
+} // end of k-fold loop
+
+```
+This gives the following output:
+
+```bash
+data is exact multiple of number of folds 100 lastFoldSize 100
+Processing fold 1 of 10
+-------re-start empty params------------------------
+  -0.9569
+   0.5090
+   0.0497
+  -0.7270
+  -0.1949
+  -0.3512
+  -0.4596
+  -0.1957
+   0.2470
+  -0.3391
+  -0.2576
+   0.3777
+   0.3602
+   0.9576
+   0.7043
+   0.6197
+  -0.1943
+   0.2445
+  -0.8926
+  -0.5218
+
+-------re-start final params------------------------
+  -1.5445
+   1.0989
+  -0.5155
+  -0.1618
+   4.1959
+  -4.7443
+  -0.5882
+  -0.0736
+   0.0646
+  -0.1591
+   0.1740
+  -0.0517
+   0.7355
+   0.5857
+   0.7564
+   0.5620
+   0.0151
+   0.0358
+   0.4289
+  -1.8019
+
+SIZE=100
+P= 38  TP=33  N= 62  TN= 59
+sensitivity = 0.86842 specificity = 0.95161 accuracy= 0.92000
+Processing fold 2 of 10
+-------re-start empty params------------------------
+  -0.7096
+  -0.0173
+
+...
+
+Processing fold 10 of 10
+-------re-start empty params------------------------
+   0.9011
+  -0.1312
+  -0.1270
+   0.7684
+   0.1311
+  -0.3305
+  -0.6499
+  -0.6583
+  -0.9079
+   0.3433
+  -0.7067
+  -0.3934
+  -0.4293
+  -0.1467
+  -0.3419
+  -0.6472
+  -0.3377
+  -0.1410
+   0.3335
+   0.6602
+
+-------re-start final params------------------------
+  -0.8368
+   1.6075
+   0.1005
+   0.5396
+   4.0246
+  -4.2259
+  -0.9253
+  -0.3853
+  -0.1550
+  -0.4102
+  -0.4851
+  -0.6120
+  -0.1760
+  -0.3992
+  -0.4511
+  -0.5405
+  -0.2985
+  -0.1840
+   1.5897
+  -0.5639
+
+SIZE=100
+P= 44  TP=38  N= 56  TN= 54
+sensitivity = 0.86364 specificity = 0.96429 accuracy= 0.92000
+in-sample Se= 0.90931 in-sample Sp = 0.94492
+out-sample 10-fold mean Se = 0.90761 out-sample 10-fold mean Sp = 0.94405
+```
+The last two lines show the accuracy metrics on the performance of the model on the same data it was fitted to (all the data), this is the in-sample estimates, and then compares this with the out of sample estimate which is the mean performance over the 10 folds. 
