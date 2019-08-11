@@ -781,8 +781,6 @@ P= 419  TP=381  N= 581  TN= 549
 sensitivity = 0.90931 specificity = 0.94492 accuracy= 0.93000
 ```
 
-
-
 <a name="ffn22"></a> 
 ## 3.2 PyTorch version
 This example uses **ffn_ex2_bin_torch.py** and fits the same model as in **ffn_ex2_bin.cpp** although without the extra code to compute accuracy measures. This example uses an Adam() optimizer with default parameters, and the mlpack version uses the same type of optimizer and parameters (although the starting conditions are different between these two versions as randomly set within each of C++ and python). 
@@ -806,7 +804,7 @@ This gives the following output:
 2700 138.49194628939256
 2800 138.48913947560112
 2900 138.48744828558551
-BREAK: iter= 2947   current loss= 138.48691488261667 	 previous 138.4869248666776  
+BREAK: iter= 2947   current loss= 138.48691488261667 	 previous 138.4869248666776 	 -9.98406093799531e-06 
 
 ---PARAMETERS-----
 
