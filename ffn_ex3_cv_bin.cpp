@@ -152,7 +152,7 @@ if(checkPredict){
 
 // compute the negative log like loss manually 
 double lossManual=0;
-double predp2,predp1,sen,spec,acc;
+double predp2,predp1,sen,spec,acc,inSampleSe,inSampleSp;
 uword P,N,TP,TN;
 P=0;
 N=0;
@@ -186,6 +186,9 @@ std::cout<<"NLL (from Evaluate()) on full data set="<<lossAuto<<std::endl;
 std::cout<<"NLL manual - and correct - on full data set="<<lossManual<<std::endl;
 std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
 std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
+
+inSampleSe=sen;
+inSampleSp=spec;// estimates of within sampe accuracy
 // these are identical if batch size is set to full data set size - or change to false to true for randomize at each batch
 //exit(0);
 
@@ -206,6 +209,10 @@ uword curFold;
 
 //curFold=2;//1-based
 //arma::mat assignments2;
+
+double meanSe=0.0;
+double meanSp=0.0;
+
 for(curFold=1;curFold<=nFolds;curFold++){
   std::cout<<"Processing fold "<<curFold<<" of "<<nFolds<<std::endl;
   getFold(nFolds,curFold,indexes,foldinfo,&trainIdx,&testIdx,verbose);// note references and pointers, refs for
@@ -253,9 +260,19 @@ for(curFold=1;curFold<=nFolds;curFold++){
   spec=(double)TN/(double)N;
   acc=((double)TP+(double)TN)/((double)P+(double)N);//overall accuracy
   
+  meanSe+=sen;
+  meanSp+=spec;
+
+
   std::cout<<"P= "<<P<<"  TP="<<TP<<"  N= "<<N<<"  TN= "<<TN<<std::endl;
   std::cout<<"sensitivity = "<<std::setprecision(5)<<fixed<<sen<<" specificity = "<<spec<<" accuracy= "<<acc<<std::endl;
 
   } //end of fold loop
+
+// output overall mean sen and spec
+  std::cout<<"in-sample Se= "<<std::setprecision(5)<<fixed<<inSampleSe<<" in-sample Sp = "<<inSampleSp<<std::endl;
+  std::cout<<"out-sample 10-fold mean Se = "<<std::setprecision(5)<<fixed<<meanSe/(double)nFolds<<" out-sample 10-fold mean Sp = "<<meanSp/(double)nFolds<<std::endl;
+
+
 
 }
