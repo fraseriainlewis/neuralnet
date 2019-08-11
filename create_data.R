@@ -50,3 +50,11 @@ write_csv(x=as.data.frame(ifelse(dat[,"y"]>median(dat[,"y"]),1,0)),path="data/la
 write_csv(x=as.data.frame(ifelse(dat[,"ynl1"]>median(dat[,"y"]),1,0)),path="data/labelsBNL1.csv",col_names=FALSE)
 write_csv(x=as.data.frame(ifelse(dat[,"ynl2"]>median(dat[,"y"]),1,0)),path="data/labelsBNL2.csv",col_names=FALSE)
 
+## ex 1
+setwd("~/myrepos/neuralnet")
+features<-read.csv("data/features.csv",header=FALSE)
+labels<-read.csv("data/labelsL1.csv",header=FALSE)
+dat<-data.frame(v0=labels$V1,features)
+summary(m1<-lm(v0~.,data=dat))
+
+
