@@ -90,22 +90,22 @@ git clone https://github.com/fraseriainlewis/neuralnet.git
 ```bash
 # in the bash terminal in the guest (Ubuntu OS)
 cd /files/neuralnet
-c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp
-# this should create executable linReg1 with no errors or warnings
+c++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp -Wall
+# this should create executable linReg_ex1 with no errors or warnings
 ./linReg_ex1
 # which should print output to the terminal and the last part should be as below
 ....
 -------re-start final params------------------------
-   0.4838
-  -0.8266
-   1.4217
-  -0.2708
-   0.3052
-  -0.0655
-   1.4153
-  -0.0805
-   0.4420
-   1.2825
+    1.0010
+   -2.4073
+    2.8359
+    0.4678
+   -5.9357
+   -0.9726
+   19.5992
+   -1.5430
+    0.2949
+    2.8393
 # if the above was successful then we can compile and run neural networks using mlpack
 ```
 
@@ -189,49 +189,47 @@ arma::cout << model1.Parameters() << arma::endl;
 output from the terminal is below. The first call to model1.Parameters() is empty as the parameters are initialized as part of the later call in model1.Train(). The second call to model1.Parameters() is after model1.Train() and prints the final estimated point estimates after the training has completed using RMSprop optimizer opt(). The last estimate - 2.1024 is the bias (i.e. intercept).   
 
 ```bash
--------empty params------------------------
 [matrix size: 0x0]
-
 -------final params------------------------
-    1.0222
-   -2.5820
-    2.9369
-    0.5715
-   -5.8861
-   -0.8739
-   20.1051
-   -1.5223
-    0.3459
-    2.1024
+    1.0095
+   -2.3980
+    2.8343
+    0.4778
+   -5.9454
+   -0.9827
+   19.5992
+   -1.5334
+    0.3052
+    2.8292
 ```   
 If we now fit the same model using [R](https://www.r-project.org) 
 ```R
 setwd("~/myrepos/neuralnet")
-features<-read.csv("features.csv",header=FALSE)
-labels<-read.csv("labelsL1.csv",header=FALSE)
+features<-read.csv("data/features.csv",header=FALSE)
+labels<-read.csv("data/labelsL1.csv",header=FALSE)
 dat<-data.frame(v0=labels$V1,features)
 summary(m1<-lm(v0~.,data=dat))
 ```
 we get the following output
 ```R
 Coefficients:
-            Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  2.10739    0.03086   68.29   <2e-16 ***
-V1           1.02055    0.03102   32.90   <2e-16 ***
-V2          -2.58056    0.03100  -83.24   <2e-16 ***
-V3           2.93324    0.03100   94.61   <2e-16 ***
-V4           0.57531    0.03098   18.57   <2e-16 ***
-V5          -5.88210    0.03098 -189.89   <2e-16 ***
-V6          -0.86965    0.03101  -28.05   <2e-16 ***
-V7          20.10959    0.03106  647.39   <2e-16 ***
-V8          -1.51738    0.03101  -48.93   <2e-16 ***
-V9           0.34401    0.03108   11.07   <2e-16 ***
+            Estimate Std. Error  t value Pr(>|t|)    
+(Intercept)  2.83425    0.03196   88.695   <2e-16 ***
+V1           1.00577    0.03205   31.385   <2e-16 ***
+V2          -2.40246    0.03211  -74.812   <2e-16 ***
+V3           2.83563    0.03201   88.588   <2e-16 ***
+V4           0.47255    0.03217   14.690   <2e-16 ***
+V5          -5.94067    0.03208 -185.155   <2e-16 ***
+V6          -0.97756    0.03204  -30.506   <2e-16 ***
+V7          19.59917    0.03202  612.097   <2e-16 ***
+V8          -1.53827    0.03206  -47.976   <2e-16 ***
+V9           0.29987    0.03207    9.352   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 0.9758 on 990 degrees of freedom
-Multiple R-squared:  0.9978,	Adjusted R-squared:  0.9978 
-F-statistic: 5.035e+04 on 9 and 990 DF,  p-value: < 2.2e-16
+Residual standard error: 1.011 on 990 degrees of freedom
+Multiple R-squared:  0.9977,	Adjusted R-squared:  0.9977 
+F-statistic: 4.762e+04 on 9 and 990 DF,  p-value: < 2.2e-16
 ```
 The point estimates from R are almost identical to those from mlpack. They will not be identical as different optimizers are used (with different error tolerances and parameters) in addition to the usual caveats of comparing floating point estimates between programs and architectures. The R-squared is very high because this is simulated data and the additive model used here is the true generating model. 
 
@@ -248,7 +246,6 @@ arma::cout << model1.Parameters() << arma::endl;
 ```
 which gives output identical to above but this time we also see the initialize parameters before fitting
 ```bash
--------re-start params------------------------
    0.9000
    0.9000
    0.9000
@@ -261,16 +258,16 @@ which gives output identical to above but this time we also see the initialize p
    0.9000
 
 -------re-start final params------------------------
-    1.0222
-   -2.5820
-    2.9369
-    0.5715
-   -5.8861
-   -0.8739
-   20.1051
-   -1.5223
-    0.3459
-    2.1024
+    1.0095
+   -2.3980
+    2.8343
+    0.4778
+   -5.9454
+   -0.9827
+   19.5992
+   -1.5334
+    0.3052
+    2.8292
 ```
 <a name="lr2"></a> 
 ## 1.2 Start model fit optimization from matrix of parameters
@@ -296,7 +293,7 @@ arma::cout<<"-------manual set init params------------------------"<<arma::endl;
 arma::cout << model2.Parameters() << arma::endl;
 
 // set up optimizer 
-ens::RMSProp opt2(0.01, 1060, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::RMSProp opt2(0.01, trainLabels.n_cols, 0.99, 1e-8, 0,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
                  
 model2.Train(trainData, trainLabels,opt2);
 arma::cout<<"-------final params------------------------"<<arma::endl;
@@ -317,16 +314,16 @@ Which gives output
    0.0500
 
 -------final params------------------------
-    1.0157
-   -2.5864
-    2.9313
-    0.5778
-   -5.8802
-   -0.8699
-   20.1108
-   -1.5202
-    0.3399
-    2.1024
+    1.0105
+   -2.3975
+    2.8359
+    0.4775
+   -5.9458
+   -0.9827
+   19.5979
+   -1.5334
+    0.3050
+    2.8394
 ```
 The final solution is similar but not absolutely identical to above, rounding errors.
 <a name="lr3"></a> 
@@ -342,7 +339,7 @@ FFN<MeanSquaredError<>,RandomInitialization> model3(MeanSquaredError<>(),RandomI
 model3.Add<Linear<> >(trainData.n_rows,1);
 model3.Add<IdentityLayer<> >();// needed = final output value is sum of weights and data
 // set up optimizer 
-ens::RMSProp opt3(0.01, 1060, 0.99, 1e-8, 10000,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
+ens::RMSProp opt3(0.01, trainLabels.n_cols, 0.99, 1e-8, 10000,1e-8,false,true); //https://ensmallen.org/docs.html#rmsprop.
 
 arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
 arma::cout << model3.Parameters() << arma::endl;
@@ -376,16 +373,16 @@ Which produces output
 [matrix size: 0x0]
 
 -------final params------------------------
-   0.4838
-  -0.8266
-   1.4217
-  -0.2708
-   0.3052
-  -0.0655
-   1.4153
-  -0.0805
-   0.4420
-   1.2825
+    1.0010
+   -2.4073
+    2.8359
+    0.4678
+   -5.9357
+   -0.9726
+   19.5992
+   -1.5430
+    0.2949
+    2.8393
 
 -------re-start params random start------------------------
    0.9233
@@ -400,16 +397,16 @@ Which produces output
    0.8185
 
 -------re-start final params------------------------
-   0.4838
-  -0.8266
-   1.4217
-  -0.2708
-   0.3052
-  -0.0655
-   1.4153
-  -0.0805
-   0.4420
-   1.2825
+    1.0010
+   -2.4073
+    2.8359
+    0.4678
+   -5.9357
+   -0.9726
+   19.5992
+   -1.5430
+    0.2949
+    2.8393
 
 -------re-start params random start------------------------
    0.9233
@@ -424,16 +421,16 @@ Which produces output
    0.8185
 
 -------re-start final params------------------------
-   0.4838
-  -0.8266
-   1.4217
-  -0.2708
-   0.3052
-  -0.0655
-   1.4153
-  -0.0805
-   0.4420
-   1.2825
+    1.0010
+   -2.4073
+    2.8359
+    0.4678
+   -5.9357
+   -0.9726
+   19.5992
+   -1.5430
+    0.2949
+    2.8393
 ```
 <a name="ffn1"></a>
 # 2. Example 2. Two-layer forward feed network
