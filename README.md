@@ -455,8 +455,8 @@ model1.Add<Linear<> >(trainData.n_rows, hiddenLayerSize); //hidden layer
 model1.Add<SigmoidLayer<> >(); //activation in hidden layer
 model1.Add<Linear<> >(hiddenLayerSize, outputSize); // output - layer - sum to single value plus bias
 
-// set up optimizer - use Adam optimizer t
-ens::Adam opt(0.001, 32, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); 
+// set up optimizer - use Adam optimizer 
+ens::Adam opt(0.01, trainData.n_cols, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); 
                  // see https://ensmallen.org/docs.html#adam - these are largely defaults and similar to pyTorch
 
 model1.Train(trainData, trainLabels,opt);
@@ -479,31 +479,31 @@ arma::cout << "n rows="<<assignments.n_rows <<" n cols="<< assignments.n_cols <<
 The output in the terminal should end as below:
 ```bash
 -------final params------------------------
-   -0.2245
-   -0.1361
-    0.6666
-    0.2905
-   -0.7597
-   -0.3231
-   -0.1226
-   -0.0571
-    1.5225
-    0.6417
-    0.2516
-    0.0757
-   -5.0853
-   -2.2369
-    0.4244
-    0.1586
-   -0.0464
-   -0.0471
-   -3.0177
-   -4.2481
-   15.3691
-   42.9384
-   -0.3416
+   -0.2217
+   -0.1183
+    0.6000
+    0.2821
+   -0.6739
+   -0.3516
+   -0.1108
+   -0.0499
+    1.4475
+    0.6751
+    0.2419
+    0.1248
+   -4.8933
+   -2.2408
+    0.4083
+    0.1457
+   -0.0557
+   -0.0401
+   -3.1662
+   -4.4231
+   15.7721
+   41.6386
+   -0.2959
 
-MSE(sum)=683.55
+MSE=635.869
 n rows=1 n cols=1000
 ```
 The parameters are all the weights and biases from each of the hidden and output layers. These are not so easy to assign to specific place in the network structure. See next example using Torch which allocated parameters into tensors and we can compare back with these. 
@@ -512,7 +512,7 @@ The parameters are all the weights and biases from each of the hidden and output
 ## 2.2 PyTorch version
 This example uses **ffn_ex1_torch.py** to repeat the same neural network as in Section 3.1 but using PyTorch. The complete code listing is given below. The optimizer used is Adam, same as in 3.1, and in particular this using batching of results and batch size=32. Implementing batching requires some care and the *DataLoader* class was used. Agruably the simplest option for reading in data from csv is to use pandas, then coerce to numpy array then coerce into a PyTorch tensor, as functions exist for each of these coercions. The disadvantage of this approach is that the assumptions then used by PyTorch as to batch size, specifically how many data points are processed in a batch and therefore how much data is used to do weight updating during the optimization/training stage is implicity and unclear. Using *DataLoader* allows a specific batch size to be specified. 
 
-One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every 32 data points. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. The parameters in the Adam optimizer are the same as those used in mlpack but with different starting conditions for the weights, each are started randomly with a fixed seed. Note this code takes quite some minutes to run. 
+One other important aspect in the below code is that two loops are used when training the model, the outer loop is per epoch - one complete run of the data through the model, and the inner loop is the batching, weight updates every X data points. Given our data set is small we use all data points in each batch update. The code also has a break statement to stop early when the value of the objective function ceases to change by a sufficiently large amount. The parameters in the Adam optimizer are the same as those used in mlpack but with different starting conditions for the weights, each are started randomly with a fixed seed. Note this code takes quite some minutes to run. 
 
 ```python
 # -*- coding: utf-8 -*-
@@ -540,13 +540,7 @@ y = torch.from_numpy(labelsnp).double()
 
 my_dataset = utils.TensorDataset(x,y) # create your datset
 
-dataset = utils.DataLoader(my_dataset,batch_size=32) # create your dataloader
-
-#x = utils.DataLoader(x1, batch_size=32, shuffle=False)
-
-#y = utils.DataLoader(y1, batch_size=32, shuffle=False)
-
-#print(x.shape)
+dataset = utils.DataLoader(my_dataset,batch_size=1000) # create your dataloader
 
 # N is batch size; D_in is input dimension;
 # H is hidden dimension; D_out is output dimension.
@@ -567,11 +561,11 @@ model=model.double()
 # the model for us. Here we will use Adam; the optim package contains many other
 # optimization algoriths. The first argument to the Adam constructor tells the
 # optimizer which Tensors it should update.
-learning_rate = 1e-3
+learning_rate = 1e-2
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 curloss=1e+300
-abserror=1e-05
-maxiters=30000
+abserror=1e-08
+maxiters=100000
 
 for t in range(maxiters): # for each epoch - all training data run through once
     running_loss=0.0
@@ -605,60 +599,49 @@ for name, param in model.named_parameters():
 ```
 The last part of the output at the terminal from **ffn_ex1_torch.py** is 
 ```bash
-30400 688.9507893603051
-30500 688.9496733402435
-30600 688.9485942419802
-30700 688.9475507906353
-BREAK: iter= 30778   loss= 688.94676085179 
+16900 635.5367461940899
+17000 635.5431125909644
+17100 635.5367082955127
+BREAK: iter= 17137   loss= 635.5367051535782 
 
 ---PARAMETERS-----
 
-0.weight tensor([[-0.1345,  0.2795, -0.3171, -0.0566,  0.6329,  0.0782, -2.1893,  0.1507,
-         -0.0526],
-        [-0.2268,  0.6850, -0.7754, -0.1326,  1.5481,  0.2504, -5.1859,  0.4391,
-         -0.0410]], dtype=torch.float64)
-0.bias tensor([-4.1436, -3.0621], dtype=torch.float64)
-2.weight tensor([[43.5959, 14.9405]], dtype=torch.float64)
-2.bias tensor([-0.3613], dtype=torch.float64)
+0.weight tensor([[-0.1164,  0.2779, -0.3455, -0.0490,  0.6642,  0.1228, -2.2044,  0.1436,
+         -0.0397],
+        [-0.2252,  0.6089, -0.6836, -0.1133,  1.4716,  0.2456, -4.9758,  0.4161,
+         -0.0561]], dtype=torch.float64)
+0.bias tensor([-4.3438, -3.1991], dtype=torch.float64)
+2.weight tensor([[42.2919, 15.3779]], dtype=torch.float64)
+2.bias tensor([-0.3060], dtype=torch.float64)
+torch.Size([1000, 1])
+...
+MSE on full data set= [635.53670518]
 ```
-The loss in the PyTorch run is close but not identical to that from mlpack (689 v 683) and the parameter estimates are all very similar but are outputted in a diffferent order in each program. To see the similarity, note that mlpack is column major. The output below compares the results from mlpack and matches these to those from PyTorch. The results are very similar, and we would not expect them to be identical, and they are close enough to confirm the same formulation of neural network model is being fitted in each case. 
+The loss in the PyTorch run is close but not identical to that from mlpack (635.5 v 635.9) and the parameter estimates are all very similar but are outputted in a diffferent order in each program. To see the similarity, note that mlpack is column major. The output below compares the results from mlpack and matches these to those from PyTorch. The results are very similar, and we would not expect them to be identical, and they are close enough to confirm the same formulation of neural network model is being fitted in each case. 
 
 ```bash
 compare results below with the torch tensor outputs above:
-   -0.2245 0.weight tensor, first col read from the bottom up - entries [1,0] and [0,0] 
-   -0.1361 
+   -0.2217 0.weight tensor, first col read from the bottom up - entries [1,0] and [0,0] 
+   -0.1183 
 
-    0.6666 0.weight tensor, 2nd col read from the bottom up - entries [1,1] and [0,1] 
-    0.2905
+    0.6000 0.weight tensor, 2nd col read from the bottom up - entries [1,1] and [0,1] 
+    0.2821 
 
-   -0.7597 0.weight tensor, 3rd col read from the bottom up - entries [1,2] and [0,2] 
-   -0.3231
+   -0.6739 0.weight tensor, 3rd col read from the bottom up - entries [1,2] and [0,2] 
+   -0.3516 
 
-   -0.1226 0.weight tensor, 4th col read from the bottom up - entries [1,3] and [0,3]
-   -0.0571
+   ...
 
-    1.5226 0.weight tensor, 5th col read from the bottom up - entries [1,4] and [0,4]
-    0.6417
-
-    0.2516 0.weight tensor, 6th col read from the bottom up - entries [1,5] and [0,5]
-    0.0757
-
-   -5.0853 0.weight tensor, 7th col read from the bottom up - entries [1,6] and [0,6]
-   -2.2369
-
-    0.4244 0.weight tensor, 8th col read from the bottom up - entries [1,7] and [0,7]
-    0.1586
-
-   -0.0464 0.weight tensor, 9th col read from the bottom up - entries [1,8] and [0,8]
-   -0.0471
+   -0.0557 0.weight tensor, 9th col read from the bottom up - entries [1,8] and [0,8]
+   -0.0401
    
-   -3.0177 0.bias
-   -4.2481 
+   -3.1662 0.bias
+   -4.4231
 
-   15.3691 2.weight
-   42.9384 
+   15.7721 2.weight
+   41.6386 
 
-   -0.3416 2.bias tensor
+   -0.2959 2.bias tensor
    
 ```
 
