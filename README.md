@@ -1,5 +1,5 @@
 <img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain3.png" alt="drawing" width="200"/>
-## Introduction to Data Analyses with Neural Networks using [mlpack](http://mlpack.org)
+## Introduction to Machine Learning with Neural Networks using [mlpack](http://mlpack.org)
 This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org) and [pytorch](https://pytorch.org) used for selected comparisons. 
 
 
@@ -31,28 +31,32 @@ This repository contains introductory step-by-step examples detailing the basic 
 
 <a name="setup"></a>
 ## Setup
-## Installation of [mlpack 3.1.1](http://mlpack.org)
-We install [mlpack 3.1.1](http://mlpack.org) from source. The steps given here are self-contained and specific to the versions stated, additional instructions are available on the [mlpack](http://mlpack.org) website. A stock Linux docker image of [Ubuntu 18.04](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
+## Installation of [mlpack](http://mlpack.org)
+We install [mlpack](http://mlpack.org) from source by cloning the mlpack [github repository](https://github.com/mlpack/mlpack.git). Note that this is a live repository and so is subject to constant change. The steps below have been tested on the repo cloned on 24th Aug 2019. A stock Linux docker image of [Ubuntu 19.10](https://hub.docker.com/_/ubuntu) is used. This is to allow full repeatability of the [mlpack](http://mlpack.org) installation on a clean Linux OS. It is assumed docker is already installed on the host OS ([see Docker Desktop Community Edition)](https://www.docker.com/products/docker-desktop). 
 
 The code below assumes the top-level folder where [mlpack](http://mlpack.org) will be downloaded to, and also where this repo will be cloned to, is *$HOME/myrepos*. The simplest way to execute the code below is to open up two terminal windows, one where we will run commands on the host (e.g. macOS) and a second where we will run commands on the guest (Ubuntu 18.04 via docker). We switch between both of these, the guest terminal is where [mlpack](http://mlpack.org) is used, the host terminal for non-mlpack activities. 
 
 ```bash
-# at a terminal prompt on the host (e.g. macOS)
-docker pull ubuntu:18.04
+# go to top level directory 
+cd $HOME/myrepos
+# at a terminal prompt on the host (e.g. macOS) clone the repo to a local folder
+git clone https://github.com/mlpack/mlpack.git
 # pull down docker image
-docker run -it -v ~/myrepos:/files ubuntu:18.04 
+docker pull ubuntu:19.10
+# start a terminal on the guest OS - ubuntu linux with a mapping into the host OS filesystem
+docker run -it -v ~/myrepos:/files ubuntu:19.10 
 # start a terminal on the guest OS - ubuntu linux with a mapping into the host OS filesystem
 # /files in Ubuntu is mapped into local folder ~/myrepos
-# at guest/Ubuntu 18.04 terminal prompt
+# at guest/Ubuntu 19.10 terminal prompt
 > apt update
 > apt install cmake clang libarmadillo-dev libboost-dev \
 libboost-math-dev libboost-program-options-dev libboost-test-dev \
 libboost-serialization-dev wget graphviz doxygen vim
 
 cd /files
-wget https://www.mlpack.org/files/mlpack-3.1.1.tar.gz
-tar -xvzpf mlpack-3.1.1.tar.gz
-mkdir -p mlpack-3.1.1/build/ && cd mlpack-3.1.1/build/
+# change folder name so if later download a newer repo it does not overwrite - use date of download, here 24thAug2019
+mv mlpack mlpack24Aug2019
+mkdir -p mlpack24Aug2019/build/ && cd mlpack24Aug2019/build/
 cmake ../
 make -j2 
 # can take a while 15-20 mins depending on system
