@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain3.png" alt="drawing" width="200"/>
 ## Introduction to Machine Learning with Neural Networks using [mlpack](http://mlpack.org)
-This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org), [pytorch](https://pytorch.org) and [tensorflow](https://tensorflow.org) used for selected comparisons. 
+This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org), [pytorch](https://pytorch.org) and [Tensorflow](https://tensorflow.org) used for selected comparisons. 
 
 
  ## **[Setup and installation](#setup)**
@@ -90,8 +90,8 @@ apt install python3-pip
 pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 pip3 install pandas
 ```
-## Installation of [tensorflow](https://tensorflow.org)
-[tensorflow](https://tensorflow.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
+## Installation of [Tensorflow](https://tensorflow.org)
+[Tensorflow](https://tensorflow.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case. Note that this does not work for the latest snapshot of v2.0.0+ API, it does work with the latest stable release (which is used in the installation code below). 
 ```bash
 # at a terminal prompt on the host (e.g. macOS)
 docker run -it -v ~/myrepos:/files ubuntu:19.10 # only do this if installing into new docker container
