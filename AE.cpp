@@ -24,8 +24,8 @@ arma::arma_rng::set_seed(1000);//1000
 /** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
 arma::mat trainData, trainLabels;
 uword i,j;
-data::Load("AEdata.csv", trainData, true);//  
-data::Load("AEdata.csv", trainLabels, true);// 
+data::Load("data/AEdata.csv", trainData, true);//  
+data::Load("data/AEdata.csv", trainLabels, true);// use same data as train and test is the same in AE
 
 // print out to check the data is read in correctly
 arma::cout << "n rows="<<trainData.n_rows <<" n cols="<< trainData.n_cols << arma::endl;
