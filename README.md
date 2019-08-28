@@ -1021,11 +1021,11 @@ The last two lines show the accuracy metrics on the performance of the model on 
 <a name="ae"></a>
 # 4. Example 4. Simple autoencoder
 **Single hidden layer with one node**
-An encoder - at its simplest is analogous to non-linear principle components analysis (PCA) - uses a bottleneck (a set of hidden layers) which reduces the dimension of the data. The general process is that high dimension data is passed through the neural network and pushed through the bottleneck and the output dimension is the same as the input dimension, and is reconstructed data. We fit the model so the reconstructed data is as close as possible to the initial data, but there will be information loss due to the bottlneck, the intuitive idea is that the key features of the data will be retained, giving a similar - lower dimension - representation of the original data. By capturing the encoded data, this is analogous to PCA components (if the activation function is linear), at least up to a rotation, reflection or translation. Non-linear activations, multiple hidden layers make this a very rich methodology for dimension reduction. The examples here are the simplest possible: one hidden layer with one node and linear activation. The code demonstrated how to capture the encoded data and compute the loss.  
+An encoder - at its simplest is analogous to linear principle components analysis (PCA) - it uses a bottleneck (a set of hidden layers) which reduces the dimension of the data. The general process is that high dimensional data is passed through the neural network and pushed through the bottleneck and the output dimension is the same as the input dimension, and is reconstructed data. We fit the model so the reconstructed data is as close as possible to the original data, but there will be information loss due to the bottlneck. The intuitive idea is that the key features of the data will be retained, giving a similar - but lower dimensional - representation of the original data. By capturing the encoded data, this is analogous to PCA components (if the activation function is linear), at least up to a rotation, reflection or translation. Non-linear activations, and multiple hidden layers make this a very rich methodology for dimension reduction. The examples here are the simplest possible: one hidden layer with one node and linear activation. The code demonstrates how to capture the encoded data and compute the loss.  
 
 <a name="ae1"></a> 
 ## 4.1 mlpack version
-This example uses **AE.cpp**. Only key parts are shown below, for example how to set up the network is a more natural way using sequential() and how to manual extract the encoded and decoded data. Input dimension = 8, hidden layer dimension =1, output dimension = 8. We use the .Forward() method to push data through the layers using the estimated weights, this is one way to get the encoded data.
+This example uses **AE.cpp**. Only key parts are shown below, for example how to set up the network using sequential(), which is more natural than the raw method in the previous examples, and how to manually extract the encoded and decoded data. Input dimension = 8, hidden layer dimension =1, output dimension = 8. We use the .Forward() method to push the data through the layers (using the estimated weights), which is one way to get the encoded data.
 
 ```c++
 ...
@@ -1137,8 +1137,267 @@ ass5T.save("c_decoded8.csv", csv_ascii);
 
 ...
 
+```
+
+```bash
+n rows=8 n cols=438
+-------empty params------------------------
+[matrix size: 0x0]
+
+-------final params------------------------
+   0.3450
+   0.2518
+   0.1047
+  -0.3409
+  -0.3545
+  -0.3687
+  -0.3338
+  -0.3096
+   1.1270
+   0.4377
+   0.3147
+   0.1308
+  -0.4432
+  -0.4577
+  -0.4753
+  -0.4313
+  -0.4001
+   0.8588
+   0.3215
+   0.2091
+   1.0491
+   0.7900
+   0.9175
+   0.8754
+   0.8350
+
+MSE auto=5.91827
+MSE manual predict=5.91827
+MSE manual forward(0,2)=5.91827
+FORWARD SEQ 0 1 ncol438 FORWARD SEQ 0 1 nrow1
+FORWARD 0 1 ncol438 FORWARD 1 nrow8
 
 ```
+
 <a name="ae2"></a> 
 ## 4.2 Pytorch version
-This example uses **AE_torch.py**. 
+This example uses **AE_torch.py**. The general idea is the same as in the mlpack code, the parameter estimates are difficult to compare due to the equivalence of the linear transformation of the references axes (rotation etc), but the losses came be compared as an intuitive check, and these are similar, 5.92 in mlpack and 5.95 in pytorch. Note that this loss estimate is manually computed in the code, to ensure it is directly comparable with that from mlpack. To get the encoded data we extract data out of the relevant subset of layers in the torch sequential model framework (rather than push data through layers, it is stored as part of this). 
+
+```python
+
+model = torch.nn.Sequential(
+	torch.nn.Linear(8, 1),
+	torch.nn.Identity(), # also Identity
+	torch.nn.Linear(1, 8),
+	torch.nn.Identity() # also Identity
+      )
+
+print(model)
+print(model[0:2:1])
+
+loss_fn = torch.nn.MSELoss(reduction='mean')
+
+model=model.double()
+
+learning_rate = 1e-3
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+curloss=1e+300
+abserror=1e-05
+maxiters=100000
+
+
+minLossOverall=1e+300
+
+for t in range(maxiters): # for each epoch - all training data run through once
+    running_loss=0.0
+    i=0
+    for input, target in dataset: # for each batch of training data update the current weights
+        optimizer.zero_grad()
+        output = model(input)
+        loss = loss_fn(output, target)
+        loss.backward()
+        optimizer.step()
+        # print statistics
+        running_loss += loss.item()
+        #if i % 25 == (25-1):    # print every 25 mini-batches
+        #    print('[%d, %5d] loss: %.3f' %
+        #          (t + 1, i + 1, running_loss))
+        #    #running_loss = 0.0
+        i=i+1  
+    #print("t=",t," ",i," ",running_loss)
+    if np.absolute(running_loss-curloss) <abserror:
+        # have good enough solution so stop
+        print("BREAK: iter=",t," ","loss=",running_loss,"\n")
+        break
+    else: 
+        curloss=running_loss # copy loss
+
+    if ((t%100)==0):
+        print(t, curloss)
+
+
+# print out parameters
+print("---PARAMETERS-----\n")
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print (name, param.data)
+
+
+#modelNew=model[]
+preds = model(x)
+#print(preds.shape)
+prednp=preds.detach().numpy()
+#print("first 10 and last 10 probabilities output from model\n")
+#print(prednp[0:10:1,:])
+
+nrows=prednp.shape[0]
+ncols=prednp.shape[1]
+myloss=0.0
+for i in range(nrows):
+	for j in range(ncols):
+		myloss+= (prednp[i,j]-labelsnp[i,j])*(prednp[i,j]-labelsnp[i,j])
+
+print("MANUAL LOSS=",myloss/y.shape[0],"\n")
+
+## print encoding of 8-dim vector into
+new_model = torch.nn.Sequential(*list(model.children())[0:2:1]) ## only keep first two layers
+#print(new_model(x))
+encodepreds2dim=new_model(x)
+
+
+# print out parameters
+print("---PARAMETERS-----\n")
+for name, param in new_model.named_parameters():
+    if param.requires_grad:
+        print (name, param.data)
+
+new_model2 = torch.nn.Sequential(*list(model.children())[2:4:1]) ## only keep first two layers
+#print(new_model2(encodepreds2dim))
+decodepreds8dim=new_model2(encodepreds2dim);
+
+# print out parameters
+print("---PARAMETERS-----\n")
+for name, param in new_model2.named_parameters():
+    if param.requires_grad:
+        print (name, param.data)
+
+print("-----------\n")
+# get encoded values in np
+encodepreds2dimnp=encodepreds2dim.detach().numpy()
+print(encodepreds2dimnp[0:10:1,:])
+
+encodepd=pd.DataFrame(data=encodepreds2dimnp)
+
+# get decoded values in np
+decodepreds8dimnp=decodepreds8dim.detach().numpy()
+print(decodepreds8dimnp[0:10:1,:])
+
+# this works arithmetically just fine!
+encodepd=pd.DataFrame(data=encodepreds2dimnp)
+decodepd=pd.DataFrame(data=decodepreds8dimnp)
+encodepd.to_csv("torch_encoded.csv", encoding='utf-8', index=False)
+decodepd.to_csv("torch_decoded.csv", encoding='utf-8', index=False)
+```
+
+```bash
+torch.Size([438, 8])
+torch.Size([438, 8])
+Sequential(
+  (0): Linear(in_features=8, out_features=1, bias=True)
+  (1): Identity()
+  (2): Linear(in_features=1, out_features=8, bias=True)
+  (3): Identity()
+)
+Sequential(
+  (0): Linear(in_features=8, out_features=1, bias=True)
+  (1): Identity()
+)
+0 1.715515742858413
+100 1.4177103432437188
+200 1.2447982699915816
+300 1.1176322918071444
+400 1.0192697696308524
+500 0.9403487709692049
+600 0.8822497407762648
+700 0.8415934698863026
+800 0.8133681358925989
+900 0.7935171904337369
+1000 0.7792329346694701
+1100 0.7687454247717685
+1200 0.7609888315691693
+1300 0.7552784794785009
+1400 0.7511161487104931
+1500 0.7481098719911505
+1600 0.7459483900755002
+1700 0.7443912774392966
+BREAK: iter= 1789   loss= 0.7433677820221017 
+
+---PARAMETERS-----
+
+0.weight tensor([[ 0.1370,  0.0757,  0.0157, -0.3563, -0.2745, -0.2650, -0.2338, -0.2397]],
+       dtype=torch.float64)
+0.bias tensor([-0.0510], dtype=torch.float64)
+2.weight tensor([[ 0.6091],
+        [ 0.3648],
+        [ 0.1621],
+        [-0.7784],
+        [-0.6588],
+        [-0.6535],
+        [-0.5559],
+        [-0.5704]], dtype=torch.float64)
+2.bias tensor([1.5363, 0.8159, 0.4138, 0.1911, 0.0172, 0.1509, 0.2036, 0.1740],
+       dtype=torch.float64)
+MANUAL LOSS= 5.946862542963064 
+
+---PARAMETERS-----
+
+0.weight tensor([[ 0.1370,  0.0757,  0.0157, -0.3563, -0.2745, -0.2650, -0.2338, -0.2397]],
+       dtype=torch.float64)
+0.bias tensor([-0.0510], dtype=torch.float64)
+---PARAMETERS-----
+
+0.weight tensor([[ 0.6091],
+        [ 0.3648],
+        [ 0.1621],
+        [-0.7784],
+        [-0.6588],
+        [-0.6535],
+        [-0.5559],
+        [-0.5704]], dtype=torch.float64)
+0.bias tensor([1.5363, 0.8159, 0.4138, 0.1911, 0.0172, 0.1509, 0.2036, 0.1740],
+       dtype=torch.float64)
+-----------
+
+[[ 0.17450165]
+ [-0.129184  ]
+ [ 0.34673723]
+ [ 0.18031122]
+ [ 0.34778009]
+ [-0.80109972]
+ [ 0.25190284]
+ [ 0.34042402]
+ [-0.20006302]
+ [-0.76083321]]
+[[ 1.64257051  0.87954356  0.44205581  0.05531233 -0.09776347  0.03681768
+   0.1066209   0.07450145]
+ [ 1.45759097  0.76875068  0.39282539  0.29170825  0.10231608  0.23527126
+   0.27544793  0.24773156]
+ [ 1.74748181  0.94237983  0.46997688 -0.07875982 -0.21123876 -0.07573544
+   0.01087051 -0.02374615]
+ [ 1.6461092   0.88166305  0.44299759  0.05079003 -0.10159103  0.03302122
+   0.10339121  0.07118753]
+ [ 1.74811703  0.9427603   0.47014594 -0.07957161 -0.21192583 -0.07641694
+   0.01029076 -0.02434103]
+ [ 1.04831692  0.52361735  0.28390129  0.81474295  0.54499945  0.67435714
+   0.64898395  0.63100956]
+ [ 1.68971674  0.90778164  0.4546033  -0.00493854 -0.14875829 -0.01376273
+   0.0635915   0.03034983]
+ [ 1.74363634  0.9400766   0.46895345 -0.07384548 -0.20707938 -0.07160987
+   0.01438019 -0.02014493]
+ [ 1.41441748  0.74289206  0.38133521  0.34688212  0.14901384  0.28158954
+   0.31485148  0.28816278]
+ [ 1.07284386  0.53830768  0.29042888  0.78339858  0.51847036  0.64804364
+   0.62659871  0.60804051]]
+
+```
