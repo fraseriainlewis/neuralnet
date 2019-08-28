@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain1.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain2.png" alt="drawing" width="200"/><img src="https://raw.githubusercontent.com/fraseriainlewis/neuralnet/master/neural_network_brain3.png" alt="drawing" width="200"/>
 ## Introduction to Machine Learning with Neural Networks using [mlpack](http://mlpack.org)
-This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org) and [pytorch](https://pytorch.org) used for selected comparisons. 
+This repository contains introductory step-by-step examples detailing the basic and essential tasks needed to fit and assess neural networks applied to data using C++ library [mlpack](http://mlpack.org), with [R](https://r-project.org), [pytorch](https://pytorch.org) and [tensorflow](https://tensorflow.org) used for selected comparisons. 
 
 
  ## **[Setup and installation](#setup)**
@@ -28,6 +28,13 @@ This repository contains introductory step-by-step examples detailing the basic 
    3.2 *[comparison with PyTorch](#ffn22)*
    
    3.3 *[k-fold cross-validation with mlpack](#ffn23)*
+
+4. **[Example 4. Simple autoencoder](#ae)** 
+
+   4.1 *[mlpack code](#ae1)* 
+   
+   4.2 *[comparison with PyTorch](#ae2)*
+   
 
 <a name="setup"></a>
 ## Setup
@@ -83,6 +90,16 @@ apt install python3-pip
 pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 pip3 install pandas
 ```
+## Installation of [tensorflow](https://tensorflow.org)
+[tensorflow](https://tensorflow.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
+```bash
+# at a terminal prompt on the host (e.g. macOS)
+docker run -it -v ~/myrepos:/files ubuntu:19.10 # only do this if installing into new docker container
+apt update
+apt install python3-pip
+pip3 install --upgrade tensorflow
+```
+
 
 ## Clone this reposoitory 
 ```bash
@@ -1000,3 +1017,128 @@ in-sample Se= 0.90931 in-sample Sp = 0.94492
 out-sample 10-fold mean Se = 0.90761 out-sample 10-fold mean Sp = 0.94405
 ```
 The last two lines show the accuracy metrics on the performance of the model on the same data it was fitted to (all the data), this is the in-sample estimates, and then compares this with the out of sample estimate which is the mean performance over the 10 folds. 
+
+<a name="ae"></a>
+# 4. Example 4. Simple autoencoder
+**Single hidden layer with one node**
+An encoder - at its simplest is analogous to non-linear principle components analysis (PCA) - uses a bottleneck (a set of hidden layers) which reduces the dimension of the data. The general process is that high dimension data is passed through the neural network and pushed through the bottleneck and the output dimension is the same as the input dimension, and is reconstructed data. We fit the model so the reconstructed data is as close as possible to the initial data, but there will be information loss due to the bottlneck, the intuitive idea is that the key features of the data will be retained, giving a similar - lower dimension - representation of the original data. By capturing the encoded data, this is analogous to PCA components (if the activation function is linear), at least up to a rotation, reflection or translation. Non-linear activations, multiple hidden layers make this a very rich methodology for dimension reduction. The examples here are the simplest possible: one hidden layer with one node and linear activation. The code demonstrated how to capture the encoded data and compute the loss.  
+
+<a name="ae1"></a> 
+## 4.1 mlpack version
+This example uses **AE.cpp**. Only key parts are shown below, for example how to set up the network is a more natural way using sequential() and how to manual extract the encoded and decoded data. Input dimension = 8, hidden layer dimension =1, output dimension = 8. We use the .Forward() method to push data through the layers using the estimated weights, this is one way to get the encoded data.
+
+```c++
+...
+/**************************************************************************************************/
+/** Load the training set - separate files for features and lables (regression) **/
+/** note - data is read into matrix in column major, e.g. each new data point is a column - opposite from data file **/
+arma::mat trainData, trainLabels;
+uword i,j;
+data::Load("AEdata.csv", trainData, true);//  
+data::Load("AEdata.csv", trainLabels, true);// use same data as train and test is the same in AE
+
+// print out to check the data is read in correctly
+arma::cout << "n rows="<<trainData.n_rows <<" n cols="<< trainData.n_cols << arma::endl;
+//arma::cout << "n rows="<< trainLabels.n_rows <<" n cols"<< trainLabels.n_cols << arma::endl;
+
+/**************************************************************************************************/
+/** MODELS - linear autoencoder with one hidden layer with one node **/
+
+const size_t inputSize=trainData.n_rows;// =8 
+const size_t outputSize=trainData.n_rows;// =8
+const size_t hiddenLayerSize=1;//
+
+/** could build model direct in layers - this works fine but more elegant using sequential here see below **/
+/* not using this code *//*
+FFN<MeanSquaredError<>,RandomInitialization> model0(MeanSquaredError<>(),RandomInitialization(-1,1));
+model0.Add<Linear<> >(inputSize, hiddenLayerSize);
+model0.Add<IdentityLayer<> >();
+model0.Add<Linear<> >(hiddenLayerSize, outputSize);
+model0.Add<IdentityLayer<> >();
+*/
+
+FFN<MeanSquaredError<>,RandomInitialization> model1(MeanSquaredError<>(),RandomInitialization(-1,1));
+// Encoder
+Sequential<>* encoder = new Sequential<>();
+encoder->Add<Linear<> >(inputSize, hiddenLayerSize);
+encoder->Add<IdentityLayer<> >();
+// Decoder
+Sequential<>* decoder = new Sequential<>();
+decoder->Add<Linear<> >(hiddenLayerSize,outputSize);
+decoder->Add<IdentityLayer<> >();
+
+// now link all the layers together
+model1.Add<IdentityLayer<> >(); // layer-0 this is needed a can't start with sequential as first layer
+model1.Add(encoder);            // layer-1
+model1.Add(decoder);            // layer-2
+
+// set up optimizer 
+ens::Adam opt(0.001,trainData.n_cols, 0.9, 0.999, 1e-8, 0, 1e-5,false,true); //https://ensmallen.org/docs.html#adam
+                 
+
+arma::cout<<"-------empty params------------------------"<<arma::endl;//empty params as not yet allocated
+arma::cout << model1.Parameters() << arma::endl;
+model1.Train(trainData, trainLabels,opt);
+arma::cout<<"-------final params------------------------"<<arma::endl;
+arma::cout << model1.Parameters() << arma::endl;
+
+// Use the Predict method to get the assignments.
+double loss1=model1.Evaluate(trainData,trainLabels);
+arma::mat assignments;
+model1.Predict(trainData, assignments);
+
+//check forward - full forward, all layers, should be same as Predict
+arma::mat assignments2;
+model1.Forward(trainData, assignments2,0,2);// start layer 0, stop layer 2
+
+// manual computation of MSE loss - from predict
+double loss2=0;
+for(i=0;i<assignments.n_cols;i++){
+  for(j=0;j<assignments.n_rows;j++){
+    loss2+= (assignments(j,i)-trainLabels(j,i))*(assignments(j,i)-trainLabels(j,i));
+  }
+}
+
+// manual computation of MSE loss - from predict
+double loss3=0;
+for(i=0;i<assignments2.n_cols;i++){
+  for(j=0;j<assignments2.n_rows;j++){
+    loss3+= (assignments2(j,i)-trainLabels(j,i))*(assignments2(j,i)-trainLabels(j,i));
+  }
+}
+
+
+// check loss manually
+loss1=loss1;//get mean error from predict
+loss2=loss2/ (double)assignments.n_cols;//get mean error from forward
+loss3=loss3/ (double)assignments2.n_cols;//get mean error from forward
+arma::cout<<"MSE auto="<<loss1<<arma::endl;
+arma::cout<<"MSE manual predict="<<loss2<<arma::endl;
+arma::cout<<"MSE manual forward(0,2)="<<loss3<<arma::endl;
+
+
+// now compute just encoded data - push into layer 0 and out of layer 1
+arma::mat assignments3;
+model1.Forward(trainData, assignments3,0,1);// this works 
+arma::cout<<"FORWARD SEQ 0 1 ncol"<<assignments3.n_cols<<" FORWARD SEQ 0 1 nrow"<<assignments3.n_rows<<arma::endl;
+
+// now compute decoded data - push encoded data into layer 2 and out of layer 2
+arma::mat assignments4;
+model1.Forward(assignments3, assignments4,2,2);// this works but 
+arma::cout<<"FORWARD 0 1 ncol"<<assignments4.n_cols<<" FORWARD 1 nrow"<<assignments4.n_rows<<arma::endl;
+
+//now send to disk - encoded data
+mat ass4T = assignments3.t();
+ass4T.save("c_encoded1.csv", csv_ascii); 
+
+//now send to disk - decoded data
+mat ass5T = assignments4.t();
+ass5T.save("c_decoded8.csv", csv_ascii); 
+
+...
+
+
+```
+<a name="ae2"></a> 
+## 4.2 Pytorch version
+This example uses **AE_torch.py**. 

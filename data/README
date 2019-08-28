@@ -1,4 +1,4 @@
 note that create_data.R in above directory has rcode to create dummy data sets but this does not
 create features0.csv and labelsBNL10.csv which are used with ffn_ex2* and ffn_ex3* as these were
 created with same code but on different machine with different rv stream. So do not delete these
-files are there results correspond to the readme.md output
+files are their results correspond to the readme.md output
