@@ -58,8 +58,9 @@ cd /files
 mv mlpack mlpack24Aug2019
 mkdir -p mlpack24Aug2019/build/ && cd mlpack24Aug2019/build/
 cmake ../
-make -j2 
-# can take a while 15-20 mins depending on system
+make 
+# can take a while 15-20 mins depending on system. note "make -j2" is possible to parallelize but gave compiler error
+# with this particular snapshot build, mileage may vary, serial compilation worked with no errors 
 make install
 # mlpack is now installed
 ```
