@@ -77,11 +77,10 @@ mlpack_random_forest --help
 [PyTorch](https://pytorch.org) can be installed into either a new docker container or added to the same container as [mlpack](http://mlpack.org). The additional installation commands needed are the same in each case:
 ```bash
 # at a terminal prompt on the host (e.g. macOS)
-docker run -it -v ~/myrepos:/files ubuntu:18.04 # only do this if installing into new docker container
+docker run -it -v ~/myrepos:/files ubuntu:19.10 # only do this if installing into new docker container
 apt update
 apt install python3-pip
-pip3 install https://download.pytorch.org/whl/cpu/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
-pip3 install https://download.pytorch.org/whl/cpu/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
+pip3 install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 pip3 install pandas
 ```
 
