@@ -45,25 +45,14 @@ loss_fn = torch.nn.MSELoss(reduction='mean')
 
 model=model.double()
 
-# Use the optim package to define an Optimizer that will update the weights of
-# the model for us. Here we will use Adam; the optim package contains many other
-# optimization algoriths. The first argument to the Adam constructor tells the
-# optimizer which Tensors it should update. 
 learning_rate = 1e-3
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-#optimizer=torch.optim.RMSprop(model.parameters(), lr=0.01, alpha=0.99, eps=1e-08, weight_decay=0, momentum=0, centered=False)
+
 curloss=1e+300
 abserror=1e-05
 maxiters=100000
 
- #img = img.view(img.size(0), -1)
- #       img = Variable(img).cuda()
- #       # ===================forward=====================
- #       output = model(img)
- #       loss = criterion(output, img)
 
-#data   = Variable(data,requires_grad=False)
- #   target = Variable(target.long(),requires_grad=False)
 minLossOverall=1e+300
 
 for t in range(maxiters): # for each epoch - all training data run through once
@@ -129,7 +118,7 @@ for name, param in new_model.named_parameters():
     if param.requires_grad:
         print (name, param.data)
 
-new_model2 = torch.nn.Sequential(*list(model.children())[2:4:1]) ## only keep first two layers
+new_model2 = torch.nn.Sequential(*list(model.children())[2:4:1]) ## only keep layers 2 and 3
 #print(new_model2(encodepreds2dim))
 decodepreds8dim=new_model2(encodepreds2dim);
 
