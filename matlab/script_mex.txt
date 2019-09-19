@@ -1,0 +1,1 @@
+/Applications/MATLAB_R2019a.app/bin/mex -I/usr/local/include -L/usr/local/lib -lgsl -lgslcblas arrayProductA.c -R2018a
