@@ -26,13 +26,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. SETUP - use data in 1994 example
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+n=3; % dimension of total DAG - total number of variables
 nu  = [1,1,1];
 mu0 = [0.1,-0.3,0.2];
-b2  = [0];
-b3  = [1;1];
+%b2  = [0];
+%b3  = [1;1];
+% setup b col vectors as matrix
+b=zeros(n,n); %storage - note we will never used top row or first col
+              % as b1 is not defined - each DAG must have one node without a parent
+b(1,2)=0.0;               
+b(1,3)=1; b(2,3)=1;
+
 alpha_w = 6;
 alpha_u = 6;
-n=3; % dimension of total DAG - total number of variables
+
 N=20; % number of observations
 thedata=[-0.78 -1.55  0.11;
           0.18 -3.04 -2.35;
@@ -60,47 +67,7 @@ thedata=[-0.78 -1.55  0.11;
 % 2. Compute T = precision matrix in Wishart prior.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% equation 5 and 6 in Geiger - this is manual and neededs automated
-w1  = zeros(1,1);
-w1(1,1) = 1/nu(1,1);
-w1
-
-wsize=2;
-w2  = zeros(wsize,wsize); % initialize
-
-w2(1:(wsize-1),1:(wsize-1)) = w1+kron(b2,b2')/nu(2) % set submatrix top corner
-w2(wsize,1:(wsize-1))= -b2'/nu(2); % last row
-w2(wsize,1:(wsize-1))= -b2/nu(2); % last col
-w2(wsize,wsize) = 1/nu(2); % bottom right cell
-w2;
-
-wsize=3;
-w3  = zeros(wsize,wsize); % initialize
-
-w3(1:(wsize-1),1:(wsize-1)) = w2+kron(b3,b3')/nu(3); % set submatrix top corner
-w3(wsize,1:(wsize-1))= -b3'/nu(3); % last row
-w3(1:(wsize-1),wsize)= -b3/nu(3); % last col
-w3(wsize,wsize) = 1/nu(3); % bottom right cell
-
-% check - this uses long hand formula in equation 6 as a check.
-wcheck=zeros(wsize,wsize);
-wcheck(1,1)=1/nu(1)+(b3(1)^2)/nu(3);
-wcheck(1,2)=(b3(1)*b3(2))/nu(3);
-wcheck(1,3)=-b3(1)/nu(3);
-wcheck(2,2)=(1/nu(2))+(b3(2)^2)/nu(3);
-wcheck(2,3)=-b3(2)/nu(3);
-wcheck(3,3)=1/nu(3);
-
-wcheck(2,1)=wcheck(1,2);
-wcheck(3,1)=wcheck(1,3);
-wcheck(3,2)=wcheck(2,3);
-
-% check that code computation is same as manual long hand
-if (isequal(w3,wcheck))
-	disp("correct match - precision matrix of prior DAG");
-	sigmainv=w3;
-else disp("error!");
-	 clear sigmainv;
-end;
+sigmainv=priorPrec(nu,b)
 
 %%%%%%%%%%%%%%%%%%%%
 % We need precision matrix T which defines the prior Wishart distribution. 
@@ -110,7 +77,7 @@ end;
 % so re-arranging gives T = inv(sigmainv)/sigmaFactor as below. Lots of faff but easy enough.   
 sigmaFactor = (alpha_u+1)/(alpha_u*(alpha_w-n-1));
 disp("This is precision matrix T for use in wishart prior")
-T=inv(sigmainv)/sigmaFactor
+T=inv(sigmainv)/sigmaFactor;
 %% this matches the T0 matrix values given in 1994 Heckerman - so works ok. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -127,25 +94,17 @@ for i=1:N
 end;
 
 disp("R using equation 4 in Kuipers 2014")
-R = T + sL + (alpha_w*N)/(alpha_w+N) * (mu0-xbarL).*(mu0-xbarL)'
+R = T + sL + (alpha_w*N)/(alpha_w+N) * (mu0-xbarL).*(mu0-xbarL)';
 % this matches matrix values given in 1994 Heckerman - but this because alpha_w=alpha_u in that example. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 4. Compute terms in Eqn(2) in Kuiper 2014
 l=3; % l = dimension of current term in score
-term1 = (alpha_u/(N+alpha_u))^(l/2);
-
-topGamma=gammamult(l,(N+alpha_w-n+l)/2);
-botGamma=gammamult(l,(alpha_w-n+l)/2);
-term2 = topGamma/( pi^(l*N/2)*botGamma);
-
-topdet = det(T)^((alpha_w-n+l)/2);
-botdet = det(R)^((N+alpha_w-1+l)/2);
-term3 = topdet/botdet; 
-
-disp("This is P(d|Gc) for complete network")
-p_dC = term1*term2*term3 % the complete DAG score term
+YYrow=[1 2 3];
+YYcol=[1 2 3];
+disp("This is logP(d|Gc) using logs");
+log_pdC=pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % now compute DAG x1->x2->x3
@@ -154,106 +113,37 @@ p_dC = term1*term2*term3 % the complete DAG score term
 %           = P(X1, X2) * P(X2, X3) / P(X2)
 % a. p_dX2X1  
 l=2; % two variables
-myrow=[1 2];
-mycol=[1 2];
-disp("T and R");
-T
-R
-disp("Ta and Ra")
-Ta=T(myrow,mycol)
-Ra=R(myrow,mycol)
-
-term1 = (alpha_u/(N+alpha_u))^(l/2);
-
-topGamma=gammamult(l,(N+alpha_w-n+l)/2);
-botGamma=gammamult(l,(alpha_w-n+l)/2);
-term2 = topGamma/( pi^(l*N/2)*botGamma);
-
-topdet = det(Ta)^((alpha_w-n+l)/2);
-botdet = det(Ra)^((N+alpha_w-1+l)/2);
-term3 = topdet/botdet; 
-
-disp("This is P(d|X1,X2) ")
-p_dX1X2 = term1*term2*term3 % the complete DAG score term
+YYrow=[1 2];
+YYcol=[1 2];
+disp("This is log P(d|X1,X2) ")
+logp_dX1X2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % b. p_dX3X2  
 l=2; % two variables
-myrow=[2 3];
-mycol=[2 3];
-disp("T and R");
-T
-R
-disp("Tb and Rb")
-Tb=T(myrow,mycol)
-Rb=R(myrow,mycol)
-
-term1 = (alpha_u/(N+alpha_u))^(l/2);
-
-topGamma=gammamult(l,(N+alpha_w-n+l)/2);
-botGamma=gammamult(l,(alpha_w-n+l)/2);
-term2 = topGamma/( pi^(l*N/2)*botGamma);
-
-topdet = det(Tb)^((alpha_w-n+l)/2);
-botdet = det(Rb)^((N+alpha_w-1+l)/2);
-term3 = topdet/botdet; 
-
-disp("This is P(d|X2,X3) ")
-p_dX2X3= term1*term2*term3 % the complete DAG score term
-
+YYrow=[2 3];
+YYcol=[2 3];
+disp("This is log P(d|X2,X3) ")
+logp_dX2X3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % c. p_X2  
 l=1; % two variables
-myrow=[2];
-mycol=[2];
-disp("T and R");
-T
-R
-disp("Tc and Rc")
-Tc=T(myrow,mycol)
-Rc=R(myrow,mycol)
+YYrow=[2];
+YYcol=[2];
+disp("This is log P(d|X2) ")
+logp_dX2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-term1 = (alpha_u/(N+alpha_u))^(l/2);
-
-topGamma=gammamult(l,(N+alpha_w-n+l)/2);
-botGamma=gammamult(l,(alpha_w-n+l)/2);
-term2 = topGamma/( pi^(l*N/2)*botGamma);
-
-topdet = det(Tc)^((alpha_w-n+l)/2);
-botdet = det(Rc)^((N+alpha_w-1+l)/2);
-term3 = topdet/botdet; 
-
-disp("This is P(d|X2) ")
-p_dX2= term1*term2*term3 % the complete DAG score term
-
-disp("This is P(d|x1->x2->x3 ")
-score=exp(log(p_dX1X2)+log(p_dX2X3)-log(p_dX2))
-
+disp("This is x1->x2->x3")
+score=exp(logp_dX1X2+logp_dX2X3-logp_dX2)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% c. p_X1  
+%% now try network x1 x2->x3
+l=1;
 l=1; % two variables
-myrow=[1];
-mycol=[1];
-disp("T and R");
-T
-R
-disp("Td and Rd")
-Td=T(myrow,mycol)
-Rd=R(myrow,mycol)
+YYrow=[1];
+YYcol=[1];
+disp("This is log P(d|X1) ")
+logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); 
 
-term1 = (alpha_u/(N+alpha_u))^(l/2);
-
-topGamma=gammamult(l,(N+alpha_w-n+l)/2);
-botGamma=gammamult(l,(alpha_w-n+l)/2);
-term2 = topGamma/( pi^(l*N/2)*botGamma);
-
-topdet = det(Td)^((alpha_w-n+l)/2);
-botdet = det(Rd)^((N+alpha_w-1+l)/2);
-term3 = topdet/botdet; 
-
-disp("This is P(d|X1) ")
-p_dX1= term1*term2*term3 % the complete DAG score term
-
-disp("This is P(d|x1 x2->x3 ")
-score=exp(log(p_dX1)+log(p_dX2X3))
+disp("This is x1 x2->x3")
+score=exp(logp_dX1+logp_dX2X3)
