@@ -1,3 +1,4 @@
+clear all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Purpose: Compute network scores as per example 3.5 in Geiger and Heckerman 1994
 %
@@ -28,14 +29,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 n=3; % dimension of total DAG - total number of variables
 nu  = [1,1,1];
-mu0 = [0.1,-0.3,0.2];
+%mu0 = [0.1,-0.3,0.2];
+mu0 = [0,0,0];
 %b2  = [0];
 %b3  = [1;1];
 % setup b col vectors as matrix
 b=zeros(n,n); %storage - note we will never used top row or first col
               % as b1 is not defined - each DAG must have one node without a parent
-b(1,2)=0.0;               
-b(1,3)=1; b(2,3)=1;
+%b(1,2)=0.0;               
+%b(1,3)=1; b(2,3)=1;
 
 alpha_w = 6;
 alpha_u = 6;
@@ -67,6 +69,7 @@ thedata=[-0.78 -1.55  0.11;
 % 2. Compute T = precision matrix in Wishart prior.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%% equation 5 and 6 in Geiger - this is manual and neededs automated
+disp("sigmainv")
 sigmainv=priorPrec(nu,b)
 
 %%%%%%%%%%%%%%%%%%%%
@@ -77,7 +80,7 @@ sigmainv=priorPrec(nu,b)
 % so re-arranging gives T = inv(sigmainv)/sigmaFactor as below. Lots of faff but easy enough.   
 sigmaFactor = (alpha_u+1)/(alpha_u*(alpha_w-n-1));
 disp("This is precision matrix T for use in wishart prior")
-T=inv(sigmainv)/sigmaFactor;
+T=inv(sigmainv)/sigmaFactor
 %% this matches the T0 matrix values given in 1994 Heckerman - so works ok. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,9 +96,20 @@ for i=1:N
     sL=sL+(thedata(i,:)-xbarL).*(thedata(i,:)-xbarL)'; 
 end;
 
-disp("R using equation 4 in Kuipers 2014")
-R = T + sL + (alpha_w*N)/(alpha_w+N) * (mu0-xbarL).*(mu0-xbarL)';
+%disp("T from Kuipers")
+%T=diag(1/sigmaFactor);
+%disp("R using equation 4 in Kuipers 2014")
+disp("new!")
+R = T + sL + (alpha_w*N)/(alpha_w+N) * (mu0-xbarL).*(mu0-xbarL)'
 % this matches matrix values given in 1994 Heckerman - but this because alpha_w=alpha_u in that example. 
+
+%% now try network x1 x2->x3
+l=1;
+YYrow=[1];
+YYcol=[1];
+disp("This is log P(d|X1) ")
+logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -134,16 +148,48 @@ logp_dX2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("This is x1->x2->x3")
-score=exp(logp_dX1X2+logp_dX2X3-logp_dX2)
+score=exp(logp_dX1X2+logp_dX2X3-logp_dX2);
+disp("This is log x1->x2->x3")
+score=logp_dX1X2+logp_dX2X3-logp_dX2;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% now try network x1 x2->x3
 l=1;
-l=1; % two variables
 YYrow=[1];
 YYcol=[1];
 disp("This is log P(d|X1) ")
 logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); 
 
 disp("This is x1 x2->x3")
-score=exp(logp_dX1+logp_dX2X3)
+score=exp(logp_dX1+logp_dX2X3);
+disp("This is log x1 x2->x3")
+score=logp_dX1+logp_dX2X3;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% now try network x1 x2 x3
+l=1;
+YYrow=[3];
+YYcol=[3];
+disp("This is log P(d|X3) ")
+logp_dX3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); 
+
+disp("This is x1 x2 x3")
+score=exp(logp_dX1+logp_dX2+logp_dX3);
+disp("This is log x1 x2 x3")
+score=logp_dX1+logp_dX2+logp_dX3;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% now compute DAG x1<-x2<-x3
+%
+% so this is P(X3) * P(X3, X2)/P(X3) * P(X2, X1)/P(X2)
+%           = P(X3, X2) * P(X2, X1) / P(X2)
+% b. p_dX3X2  
+l=2; % two variables
+YYrow=[3 2];
+YYcol=[3 2];
+disp("This is log P(d|X3,X2) ")
+logp_dX3X2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
+
+

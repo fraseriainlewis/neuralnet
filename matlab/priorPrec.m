@@ -1,7 +1,8 @@
 function m = priorPrec(nu,b)
  
- n=size(b)(1); % number of variables
-
+ dim=size(b); % number of variables
+ n=dim(1);
+ 
  wsize=1;
  w1  = zeros(wsize,wsize);
  w1(1,1) = 1/nu(1);
@@ -17,8 +18,8 @@ function m = priorPrec(nu,b)
   w2(wsize,wsize) = 1/nu(i); % bottom right cell
 
   w1=w2; % update copy new matrix to current matrix
- end;
+ end
  
  m = w2; % return the final matrix Wn
 
-end;
+end
