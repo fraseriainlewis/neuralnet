@@ -65,6 +65,7 @@ thedata=[-0.78 -1.55  0.11;
           0.53 -0.93 -2.92;
           ];
 
+%writematrix(thedata,"data.txt");
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 2. Compute T = precision matrix in Wishart prior.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,7 +111,37 @@ YYcol=[1];
 disp("This is log P(d|X1) ")
 logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% c. p_X2  
+l=1; % two variables
+YYrow=[2];
+YYcol=[2];
+disp("This is log P(d|X2) ")
+logp_dX2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% c. p_X3  
+l=1; % two variables
+YYrow=[3];
+YYcol=[3];
+disp("This is log P(d|X3) ")
+logp_dX3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+disp("This is ln score x1 x2 x3")
+logp_dX1+logp_dX2+logp_dX3
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% b. p_dX3X2  
+l=2; % two variables
+YYrow=[2 3];
+YYcol=[2 3];
+disp("This is log P(d|X2,X3) ")
+logp_dX2X3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp("This is ln score x1 x2->x3")
+score=logp_dX1+logp_dX2X3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 4. Compute terms in Eqn(2) in Kuiper 2014
@@ -138,13 +169,6 @@ YYrow=[2 3];
 YYcol=[2 3];
 disp("This is log P(d|X2,X3) ")
 logp_dX2X3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% c. p_X2  
-l=1; % two variables
-YYrow=[2];
-YYcol=[2];
-disp("This is log P(d|X2) ")
-logp_dX2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("This is x1->x2->x3")
