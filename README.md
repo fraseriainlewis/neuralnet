@@ -56,14 +56,14 @@ docker run -it -v ~/myrepos:/files ubuntu:19.10
 # /files in Ubuntu is mapped into local folder ~/myrepos
 # at guest/Ubuntu 19.10 terminal prompt
 > apt update
-> apt install cmake clang libarmadillo-dev libboost-dev \
+> apt install cmake g++ clang libarmadillo-dev libboost-dev \
 libboost-math-dev libboost-program-options-dev libboost-test-dev \
 libboost-serialization-dev wget graphviz doxygen vim
 
 cd /files
 # change folder name so if later download a newer repo it does not overwrite - use date of download, here 24thAug2019
-mv mlpack mlpack24Aug2019
-mkdir -p mlpack24Aug2019/build/ && cd mlpack24Aug2019/build/
+mv mlpack mlpack26Sep2019
+mkdir -p mlpack26Sep2019/build/ && cd mlpack26Sep2019/build/
 cmake ../
 make 
 # can take a while 15-20 mins depending on system. note "make -j2" is possible to parallelize but gave compiler error
