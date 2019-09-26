@@ -27,21 +27,12 @@ DAGscore(3,myScore, m)
 
 m2<-m;
 m2[2,3]<-1;
+m2[1,2]<-1;
 m2[3,1]<-1;
 DAGscore(3,myScore, m2)
 
 
 
-
-
-
-library(deal)
-data(rats)
-fit       <- network(thedata)
-fit.prior <- jointprior(fit)
-fit.learn <- learn(fit,rats,fit.prior,timetrace=TRUE)
-fit.nw    <- getnetwork(fit.learn)
-score(fit.nw)
 
 
 

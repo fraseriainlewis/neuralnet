@@ -112,7 +112,7 @@ R = T + cov(thedata)*(N-1) + (alpha_m*N)/(alpha_m+N) * (mu0-xbarL).*(mu0-xbarL)'
 %                                                  B=pDln(...,[node only])
 % so for each node we need it's parents
 dag=[0 0 1;
-     0 0 0;
+     1 0 0;
      0 1 0];
 [nrow,ncol]=size(dag); 
 totLogScore=0.0;    
@@ -126,15 +126,15 @@ for i=1:nrow
       % we are done as p(d) = singleX/1.0
       YY=[i];
       [tmp,l] = size(YY); % l=dimension of d
-      totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+      totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
     else disp("have parents")
       % if we have parents then we need to compute A/B, A = parents U node, B = parents
       YY=[par_idx i];
       [tmp,l] = size(YY); % l=dimension of d
-      A=pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+      A=pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
       YY=[par_idx];
       [tmp,l] = size(YY); % l=dimension of d
-      B=pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+      B=pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
       totLogScore=totLogScore+A-B;
     end  
 end 
@@ -146,7 +146,7 @@ l=1;
 YYrow=[1];
 YYcol=[1];
 disp("This is log P(d|X1) ")
-logp_dX1 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) 
+logp_dX1 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow) 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % c. p_X2  
@@ -154,7 +154,7 @@ l=1; % two variables
 YYrow=[2];
 YYcol=[2];
 disp("This is log P(d|X2) ")
-logp_dX2 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+logp_dX2 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -163,7 +163,7 @@ l=1; % two variables
 YYrow=[3];
 YYcol=[3];
 disp("This is log P(d|X3) ")
-logp_dX3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+logp_dX3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("This is ln score x1 x2 x3")
@@ -175,7 +175,7 @@ l=2; % two variables
 YYrow=[2 3];
 YYcol=[2 3];
 disp("This is log P(d|X2,X3) ")
-logp_dX2X3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+logp_dX2X3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp("This is ln score x1 x2->x3")
 score=logp_dX1+logp_dX2X3
