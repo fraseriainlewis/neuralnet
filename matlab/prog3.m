@@ -14,7 +14,7 @@ clear all;
 %    b2 = (0) % line vector for x2 regression coefficients
 %    b3 = (1,1) % line vector for x3 regression coefficients
 %    alpha_w = 6 hyper parameter for precision in normal-Wishart (u,W) dist alpha_w>n+1, n=dimension=3 
-%    alpha_u = 6 hyper paramters for mean in normal-Wishart (u,W)
+%    alpha_m = 6 hyper paramters for mean in normal-Wishart (u,W)
 %
 % 2. Compute T = precision matrix in Wishart prior. See eqn 5 and 6 in Heckerman 1994, and then eqn 19 and 20 in Heckerman 2003 
 %    (or eqn 18 + 19 in 1994 but slightly different notation)
@@ -40,7 +40,7 @@ b=zeros(n,n); %storage - note we will never used top row or first col
 %b(1,3)=1; b(2,3)=1;
 
 alpha_w = 6;
-alpha_u = 6;
+alpha_m = 6;
 
 N=20; % number of observations
 thedata=[-0.78 -1.55  0.11;
@@ -77,39 +77,76 @@ sigmainv=priorPrec(nu,b)
 % We need precision matrix T which defines the prior Wishart distribution. 
 % Basic method: Equation 20 in 2003 defines the covariance of X as a function of (T^prime)^-1 we know the cov of X, it's just inv(sigmainv) from Equation 5. 
 % so we have the left hand side of Equation 20. Now equation 19 gives us an expression for T^prime = RHS, and so (T^prime)^-1 is just the inverse of the RHS of equation 19
-% which reduces to inv(sigmainv) = (alpha_w-n+1)/(alpha_w-n-1)*(alpha_u+1)/(alpha_u*(alpha_w-n_1)) * T, and cancelling the terms gives 
+% which reduces to inv(sigmainv) = (alpha_w-n+1)/(alpha_w-n-1)*(alpha_m+1)/(alpha_m*(alpha_w-n_1)) * T, and cancelling the terms gives 
 % so re-arranging gives T = inv(sigmainv)/sigmaFactor as below. Lots of faff but easy enough.   
-sigmaFactor = (alpha_u+1)/(alpha_u*(alpha_w-n-1));
+sigmaFactor = (alpha_m+1)/(alpha_m*(alpha_w-n-1));
 disp("This is precision matrix T for use in wishart prior")
 T=inv(sigmainv)/sigmaFactor
 %% this matches the T0 matrix values given in 1994 Heckerman - so works ok. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 3. Compute R = precision matrix term in score expression
-% note using equation 4 in Kuipers et al 2014 which is different from Heckerman 1994 (eqn 9) and Heckerman 2003 (eqn 17) as the latter two use alpha_u where in Kuipers
-% they use alpha_w - suspect Kuipers is correct. If they are same it matter not, i.e. alpha_w=alpha_u
+% note using equation 4 in Kuipers et al 2014 which is different from Heckerman 1994 (eqn 9) and Heckerman 2003 (eqn 17) as the latter two use alpha_m where in Kuipers
+% they use alpha_w - suspect Kuipers is correct. If they are same it matter not, i.e. alpha_w=alpha_m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 xbarL=mean(thedata);
 
-sL=zeros(1,n);
-for i=1:N
-    sL=sL+(thedata(i,:)-xbarL).*(thedata(i,:)-xbarL)'; 
-end;
+%sL=zeros(1,n);
+%for i=1:N
+%    sL=sL+(thedata(i,:)-xbarL).*(thedata(i,:)-xbarL)'; 
+%end;
 
 %disp("T from Kuipers")
 %T=diag(1/sigmaFactor);
 %disp("R using equation 4 in Kuipers 2014")
-disp("new!")
-R = T + sL + (alpha_w*N)/(alpha_w+N) * (mu0-xbarL).*(mu0-xbarL)'
-% this matches matrix values given in 1994 Heckerman - but this because alpha_w=alpha_u in that example. 
+disp("new!!")
+R = T + cov(thedata)*(N-1) + (alpha_m*N)/(alpha_m+N) * (mu0-xbarL).*(mu0-xbarL)'
+% this matches matrix values given in 1994 Heckerman - but this because alpha_w=alpha_m in that example. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% above this is all necessary for any network score
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% log(DAG)= sum over each node
+%           for each node there are two terms A-B, A=pDln(...,[node and parents])
+%                                                  B=pDln(...,[node only])
+% so for each node we need it's parents
+dag=[0 0 1;
+     0 0 0;
+     0 1 0];
+[nrow,ncol]=size(dag); 
+totLogScore=0.0;    
+for i=1:nrow
+    % process node i
+    nodei=dag(i,:);
+    par_idx=find(nodei);% indexes of parents of node i
+    [tmp,npars]=size(par_idx);
+    if npars==0 
+      disp("no parents")
+      % we are done as p(d) = singleX/1.0
+      YY=[i];
+      [tmp,l] = size(YY); % l=dimension of d
+      totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+    else disp("have parents")
+      % if we have parents then we need to compute A/B, A = parents U node, B = parents
+      YY=[par_idx i];
+      [tmp,l] = size(YY); % l=dimension of d
+      A=pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+      YY=[par_idx];
+      [tmp,l] = size(YY); % l=dimension of d
+      B=pDln(N,n,l,alpha_m,alpha_w,T,R,YY,YY);
+      totLogScore=totLogScore+A-B;
+    end  
+end 
+sprintf("log score for DAG %f\n", totLogScore )
+
 
 %% now try network x1 x2->x3
 l=1;
 YYrow=[1];
 YYcol=[1];
 disp("This is log P(d|X1) ")
-logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) 
+logp_dX1 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % c. p_X2  
@@ -117,7 +154,7 @@ l=1; % two variables
 YYrow=[2];
 YYcol=[2];
 disp("This is log P(d|X2) ")
-logp_dX2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+logp_dX2 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,7 +163,7 @@ l=1; % two variables
 YYrow=[3];
 YYcol=[3];
 disp("This is log P(d|X3) ")
-logp_dX3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
+logp_dX3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp("This is ln score x1 x2 x3")
@@ -138,82 +175,28 @@ l=2; % two variables
 YYrow=[2 3];
 YYcol=[2 3];
 disp("This is log P(d|X2,X3) ")
-logp_dX2X3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
+logp_dX2X3 =pDln(N,n,l,alpha_m,alpha_w,T,R,YYrow,YYcol) % the complete DAG score term
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp("This is ln score x1 x2->x3")
 score=logp_dX1+logp_dX2X3
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 4. Compute terms in Eqn(2) in Kuiper 2014
-l=3; % l = dimension of current term in score
-YYrow=[1 2 3];
-YYcol=[1 2 3];
-disp("This is logP(d|Gc) using logs");
-log_pdC=pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% now compute DAG x1->x2->x3
-%
-% so this is P(X1) * P(X1, X2)/P(X1) * P(X2, X3)/P(X2)
-%           = P(X1, X2) * P(X2, X3) / P(X2)
-% a. p_dX2X1  
-l=2; % two variables
-YYrow=[1 2];
-YYcol=[1 2];
-disp("This is log P(d|X1,X2) ")
-logp_dX1X2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% b. p_dX3X2  
-l=2; % two variables
-YYrow=[2 3];
-YYcol=[2 3];
-disp("This is log P(d|X2,X3) ")
-logp_dX2X3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-disp("This is x1->x2->x3")
-score=exp(logp_dX1X2+logp_dX2X3-logp_dX2);
-disp("This is log x1->x2->x3")
-score=logp_dX1X2+logp_dX2X3-logp_dX2;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% now try network x1 x2->x3
-l=1;
-YYrow=[1];
-YYcol=[1];
-disp("This is log P(d|X1) ")
-logp_dX1 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); 
-
-disp("This is x1 x2->x3")
-score=exp(logp_dX1+logp_dX2X3);
-disp("This is log x1 x2->x3")
-score=logp_dX1+logp_dX2X3;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% now try network x1 x2 x3
-l=1;
-YYrow=[3];
-YYcol=[3];
-disp("This is log P(d|X3) ")
-logp_dX3 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); 
-
-disp("This is x1 x2 x3")
-score=exp(logp_dX1+logp_dX2+logp_dX3);
-disp("This is log x1 x2 x3")
-score=logp_dX1+logp_dX2+logp_dX3;
+disp("This is ln score x1 x2->x3: longhand")
+score=logp_dX1+logp_dX2+logp_dX2X3-logp_dX2
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% now compute DAG x1<-x2<-x3
-%
-% so this is P(X3) * P(X3, X2)/P(X3) * P(X2, X1)/P(X2)
-%           = P(X3, X2) * P(X2, X1) / P(X2)
-% b. p_dX3X2  
-l=2; % two variables
-YYrow=[3 2];
-YYcol=[3 2];
-disp("This is log P(d|X3,X2) ")
-logp_dX3X2 =pDln(N,n,l,alpha_u,alpha_w,T,R,YYrow,YYcol); % the complete DAG score term
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
