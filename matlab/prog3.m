@@ -92,17 +92,12 @@ T=inv(sigmainv)/sigmaFactor
 
 xbarL=mean(thedata);
 
-%sL=zeros(1,n);
-%for i=1:N
-%    sL=sL+(thedata(i,:)-xbarL).*(thedata(i,:)-xbarL)'; 
-%end;
-
-%disp("T from Kuipers")
-%T=diag(1/sigmaFactor);
-%disp("R using equation 4 in Kuipers 2014")
 disp("new!!")
 R = T + cov(thedata)*(N-1) + (alpha_m*N)/(alpha_m+N) * (mu0-xbarL).*(mu0-xbarL)'
 % this matches matrix values given in 1994 Heckerman - but this because alpha_w=alpha_m in that example. 
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% above this is all necessary for any network score
@@ -140,7 +135,7 @@ for i=1:nrow
 end 
 sprintf("log score for DAG %f\n", totLogScore )
 
-
+%{
 %% now try network x1 x2->x3
 l=1;
 YYrow=[1];
@@ -182,7 +177,7 @@ score=logp_dX1+logp_dX2X3
 
 disp("This is ln score x1 x2->x3: longhand")
 score=logp_dX1+logp_dX2+logp_dX2X3-logp_dX2
-
+%}
 
 
 
