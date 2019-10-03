@@ -1,6 +1,6 @@
-function res = pDln(N,n,l,alpha_u,alpha_w,T,R,YY)
+function res = pDln(N,n,l,alpha_m,alpha_w,T,R,YY)
   
- term1 = (l/2)*log(alpha_u/(N+alpha_u));
+ term1 = (l/2)*log(alpha_m/(N+alpha_m));
 
  topGamma=gammalnmult(l,(N+alpha_w-n+l)/2);
  botGamma=gammalnmult(l,(alpha_w-n+l)/2);
