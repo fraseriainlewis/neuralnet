@@ -10,23 +10,49 @@ run dag_setup.m;
 
 % note - need to check cycle
 
-dag=[0 0 1;
+dag=[0 0 0;
+     0 0 0;
+     0 0 0];
+
+
+dag1=[0 0 1;
      1 0 0;
      0 1 0];
 
-fitDAG(dag,N,alpha_m,alpha_w,T,R)
-
-dag=[0 0 1;
+dag2=[0 0 1;
      1 0 1;
      0 1 0];
 
-fitDAG(dag,N,alpha_m,alpha_w,T,R)
-
-dag=[0 0 0;
+dag3=[0 0 0;
      1 0 0;
      0 0 0];     
 
-fitDAG(dag,N,alpha_m,alpha_w,T,R)
+fitDAG(dag0,N,alpha_m,alpha_w,T,R)
+fitDAG(dag1,N,alpha_m,alpha_w,T,R)
+fitDAG(dag2,N,alpha_m,alpha_w,T,R)
+fitDAG(dag3,N,alpha_m,alpha_w,T,R)
+
+[n,m]=size(dag0);
+tmpDAG=zeros(n,n,'uint32');
+tmpVec1=zeros(1,n,'uint32');
+tmpVec2=zeros(1,n,'uint32');
+tmpVec3=zeros(1,n,'uint32');
+
+dag0=uint32(dag0);
+hasCycle=cycle(dag0,tmpDAG,tmpVec1,tmpVec2,tmpVec3);
+
+dag4=dag0;
+dag4(3,1)=1;
+dag4(1,3)=1;
+hasCycle=cycle(dag4,tmpDAG,tmpVec1,tmpVec2,tmpVec3);
+
+
+
+
+
+
+
+
 
 %{
 dag=[0 0 1;

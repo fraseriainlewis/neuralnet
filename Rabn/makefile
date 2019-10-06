@@ -10,7 +10,7 @@ LDFLAGS2 = -lgsl -lgslcblas -F/Library/Frameworks/R.framework/.. -framework R -W
 # use this command to erase files.
 RM = /bin/rm -f
 # list of generated object files.
-OBJS =  utility.o cycles.o
+OBJS =  utility.o cycles_min.o
 
 # program executable file name.
 PROG = abn.so
@@ -25,7 +25,7 @@ $(PROG): $(OBJS)
 utility.o: utility.c structs.h
 	$(CC) $(CFLAGS) -c utility.c
 
-cycles.o: cycles.c structs.h
+cycles.o: cycles_min.c structs.h
 	$(CC) $(CFLAGS) -c cycles.c
 
 # rule for cleaning re-compilable files.

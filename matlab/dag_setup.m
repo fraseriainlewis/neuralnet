@@ -1,4 +1,5 @@
 clear all;
+disp("SETUP FOR FITTING DAGS - loads in data set and some pre-computation. Dimension is fixed")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This is a setup script necessary for running before doing a structure search across DAGS
 % SET parameters: filename, alpha_w, alpha_m, and priorType
@@ -19,9 +20,10 @@ clear all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % csv file with data - no header
 filename='data_matrix.txt';
+disp("NOTE: CURRENT DATA SET HAS THREE VARIABLES")
 % imaginary sample sizes
-alpha_w = 6;
-alpha_m = 6;
+alpha_w = 30;
+alpha_m = 30;
 % type of prior - default indep or something more elaborate
 priorType=1;
 
