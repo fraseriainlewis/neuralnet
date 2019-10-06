@@ -1,38 +1,58 @@
 library("BiDAG")
-thedata<-matrix(data=c(-0.78,-1.55,0.11,
-         0.18,-3.04,-2.35,
-         1.87,1.04,0.48,
-         -0.42,0.27,-0.68,
-         1.23,1.52,0.31,
-         0.51,-0.22,-0.60,
-         0.44,-0.18,0.13,
-         0.57,-1.82,-2.76,
-         0.64,0.47,0.74,
-         1.05,0.15,0.20,
-         0.43,2.13,0.63,
-         0.16,-0.94,-1.96,
-         1.64,1.25,1.03,
-         -0.52,-2.18,-2.31,
-         -0.37,-1.30,-0.70,
-         1.35,0.87,0.23,
-         1.44,-0.83,-1.61,
-         -0.55,-1.33,-1.67,
-         0.79,-0.62,-2.00,
-         0.53,-0.93,-2.92
-         ),byrow=TRUE,ncol=3);
-#thedata<-as.data.frame(thedata)
+setwd("/Users/fraser/myrepos/neuralnet/matlab");
+thedata<-read.csv("data_matrix.txt",header=FALSE);
+# setup for score calc
 myScore<-scoreparameters(3,"bge",thedata,bgepar = list(aw=6,am=6))
-m<-matrix(rep(0,3*3),ncol=3);
-DAGscore(3,myScore, m)
+# define dags - note - format is each row is child/node, each col parent
+# opposite from what BiDAG needs - so use transpose
+dag0<-matrix(data=c(0,0,0,
+                    0,0,0,
+                    0,0,0), ncol=ncol(thedata),byrow=TRUE);
+dag1<-matrix(data=c(0,0,1,
+                    1,0,0,
+                    0,1,0), ncol=ncol(thedata),byrow=TRUE);
+dag2<-matrix(data=c(0,0,1,
+                    1,0,1,
+                    0,1,0), ncol=ncol(thedata),byrow=TRUE);
+dag3<-matrix(data=c(0,0,0,
+                    1,0,0,
+                    0,0,0), ncol=ncol(thedata),byrow=TRUE);
 
-m2<-m;
-m2[2,3]<-1;
-m2[1,2]<-1;
-m2[3,1]<-1;
-DAGscore(3,myScore, m2)
+DAGscore(3,myScore, t(dag0))
+DAGscore(3,myScore, t(dag1))
+DAGscore(3,myScore, t(dag2))
+DAGscore(3,myScore, t(dag3))
 
+setwd("/Users/fraser/myrepos/neuralnet/Rabn");
+dyn.load("abn.so")
+dag.m<-as.integer(dag0);## this creates one long vector - filled by cols from dag.m = same as internal C reprentation so fine.
 
+res<-.Call("checkforcycles",dag.m,3
+           #,PACKAGE="abn" ## uncomment to load as package not shlib
+)
 
+set.seed(100);
+Sigma <- matrix(rep(0,20*20),ncol=20);
+for(i in 1:20){Sigma[i,i]<-2;
+               if(i<17){Sigma[i,c(i+1,i+2,i+3)]<-1;}
+}
+Sigma[1,c(2:3)]<-1
 
+Means<-rnorm(20,mean=0,sd=2);
+
+thedata<-mvrnorm(n = 1000, mu=Means,Sigma=Sigma)
+
+myScore<-scoreparameters(20,"bge",thedata,bgepar = list(aw=30,am=30))
+
+dag0<-matrix(data=rep(0,20*20),ncol=20);
+
+DAGscore(20,myScore, t(dag0))
+
+dyn.load("abn.so")
+dag.m<-as.integer(dag0);## this creates one long vector - filled by cols from dag.m = same as internal C reprentation so fine.
+
+res<-.Call("checkforcycles",dag.m,20
+           #,PACKAGE="abn" ## uncomment to load as package not shlib
+)
 
 

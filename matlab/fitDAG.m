@@ -8,12 +8,13 @@ for i=1:nrow
     par_idx=find(nodei);% indexes of parents of node i
     [tmp,npars]=size(par_idx);
     if npars==0 
-      disp("no parents")
+      %disp("no parents")
       % we are done as p(d) = singleX/1.0
       YY=[i];
       [tmp,l] = size(YY); % l=dimension of d
       totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
-    else disp("have parents")
+    else 
+      %disp("have parents")
       % if we have parents then we need to compute A/B, A = parents U node, B = parents
       YY=[par_idx i];
       [tmp,l] = size(YY); % l=dimension of d
