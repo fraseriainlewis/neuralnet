@@ -1,3 +1,5 @@
+/** /Applications/MATLAB_R2019a.app/bin/mex -I/usr/local/include -L/usr/local/lib -lgsl -lgslcblas arrayProductA.c -R2018a
+  **/
 /** call this from matlab prompt
  cb=(nchoosek(3,0)+nchoosek(3,1)+nchoosek(3,2)+nchoosek(3,3))
   a=dagTableSize(zeros(3,3,'uint32'),cb);
