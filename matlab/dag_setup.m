@@ -19,7 +19,7 @@ disp("SETUP FOR FITTING DAGS - loads in data set and some pre-computation. Dimen
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % csv file with data - no header
-filename='n5m1000.csv'; %'data_matrix.txt';
+filename='n4m1000.csv'; %'data_matrix.txt';
 disp("NOTE: CURRENT DATA SET HAS FIVE VARIABLES")
 % imaginary sample sizes
 alpha_w = 30;
