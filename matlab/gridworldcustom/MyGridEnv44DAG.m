@@ -1,19 +1,25 @@
-classdef MyGridEnv < rl.env.MATLABEnvironment
+classdef MyGridEnv44DAG < rl.env.MATLABEnvironment
     %MYENVIRONMENT: Template for defining custom environment in MATLAB.    
     
     %% Properties (set properties' attributes accordingly)
     properties
         rewardTerminal = 10;
         rewardSpecial = 5; %alpha_mu
-        reward= -1; % number of data points
-        terminalState = [5 5];
-        gridmap=reshape(1:25,5,5);
+        reward= -1; % penalty for each step
+        terminalState =  [0   1   1   0   0   0   1   0   0   0   0   0   0   1   1   0] % old [5 5]
+                          % this is the best DAG on the simulated data at 4x4 size
+                          %  0   0   0   0
+                          %  1   0   0   1
+                          %  1   1   0   1
+                          %  0   0   0   0
+
+        %gridmap=reshape(1:25,5,5);
 
     end
     
     properties
         % Initialize system state to cell=2 (e.g. 2,1) '
-        State = [2];
+        State = zeros(1,16);
     end
     
     properties(Access = protected)
@@ -25,10 +31,10 @@ classdef MyGridEnv < rl.env.MATLABEnvironment
     methods              
         % Contructor method creates an instance of the environment
         % Change class name and constructor name accordingly
-        function this = MyGridEnv()
+        function this = MyGridEnv44DAG()
             % Initialize Observation settings
             %% this is the DAG - a matrix
-            ObservationInfo = rlFiniteSetSpec([1:25]);
+            ObservationInfo = rlNumericSpec([1 16]); %rlFiniteSetSpec([1:16]);
             ObservationInfo.Name = 'DAG';
             ObservationInfo.Description = 'current DAG, n x n';
             
