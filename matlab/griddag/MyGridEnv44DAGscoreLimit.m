@@ -1,4 +1,4 @@
-classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
+classdef MyGridEnv44DAGscoreLimit < rl.env.MATLABEnvironment
     %MYENVIRONMENT: Template for defining custom environment in MATLAB.    
     
     %% Properties (set properties' attributes accordingly)
@@ -54,7 +54,7 @@ classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
 
         % Contructor method creates an instance of the environment
         % Change class name and constructor name accordingly
-        function this = MyGridEnv44DAGscore(stateLookup, scoreLookup)
+        function this = MyGridEnv44DAGscoreLimit(stateLookup, scoreLookup)
 
             %if nargin > 0
             %this.lookup = a;

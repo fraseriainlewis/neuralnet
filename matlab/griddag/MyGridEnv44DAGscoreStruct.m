@@ -1,4 +1,4 @@
-classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
+classdef MyGridEnv44DAGscoreStruct < rl.env.MATLABEnvironment
     %MYENVIRONMENT: Template for defining custom environment in MATLAB.    
     
     %% Properties (set properties' attributes accordingly)
@@ -19,11 +19,11 @@ classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
                           %  1   0   0   1
                           %  1   1   0   1
                           %  0   0   0   0
-        %terminalState = [0 0 0 0;...
-        %                 1 0 0 1;...
-        %                 1 1 0 1;...
-        %                 0 0 0 0]'; % transpose is crucial!
-        terminalState = -6.47e+03/1000;
+        terminalState = [0 0 0 0;...
+                         1 0 0 1;...
+                         1 1 0 1;...
+                         0 0 0 0]'; % transpose here is crucial!
+        %terminalState = -6.47e+03/1000;
         %gridmap=reshape(1:25,5,5);
 
     end
@@ -54,7 +54,7 @@ classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
 
         % Contructor method creates an instance of the environment
         % Change class name and constructor name accordingly
-        function this = MyGridEnv44DAGscore(stateLookup, scoreLookup)
+        function this = MyGridEnv44DAGscoreStruct(stateLookup, scoreLookup)
 
             %if nargin > 0
             %this.lookup = a;
@@ -213,8 +213,8 @@ classdef MyGridEnv44DAGscore < rl.env.MATLABEnvironment
             % Update system states
             this.State = Observation;
 
-            %if isequal(dag1,this.terminalState)
-            if this.reward>this.terminalState
+            if isequal(dag1,this.terminalState)
+            %if this.reward>this.terminalState
                 IsDone=1; % terminate as have found best DAG
                 %disp('terminating')
             else 

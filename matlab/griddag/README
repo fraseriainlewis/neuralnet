@@ -1,0 +1,30 @@
+%% DAG and Reinforcement learning - pipeline so far
+
+Find the solution - optimal DAG - using Q-Learning Agent (a table approach). The optimal DAG is known in advance via a brute force exhaustive search (hence why 4x4, small enough to do this). The pipeline is quite long and so it detailed here - backwards - from the two working version of the Q-learner files.
+
+%% Pipeline - folder $HOME/myrepos/neuralnet/matlab/griddag
+
+0. in R run 'kuipers_v2.R'
+	This generates a repeatable simulated dataset of four variables - output file 'n4m1000.csv' - it also uses CRAN BiDAG to fit a BN DAG and is used as a computational check - that the network score computed in MATLAB is the same as that computed by BiDAG. See Kuipers PDF article.
+
+1. in Matlab run 'dag_setup.m'
+	This sets up some initial *essential* computational results this has dependency 'priorPrec.m'
+
+2. in Matlab run 'script_DAGtablen4.m'
+	This computes all possible graphs - including with cycles - then removes graphs with a cycle and computed the network score for each DAG. The following are dependencies
+	a. 'fitDAG.m' which computes a network score for a single DAG which in turn depends on 'pDln.m' which does the actual computation
+	b. 'pDln.m' which in turn depends on 'gammalnmult.m' - splits the computations into small chunks
+	c. 'dagTableOneNode.c' - does the combinatorics. NOTE A C MEX file, and needs compiled (see first line in .c file for build command), it also has gnu GSL as dependencies. Done this way as recycled source code from CRAN ABN
+	d. 'cycle.c' - checks for cycles in a DAG, NOTE A C MEX file, and needs compiled (see first line in .c file for build command), it also has gnu GSL as dependencies. Done this way as recycled source code from CRAN ABN
+
+3a. run 'rl_script_qTablescoreStruct.m'
+	This runs Q-learning and gets a successful solution where the terminalState is stated as a DAG - this is the target - and alternative and more flexible approach is to give a terminal state as a score threshold limit (once score exceeded then have success). This is the verion below. Dependency:
+	a. 'myGridEnv44DAGscoreStruct.m' - this is the custom environment, needs documented better!
+
+
+3b. run 'rl_script_qTablescoreLimit.m' (preferred over 3a.)
+	a. 'myGridEnv44DAGscoreLimit.m' - this is the custom environment, needs documented better!	
+
+
+To check the RL did a good job look at the last lines outputed in Matlab terminal - it should give indexes, e.g. 6172 or 4000, which are the locations of the best DAG. E.g. do allScores(6172) or reshape(allStates(1:16,6172),4,4)'
+ 
