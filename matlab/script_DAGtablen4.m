@@ -19,9 +19,9 @@ c=combvec(a',b); % combined to get all combinations for two nodes - n.b. in each
 dagstoreflat=combvec(a',c); % finally do again and get all combinations for four nodes
 % each COL in dagstoreflat is a DAG unrolled by row, we iterate through each COL, rolling up each COL back
 % into a 3x3 DAG e.g. 
-if false
+if true
 i=12;
-reshape(dagstoreflat(:,i),n,n)' % e.g. a single DAG
+disp(reshape(dagstoreflat(:,i),n,n)') % e.g. a single DAG
 end
 
 %ans =
@@ -36,28 +36,63 @@ tmpVec1=zeros(1,n,'uint32');
 tmpVec2=zeros(1,n,'uint32');
 tmpVec3=zeros(1,n,'uint32');
 % so now loop through each col in dagstore, build a DAG, check for a cycle - do this to get the total count, no score computation yet
-numModels=0; % keep count of number of valid DAGs
+numValidModels=0; % keep count of number of valid DAGs
+goodDAGS=zeros(1,nmodels);% will contain a 1 if no cycle and 0 if cycle
 for i=1:nmodels
  curDAG=uint32(reshape(dagstoreflat(:,i),n,n)');
  hasCycle=cycle(curDAG,tmpDAG,tmpVec1,tmpVec2,tmpVec3);
  if (~hasCycle)
- 	numModels=numModels+1;
+ 	numValidModels=numValidModels+1;
+ 	goodDAGS(1,i)=1;
  end
  end	
+disp('total no. of DAGs=')
+disp(numValidModels)
 
-scores=zeros(numModels,1);
+idx=find(goodDAGS>0);% this is the array of indexes of good DAGS, i.e. those without cycles
+
+
+
+scores=zeros(numValidModels,1);
 index=1;
-for i=1:nmodels
- curDAG=uint32(reshape(dagstoreflat(:,i),n,n)');
- hasCycle=cycle(curDAG,tmpDAG,tmpVec1,tmpVec2,tmpVec3);
- if (~hasCycle)
+for i=1:numValidModels % for each index in idx, i.e. for each DAG which does not have a cycle compute the score
+    curDAG=uint32(reshape(dagstoreflat(:,idx(i)),n,n)');
  	scores(index,1)=fitDAG(curDAG,N,alpha_m,alpha_w,T,R);
  	index=index+1;
- end
  end	
 
-plot(scores,'-s','MarkerSize',10,...
-    'MarkerEdgeColor','red',...
-    'MarkerFaceColor',[1 .6 .6])
+ % get best DAG 
+bestScoreIDX=find(scores==max(scores));
+bestDAG44=uint32(reshape(dagstoreflat(:,idx(bestScoreIDX)),n,n)')
+bestDAG44flat=dagstoreflat(:,idx(bestScoreIDX));
+fitDAG(bestDAG44,N,alpha_m,alpha_w,T,R)
+
+ %  0   0   0   0
+ %  1   0   0   1
+ %  1   1   0   1
+ %  0   0   0   0
+
+% TO-DO - below is the array of all 543 DAGs but need to 
+dagstoreflatDAGS=dagstoreflat(:,idx); % this contains flattened DAGS - ie. no cycles, each col
+scoresDAG=scores'; % scores match cols of dagstoreflatDAGS
+
+
+[a,b]=ismember(bestDAG44flat',dagstoreflatDAGS','rows')
+
+allStates=[]
+allScores=[]
+for i=1:16
+	tmp=[dagstoreflatDAGS; ones(1,543)*i];
+	allStates=[allStates tmp];
+	allScores=[allScores scoresDAG];
+end	
+
+%so all states has last row = 1 or 2 or... up to 16 - grid index flattened - blocks of 543 (each DAG a col)
+
+
+
+%plot(scores,'-s','MarkerSize',10,...
+%    'MarkerEdgeColor','red',...
+%    'MarkerFaceColor',[1 .6 .6])
 
 

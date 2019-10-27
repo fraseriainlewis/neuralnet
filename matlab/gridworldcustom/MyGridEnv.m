@@ -5,6 +5,7 @@ classdef MyGridEnv < rl.env.MATLABEnvironment
     properties
         rewardTerminal = 10;
         rewardSpecial = 5; %alpha_mu
+        rewardWall = -1.5; %alpha_mu
         reward= -1; % number of data points
         terminalState = [5 5];
         gridmap=reshape(1:25,5,5);
@@ -33,12 +34,12 @@ classdef MyGridEnv < rl.env.MATLABEnvironment
             ObservationInfo.Description = 'current DAG, n x n';
             
             % Initialize Action settings   
-            %ActionInfo = rlFiniteSetSpec([1 2 3 4]);
+            ActionInfo = rlFiniteSetSpec([1 2 3 4]);
             
-            ActionInfo = rlFiniteSetSpec({[1 1],[1 0],[1 -1],...
-                              [2 1],[2 0],[2 -1],...
-                              [3 1],[3 0],[3 -1],...
-                              [4 1],[4 0],[4 -1]})
+            %ActionInfo = rlFiniteSetSpec({[1 1],[1 0],[1 -1],...
+            %                  [2 1],[2 0],[2 -1],...
+            %                  [3 1],[3 0],[3 -1],...
+            %                  [4 1],[4 0],[4 -1]})
             ActionInfo.Name = 'DAG updates';
             ActionInfo.Description = 'DAG updates, two layer, grid move, then add/nothing/remove arc';
 
@@ -61,35 +62,42 @@ classdef MyGridEnv < rl.env.MATLABEnvironment
             curloc=[r c];
             newloc=curloc;
 
+            specialMove=0;
             % 2. determine action and generate new move
-            if isequal(curloc,[2 4]) && Action(1)==4
+            if isequal(curloc,[2 4]) && Action==4
                 specialMove=1;
                 newloc=[4 4];
-                disp('special move')
-            else specialMove=0;	
+                %disp('special move')
             end
 
+            %disp('action')
+            %disp(Action)
+
             if ~specialMove
-                if Action(1)==1 % move left
+                if Action==1 % move left
                 newloc(2)=newloc(2)-1; % reduce col index by 1
-                elseif Action(1)==2 % move right
+                elseif Action==2 % move right
                 newloc(2)=newloc(2)+1; % increment col index by 1
-                elseif Action(1)==3 % move up
+                elseif Action==3 % move up
                 newloc(1)=newloc(1)-1; % decrement row index by 1
-                elseif Action(1)==4 % move down
+                elseif Action==4 % move down
                 newloc(1)=newloc(1)+1; % increment row index by 1
                 end
             end
 
+            hitWall=0;
             if newloc(1)>5 || newloc(1)<1 || newloc(2)>5 || newloc(2)<1
                 newloc=curloc; % a move off the grid and so reset to current location as no move
+                hitWall=1;
             end	
+
             if isequal(newloc,[3 3]) || isequal(newloc,[3 4]) || isequal(newloc,[3 5]) || isequal(newloc,[4 3])
                 newloc=curloc; % a move into a banned cell
+                hitWall=1;   
             end
             
-            disp('new loc')
-            disp(newloc)
+             %disp('newloc')
+            %disp(newloc)
 
             newlocidx=this.gridmap(newloc(1),newloc(2));% back to index
             % Transform state to observation - store in LoggedSignals and also NextObs
@@ -114,11 +122,14 @@ classdef MyGridEnv < rl.env.MATLABEnvironment
                 Reward = this.rewardTerminal; % found terminal state 
             elseif specialMove
                     Reward = this.rewardSpecial;
+            elseif hitWall 
+                    %disp('wall');
+                    Reward = this.rewardWall;        
             else Reward= this.reward;    
             end
             
-            disp('reward')
-            disp(Reward)
+            %disp('reward')
+            %disp(Reward)
 
 
         end

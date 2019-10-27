@@ -34,7 +34,7 @@ classdef MyGridEnv44DAG < rl.env.MATLABEnvironment
         function this = MyGridEnv44DAG()
             % Initialize Observation settings
             %% this is the DAG - a matrix
-            ObservationInfo = rlNumericSpec([1 16]); %rlFiniteSetSpec([1:16]);
+            ObservationInfo = rlFiniteSetSpec([1:65536]); %rlNumericSpec([1 16]); 
             ObservationInfo.Name = 'DAG';
             ObservationInfo.Description = 'current DAG, n x n';
             
