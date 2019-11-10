@@ -51,7 +51,7 @@ while delta>0.01
     		reset(env,s);
     		[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{policy(s)});% get reward from current policy-action
     		% now do update 
-        	V(s) = Reward + discount*curV;
+        	V(s) = Reward + discount*V(NextState);
         	delta=max([delta,abs(curV-V(s))]);
     	end % end if  
 	end % end for
@@ -71,7 +71,7 @@ for s = 1:numStates
     		bestValue= -realmax;
     		for a = 1:15
     			[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
-    			curQ=Reward + discount*V(s);
+    			curQ=Reward + discount*V(NextState);
     			if curQ > bestValue
     				bestValue = curQ;
     				policy(s) = a; %update policy to current action which is new best
@@ -96,7 +96,7 @@ diary off
 
 
 % check the policy
-% it seems to work fine - pick a state in AllState, e.g. 3995 which does not have the target network score and then see if the 
+% check pick a state in AllState, e.g. 3995 which does not have the target network score and then see if the 
 % policy for this state when taken then gives a DAG this is in the target state (assuming it can reach target from just one action)
 %mydag=reshape(allStates(1:16,1,4,4)';
 %fitDAG(mydag,N,alpha_m,alpha_w,T,R)

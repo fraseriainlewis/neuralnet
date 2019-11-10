@@ -31,35 +31,55 @@ actionLookup={[0 1],[0 0],[0 -1],... % no spatial move
                               [2 1],[2 0],[2 -1],...             % right
                               [3 1],[3 0],[3 -1],...             % up
                               [4 1],[4 0],[4 -1]};
-delete 'mylog.txt'
-diary on
-diary 'mylog.txt'
+%delete 'mylog.txt'
+%diary on
+%diary 'mylog.txt'
 
 % initialize environment
 % first episode - run until termination or fixed number of steps? The success of the algorithm is the average number of steps 
 % over episodes from start until reaches success.
-s=1;
-periodTotalReward=0;
-reset(env,s); % set to initial state
-% take a greedy action and update V(for currentstate) 
-bestValue= -realmax;
-    		for a = 1:15 % for each action
-    			reset(env,s);
-    			[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
-    			curQ=Reward + discount*V(s);
-    			if curQ > bestValue
-    				bestValue = curQ;
-    				V(s) =curQ; % update value function for just this state
-    				greedyA = a; % store best action
-    				greedyNextState = NextState;
-    				greedyReward = Reward; 
-    			end;	
-             end
+for p=1:1 % for each period
+	disp('new period')
+	s=1; % start state
+	disp('current state')
+	disp(s)
+	periodTotalsteps=0;
+	reset(env,s); % set to initial state
+	IsDone=false;% assume starting state is not the terminal state - change for random starts
+i=1;
+	while ~IsDone && i<15
+		% take a greedy action and update V(for currentstate) 
+		bestValue= -realmax;
+    			for a = 1:15 % for each possible action
+    				reset(env,s);% reset needed as step advances states in next line
+    				[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
+    				curQ=Reward + discount*V(NextState);
+    				if curQ > bestValue
+    					bestValue = curQ;
+    					V(s) =curQ; % update value function for just this current state
+    					greedyA = a; % store best action
+    					greedyNextState = NextState;% store next state from best action
 
-%  set next state as result of greedy action and update
-reset(env,greedyNextState);
-periodTotalReward = periodTotalReward + greedyReward;
+    				end;	
+             	end
+						disp('best action =')
+    					disp(greedyA)
+    					disp('next state in greedy check')
+    					disp(greedyNextState)
+    					disp('V(s)')
+    					disp(V(greedyNextState))
+	%  reset to current state and step next state as per greedy action
+	reset(env,s);
+	[s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
+	disp('next state')
+	disp(s)
+	periodTotalsteps = periodTotalsteps + 1;
+    i=i+1;
+	end % end of while = period steps
+disp('period=')
+disp(p)
+disp('number of steps needed to reach terminal')
+disp(periodTotalsteps)
 
-
-
+end % end of period loop
 
