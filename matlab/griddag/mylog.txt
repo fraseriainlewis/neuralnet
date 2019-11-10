@@ -1,0 +1,149 @@
+diary 'mylog.txt'
+
+for i=1:5
+disp('------------ outer iter ----------')
+disp(i)
+delta=1;% large than tolerance
+while delta>0.01 
+	delta=0;
+	for s = 1:numStates
+		%disp('iter')
+		%disp(s)
+    	% get current value for current state
+    	if ~ismember(s,terminal)  % terminal state set to zero by construction
+    		curV = V(s);
+    		% set to state s 
+    		reset(env,s);
+    		[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{policy(s)});% get reward from current policy-action
+    		% now do update 
+        	V(s) = Reward + discount*curV;
+        	delta=max([delta,abs(curV-V(s))]);
+    	end % end if  
+	end % end for
+   %disp('delta')
+   %disp(delta)
+end % end while  	
+
+disp('end of value est')
+
+% now update policy
+for s = 1:numStates
+	%disp('policy eval')
+	%disp(s)
+	curP = policy(s);
+	% set to state s and find best action of all possible
+    		reset(env,s);
+    		bestValue= -realmax;
+    		for a = 1:15
+    			[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
+    			curQ=Reward + discount*V(s);
+    			if curQ > bestValue
+    				bestValue = curQ;
+    				policy(s) = a; %update policy to current action which is new best
+    			end;	
+             end
+
+    if policy(s) == curP % so polict has not changed
+       policyStable(s)=1; % mark policy as stable/converged for this state
+    end
+
+end
+disp('end of policy update')
+disp('how many are stable')
+[r,c]=size(find(policyStable~=0))
+disp(r)
+%disp(histcounts(policy))
+
+end
+------------ outer iter ----------
+     1
+
+end of value est
+end of policy update
+how many are stable
+
+r =
+
+   545
+
+
+c =
+
+     1
+
+   545
+
+------------ outer iter ----------
+     2
+
+end of value est
+end of policy update
+how many are stable
+
+r =
+
+        8673
+
+
+c =
+
+     1
+
+        8673
+
+------------ outer iter ----------
+     3
+
+end of value est
+end of policy update
+how many are stable
+
+r =
+
+        8684
+
+
+c =
+
+     1
+
+        8684
+
+------------ outer iter ----------
+     4
+
+end of value est
+end of policy update
+how many are stable
+
+r =
+
+        8686
+
+
+c =
+
+     1
+
+        8686
+
+------------ outer iter ----------
+     5
+
+end of value est
+end of policy update
+how many are stable
+
+r =
+
+        8687
+
+
+c =
+
+     1
+
+        8687
+
+
+diary off

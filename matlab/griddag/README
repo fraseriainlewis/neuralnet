@@ -4,11 +4,13 @@ Find the solution - optimal DAG - using Q-Learning Agent (a table approach). The
 
 %% Pipeline - folder $HOME/myrepos/neuralnet/matlab/griddag
 
+[optional]
 0. in R run 'kuipers_v2.R'
 	This generates a repeatable simulated dataset of four variables - output file 'n4m1000.csv' - it also uses CRAN BiDAG to fit a BN DAG and is used as a computational check - that the network score computed in MATLAB is the same as that computed by BiDAG. See Kuipers PDF article.
 
+[not optional]
 1. in Matlab run 'dag_setup.m'
-	This sets up some initial *essential* computational results this has dependency 'priorPrec.m'
+	This sets up some initial *essential* computational results this has dependency 'priorPrec.m', which has dependency 'e1.m'
 
 2. in Matlab run 'script_DAGtablen4.m'
 	This computes all possible graphs - including with cycles - then removes graphs with a cycle and computed the network score for each DAG. The following are dependencies
@@ -23,8 +25,16 @@ Find the solution - optimal DAG - using Q-Learning Agent (a table approach). The
 
 
 3b. run 'rl_script_qTablescoreLimit.m' (preferred over 3a.)
-	a. 'myGridEnv44DAGscoreLimit.m' - this is the custom environment, needs documented better!	
+    This runs Q-learning with a score threshold as the target reward and now have random start included - change this in the myGridEnv44DAGscoreLimitRV.m file - initialization
+    to turn off random start set false in the InitialObservation method
+	a. 'myGridEnv44DAGscoreLimitRV.m' - this is the custom environment, needs documented better!
+	b. 'dagrng.m' - to create random starting DAG	
 
 
 To check the RL did a good job look at the last lines outputed in Matlab terminal - it should give indexes, e.g. 6172 or 4000, which are the locations of the best DAG. E.g. do allScores(6172) or reshape(allStates(1:16,6172),4,4)'
  
+
+ 4. run 'rl_script_AC_works.m' 
+    A continuous state space environment also works but only for a fixed - not random start. 
+    a. 'MyGridEnv44DAGcts.m' - this is the custom environment, needs documented better!
+
