@@ -64,20 +64,20 @@ classdef DAGenv < handle
             %end
             % Initialize Observation settings
             %% this is the DAG - a matrix
-            ObservationInfo = rlFiniteSetSpec([1:(543*16)]); %rlNumericSpec([1 16]); 
-            ObservationInfo.Name = 'DAG';
-            ObservationInfo.Description = 'current DAG, n x n as 1*(n x n) vector with current location x,y appended';
+            %ObservationInfo = rlFiniteSetSpec([1:(543*16)]); %rlNumericSpec([1 16]); 
+            %ObservationInfo.Name = 'DAG';
+            %ObservationInfo.Description = 'current DAG, n x n as 1*(n x n) vector with current location x,y appended';
             
             % Initialize Action settings   
             %ActionInfo = rlFiniteSetSpec([1 2 3 4]);
             
-            ActionInfo = rlFiniteSetSpec({[0 1],[0 0],[0 -1],... % no spatial move 
-                              [1 1],[1 0],[1 -1],...             % left
-                              [2 1],[2 0],[2 -1],...             % right
-                              [3 1],[3 0],[3 -1],...             % up
-                              [4 1],[4 0],[4 -1]})               % down
-            ActionInfo.Name = 'DAG updates';
-            ActionInfo.Description = 'DAG updates, two layer, grid move, then add/nothing/remove arc';
+            %ActionInfo = rlFiniteSetSpec({[0 1],[0 0],[0 -1],... % no spatial move 
+            %                  [1 1],[1 0],[1 -1],...             % left
+            %                  [2 1],[2 0],[2 -1],...             % right
+            %                  [3 1],[3 0],[3 -1],...             % up
+            %                  [4 1],[4 0],[4 -1]})               % down
+            %ActionInfo.Name = 'DAG updates';
+            %ActionInfo.Description = 'DAG updates, two layer, grid move, then add/nothing/remove arc';
 
 
 
