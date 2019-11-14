@@ -14,10 +14,28 @@ disp("make sure to run dag_setup.m first")
 n=4;
 totcomb=nchoosek(4,0)+nchoosek(4,1)+nchoosek(4,2)+nchoosek(4,3)+nchoosek(4,4); %combinations for one node -hard codes for n=3
 a=dagTableOneNode(zeros(4,4,'uint32'),totcomb);% returns matrix of all parent combinations for a single node - 16 x 4
-b=combvec(a',a'); % combined to get all combinations for two nodes - n.b. in each col, not across rows
-c=combvec(a',b); % combined to get all combinations for two nodes - n.b. in each col, not across rows
+[r,c]=size(a);
+dagstoreflat=zeros(r^4,4*4);
+index=1;
+for i=1:r
+    for j=1:r
+        for k=1:r
+            for l=1:r
+            dagstoreflat(index,:)=[a(i,:) a(j,:) a(k,:) a(l,:)];
+            index=index+1;
+            end
+        end
+    end
+end
+
+dagstoreflat=dagstoreflat';
+
+%b=combvec(a',a'); % combined to get all combinations for two nodes - n.b. in each col, not across rows
+%c=combvec(a',b); % combined to get all combinations for two nodes - n.b. in each col, not across rows
 % each COLUMN is a DAG
-dagstoreflat=combvec(a',c); % finally do again and get all combinations for four nodes
+%dagstoreflat=combvec(a',c); % finally do again and get all combinations for four nodes
+
+
 % IMPORTANT NOTE: each col in dagstoreflat needs to be rebuilt into a DAGs ROWWISE, not COLWISE, which is what reshape does
 % so after reshape must also do transpose to get the correct DAG defintion
 

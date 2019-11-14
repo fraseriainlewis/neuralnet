@@ -1,5 +1,5 @@
 clear all;
- cd '/Users/fraser/myrepos/neuralnet/matlab/griddag'
+ cd '/home/lewisfa/myrepos/neuralnet/matlab/griddag'
 if true
 	run dag_setup.m
 	run script_DAGtablen4.m 
@@ -102,4 +102,4 @@ diary off
 %fitDAG(mydag,N,alpha_m,alpha_w,T,R)
 
 
-
+exit
