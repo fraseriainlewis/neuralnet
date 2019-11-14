@@ -23,8 +23,8 @@ V=zeros(c,1); % 8688 by 1
 terminal=find(allScores>=max(allScores)); % indexes of the best score - terminal condition to value function is zero
 policy=randi([1 15],c,1); % each row is a state the entry is the action form the policy - 1 through 15
 policyStable=zeros(c,1);
-discount=0.90;
-Np=1000;
+discount=0.9;
+Np=50000;
 
 actionLookup={[0 1],[0 0],[0 -1],... % no spatial move 
                               [1 1],[1 0],[1 -1],...             % left
@@ -50,7 +50,7 @@ for p=1:Np % for each period
 	reset(env,s); % set to initial state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
-	while ~IsDone && i<=150
+	while ~IsDone && i<=250
 		% take a greedy action and update V(for currentstate) 
 		bestValue= -realmax;
     			for a = 1:15 % for each possible action
@@ -78,7 +78,7 @@ i=1;
 	%disp(s)
 	periodTotalsteps = periodTotalsteps + 1;
     i=i+1;
-    if i==150 
+    if i==250 
     	disp('!!!!!! HIT max steps!')
     end
 
@@ -95,4 +95,6 @@ end
 end % end of period loop
 
 plot(1:Np,mymeanstore)
+
+save('notgreedy50K.mat','mymeanstore');
 
