@@ -258,9 +258,11 @@ classdef DAGenv < handle
         % Reset environment to initial state and output initial observation
         function InitialObservation = reset(this,startState)
             
-            if false
+            if true
                 initdag=dagrng(this.n);% generate random dag
-                initdagflat = [reshape(initdag,1,this.n*this.n) 1]; % [.. 1] 1=top left corner
+                startLoc=randi([1 16],1,1);
+
+                initdagflat = [reshape(initdag,1,this.n*this.n) startLoc]; % [.. 1] 1=top left corner
                 [l0,c0]=ismember(initdagflat,this.lookup','rows');
                 if ~l0 
                     error('no match for random DAG')
