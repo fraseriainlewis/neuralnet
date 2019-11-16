@@ -40,6 +40,7 @@ mymeanstore=zeros(Np,1);
 unfinished=zeros(Np,1);
 startState=zeros(Np,1);
 finalState=zeros(Np,1);
+moves=zeros(1000,250);
 % initialize environment
 % first episode - run until termination or fixed number of steps? The success of the algorithm is the average number of steps 
 % over episodes from start until reaches success.
@@ -51,7 +52,7 @@ for p=1:Np % for each period
 	%disp('current state')
 	%disp(s)
 	periodTotalsteps=0;
-	c0=reset(env,s,1); % set to initial state is last arg=1 then random start state
+	c0=reset(env,s,0); % set to initial state is last arg=1 then random start state
     startState(p)=c0; % store start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
@@ -87,7 +88,8 @@ i=1;
 	%  reset to current state and step next state as per greedy action
 	reset(env,s,0);
 	[s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
-	%disp('next state')
+	moves(p,1)=greedyA;
+    %disp('next state')
 	%disp(s)
 	periodTotalsteps = periodTotalsteps + 1;
     i=i+1;
@@ -107,11 +109,11 @@ i=1;
     disp(mymeanstore(p,1))
     end
 
-finalstate(p,1)=s;
+finalState(p,1)=s;
 end % end of period loop
 
 %plot(1:Np,mymeanstore)
 
-save 'RTDPworkspace2_rv.mat';
+save 'RTDPworkspace2_norv.mat';
 
 exit
