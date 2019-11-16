@@ -50,7 +50,7 @@ for p=1:Np % for each period
 	%disp('current state')
 	%disp(s)
 	periodTotalsteps=0;
-	c0=reset(env,s,1); % set to initial state is last arg=1 then random start state
+	c0=reset(env,s,0); % set to initial state is last arg=1 then random start state
     startState(p)=c0; % store start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
@@ -109,6 +109,6 @@ end % end of period loop
 
 %plot(1:Np,mymeanstore)
 
-save 'RTDPworkspace2_rv.mat';
+save 'RTDPworkspace2_norv.mat';
 
 exit

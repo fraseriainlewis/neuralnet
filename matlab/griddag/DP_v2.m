@@ -31,11 +31,11 @@ actionLookup={[0 1],[0 0],[0 -1],... % no spatial move
                               [2 1],[2 0],[2 -1],...             % right
                               [3 1],[3 0],[3 -1],...             % up
                               [4 1],[4 0],[4 -1]};
-delete 'mylog.txt'
-diary on
-diary 'mylog.txt'
+%delete 'mylog.txt'
+%diary on
+%diary 'mylog.txt'
 
-for i=1:50  % this is the number of times to do policy iteration - perfect fit is all but 
+for i=1:15  % this is the number of times to do policy iteration - perfect fit is all but 
 disp('------------ outer iter ----------')
 disp(i)
 delta=1;% large than tolerance
