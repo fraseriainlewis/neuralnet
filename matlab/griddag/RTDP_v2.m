@@ -37,6 +37,8 @@ actionLookup={[0 1],[0 0],[0 -1],... % no spatial move
 %diary 'mylog.txt'
 mystore=zeros(Np,1);
 mymeanstore=zeros(Np,1);
+unfinished=zeros(Np,1);
+startState=zeros(Np,1);
 % initialize environment
 % first episode - run until termination or fixed number of steps? The success of the algorithm is the average number of steps 
 % over episodes from start until reaches success.
@@ -48,7 +50,8 @@ for p=1:Np % for each period
 	%disp('current state')
 	%disp(s)
 	periodTotalsteps=0;
-	reset(env,s,1); % set to initial state is last arg=1 then random start state
+	c0=reset(env,s,1); % set to initial state is last arg=1 then random start state
+    startState(p)=c0; % store start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
 	while ~IsDone && i<=250
@@ -63,17 +66,17 @@ i=1;
     					V(s) =curQ; % update value function for just this current state
     					greedyA = a; % store best action
     					greedyNextState = NextState;% store next state from best action
-						elseif curQ==bestValue
+					elseif curQ==bestValue
     					% randomly break ties
     					if rand>=0.5
     						bestValue = curQ;
     						V(s) =curQ; % update value function for just this current state
     						greedyA = a; % store best action
     						greedyNextState = NextState;% store next state from best action
-              end
+                        end
     				end	
             
-            end
+                end
 						%disp('best action =')
     					%disp(greedyA)
     					%disp('next state in greedy check')
@@ -89,6 +92,7 @@ i=1;
     i=i+1;
     if i==250 
     	disp('!!!!!! HIT max steps!')
+        unfinished(i-1)=1; % record that episode was left unfinished
     end
 
 	end % end of while = period steps

@@ -98,8 +98,6 @@ disp(r)
 
 end
 
-diary off
-
 
 % check the policy
 % check pick a state in AllState, e.g. 3995 which does not have the target network score and then see if the 
