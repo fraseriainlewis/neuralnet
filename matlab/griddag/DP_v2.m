@@ -11,7 +11,7 @@ env=DAGenv(allStates,allScores);% template file defining class
 
 
 rng(1000); %0 or 1000
-InitialObs = reset(env,1)
+InitialObs = reset(env,1,0)
 
 [NextObs,Reward,IsDone,LoggedSignals] = step(env,[2 1]);
 
@@ -48,7 +48,7 @@ while delta>0.01
     	if ~ismember(s,terminal)  % terminal state set to zero by construction
     		curV = V(s);
     		% set to state s 
-    		reset(env,s);
+    		reset(env,s,0);
     		[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{policy(s)});% get reward from current policy-action
     		% now do update 
         	V(s) = Reward + discount*V(NextState);
@@ -67,7 +67,7 @@ for s = 1:numStates
 	%disp(s)
 	curP = policy(s);
 	% set to state s and find best action of all possible
-    		reset(env,s);
+    		reset(env,s,0);
     		bestValue= -realmax;
     		for a = 1:15
     			[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
@@ -76,6 +76,12 @@ for s = 1:numStates
     				bestValue = curQ;
     				policy(s) = a; %update policy to current action which is new best
     				% TO-DO what about breaking ties? 
+    			elseif curQ==bestValue
+    				% randomly break ties
+    				if rand>=0.5
+    				bestValue = curQ; % not actually needed
+    				policy(s) = a; %update policy to current action which is new best
+    				end
     			end;	
              end
 
@@ -101,6 +107,6 @@ diary off
 %mydag=reshape(allStates(1:16,1,4,4)';
 %fitDAG(mydag,N,alpha_m,alpha_w,T,R)
 
-save 'DPworkspace.mat'
+save 'DPworkspace2.mat'
 
 exit

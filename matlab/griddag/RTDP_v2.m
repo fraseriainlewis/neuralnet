@@ -12,7 +12,7 @@ env=DAGenv(allStates,allScores);% template file defining class
 
 
 rng(1000); %0 or 1000
-InitialObs = reset(env,1)
+InitialObs = reset(env,1,0)
 
 [NextObs,Reward,IsDone,LoggedSignals] = step(env,[2 1]);
 
@@ -48,14 +48,14 @@ for p=1:Np % for each period
 	%disp('current state')
 	%disp(s)
 	periodTotalsteps=0;
-	reset(env,s); % set to initial state
+	reset(env,s,1); % set to initial state is last arg=1 then random start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
 	while ~IsDone && i<=250
 		% take a greedy action and update V(for currentstate) 
 		bestValue= -realmax;
     			for a = 1:15 % for each possible action
-    				reset(env,s);% reset needed as step advances states in next line
+    				reset(env,s,0);% reset needed as step advances states in next line
     				[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
     				curQ=Reward + discount*V(NextState);
     				if curQ > bestValue
@@ -63,7 +63,7 @@ i=1;
     					V(s) =curQ; % update value function for just this current state
     					greedyA = a; % store best action
     					greedyNextState = NextState;% store next state from best action
-						elseif curQ==bestvalue
+						elseif curQ==bestValue
     					% randomly break ties
     					if rand>=0.5
     						bestValue = curQ;
@@ -72,7 +72,8 @@ i=1;
     						greedyNextState = NextState;% store next state from best action
               end
     				end	
-             	end
+            
+            end
 						%disp('best action =')
     					%disp(greedyA)
     					%disp('next state in greedy check')
@@ -80,7 +81,7 @@ i=1;
     					%disp('V(s)')
     					%disp(V(greedyNextState))
 	%  reset to current state and step next state as per greedy action
-	reset(env,s);
+	reset(env,s,0);
 	[s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
 	%disp('next state')
 	%disp(s)
@@ -104,6 +105,6 @@ end % end of period loop
 
 %plot(1:Np,mymeanstore)
 
-save 'RTDPworkspace.mat';
+save 'RTDPworkspace2_rv.mat';
 
 exit

@@ -256,9 +256,9 @@ classdef DAGenv < handle
         end
         
         % Reset environment to initial state and output initial observation
-        function InitialObservation = reset(this,startState)
+        function InitialObservation = reset(this,startState,rv)
             
-            if true
+            if rv % start from random place
                 initdag=dagrng(this.n);% generate random dag
                 startLoc=randi([1 16],1,1);
 
