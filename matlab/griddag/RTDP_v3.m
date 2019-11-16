@@ -48,12 +48,12 @@ moves=zeros(1000,250);
 for p=1:Np % for each period
 	disp('new period')
 	disp(p)
-	s=1; % start state
+	%s=1; % start state
 	%disp('current state')
 	%disp(s)
 	periodTotalsteps=0;
-	c0=reset(env,s,1); % set to initial state is last arg=1 then random start state
-    startState(p)=c0; % store start state
+	s=reset(env,-1,1); % set to initial state is last arg=1 then random start state
+    startState(p)=s; % store start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
 	while ~IsDone && i<=250
