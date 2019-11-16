@@ -88,7 +88,7 @@ i=1;
 	%  reset to current state and step next state as per greedy action
 	reset(env,s,0);
 	[s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
-	moves(p,1)=greedyA;
+	moves(p,i)=greedyA;
     %disp('next state')
 	%disp(s)
 	periodTotalsteps = periodTotalsteps + 1;
