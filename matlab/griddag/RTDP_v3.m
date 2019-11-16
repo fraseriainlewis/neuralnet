@@ -39,6 +39,7 @@ mystore=zeros(Np,1);
 mymeanstore=zeros(Np,1);
 unfinished=zeros(Np,1);
 startState=zeros(Np,1);
+finalState=zeros(Np,1);
 % initialize environment
 % first episode - run until termination or fixed number of steps? The success of the algorithm is the average number of steps 
 % over episodes from start until reaches success.
@@ -99,12 +100,14 @@ i=1;
 %disp('period=')
 %disp(p)
 %disp('number of steps needed to reach terminal')
-mystore(p,1)=periodTotalsteps;
+    mystore(p,1)=periodTotalsteps;
 %disp(periodTotalsteps)
-if p>30 
-mymeanstore(p,1)=mean(mystore((p-30):p,1));
-disp(mymeanstore(p,1))
-end
+    if p>30 
+    mymeanstore(p,1)=mean(mystore((p-30):p,1));
+    disp(mymeanstore(p,1))
+    end
+
+finalstate(p,1)=s;
 end % end of period loop
 
 %plot(1:Np,mymeanstore)
