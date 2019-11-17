@@ -1,6 +1,6 @@
 clear all;
- %cd '/Users/fraser/myrepos/neuralnet/matlab/griddag'
-cd '/home/lewisfa/myrepos/neuralnet/matlab/griddag'
+ cd '/Users/fraser/myrepos/neuralnet/matlab/griddag'
+%cd '/home/lewisfa/myrepos/neuralnet/matlab/griddag'
 if true
 	run dag_setup.m
 	run script_DAGtablen4.m 
@@ -24,8 +24,8 @@ V=zeros(c,1); % 8688 by 1
 terminal=find(allScores>=max(allScores)); % indexes of the best score - terminal condition to value function is zero
 policy=randi([1 15],c,1); % each row is a state the entry is the action form the policy - 1 through 15
 policyStable=zeros(c,1);
-discount=0.9;
-Np=1000;
+discount=0.0;
+Np=20000;
 
 actionLookup={[0 1],[0 0],[0 -1],... % no spatial move 
                               [1 1],[1 0],[1 -1],...             % left
@@ -114,6 +114,6 @@ end % end of period loop
 
 %plot(1:Np,mymeanstore)
 
-save 'RTDPworkspace2_rv.mat';
+save 'RTDPworkspace2_rv0dis.mat';
 
-exit
+%exit
