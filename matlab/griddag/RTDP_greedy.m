@@ -1,5 +1,3 @@
-%%% this is for random start condition and also having a terminal condition
-
 clear all;
  cd '/Users/fraser/myrepos/neuralnet/matlab/griddag'
 %cd '/home/lewisfa/myrepos/neuralnet/matlab/griddag'
@@ -9,7 +7,7 @@ if true
 end
 
 
-env=DAGenv(allStates,allScores);% template file defining class
+env=DAGenvGreedy(allStates,allScores);% template file defining class
 
 
 
@@ -27,7 +25,7 @@ terminal=find(allScores>=max(allScores)); % indexes of the best score - terminal
 policy=randi([1 15],c,1); % each row is a state the entry is the action form the policy - 1 through 15
 policyStable=zeros(c,1);
 discount=0.0;
-Np=20000;
+Np=2000;
 
 actionLookup={[0 1],[0 0],[0 -1],... % no spatial move 
                               [1 1],[1 0],[1 -1],...             % left
@@ -58,9 +56,11 @@ for p=1:Np % for each period
     startState(p)=s; % store start state
 	IsDone=false;% assume starting state is not the terminal state - change for random starts
 i=1;
+bestValue= -realmax;
 	while ~IsDone && i<=250
 		% take a greedy action and update V(for currentstate) 
-		bestValue= -realmax;
+		
+        greedyMove=0;
     			for a = 1:15 % for each possible action
     				reset(env,s,0);% reset needed as step advances states in next line
     				[NextState,Reward,IsDone,LoggedSignals] = step(env,actionLookup{a});
@@ -70,52 +70,49 @@ i=1;
     					V(s) =curQ; % update value function for just this current state
     					greedyA = a; % store best action
     					greedyNextState = NextState;% store next state from best action
-					elseif curQ==bestValue
-    					% randomly break ties
-    					if rand>=0.5
-    						bestValue = curQ;
-    						V(s) =curQ; % update value function for just this current state
-    						greedyA = a; % store best action
-    						greedyNextState = NextState;% store next state from best action
-                        end
+                        greedyMove=1; % a flag to show that a better move was found
+					    %disp('reward')
+                        %disp(curQ)
     				end	
             
                 end
-						%disp('best action =')
-    					%disp(greedyA)
-    					%disp('next state in greedy check')
-    					%disp(greedyNextState)
-    					%disp('V(s)')
-    					%disp(V(greedyNextState))
-	%  reset to current state and step next state as per greedy action
-	reset(env,s,0);
-	[s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
-	moves(p,i)=greedyA;
-    %disp('next state')
-	%disp(s)
-	periodTotalsteps = periodTotalsteps + 1;
-    i=i+1;
-    if i==250 
-    	disp('!!!!!! HIT max steps!')
-        unfinished(i-1)=1; % record that episode was left unfinished
-    end
-
+						
+	if greedyMove==1 % make next move
+        %  reset to current state and step next state as per greedy action
+	   reset(env,s,0);
+	   [s,Reward,IsDone,LoggedSignals] = step(env,actionLookup{greedyA}); % this updates s - the current state
+	   moves(p,i)=greedyA;
+        %disp('next state')
+	   %disp(s)
+	   periodTotalsteps = periodTotalsteps + 1;
+        i=i+1;
+        if i==250 
+    	   disp('!!!!!! HIT max steps!')
+            unfinished(i-1)=1; % record that episode was left unfinished
+        end
+    else 
+        IsDone=true; % set flag to exit while loop
+    end 
+        
 	end % end of while = period steps
 %disp('period=')
 %disp(p)
 %disp('number of steps needed to reach terminal')
     mystore(p,1)=periodTotalsteps;
-%disp(periodTotalsteps)
+    finalState(p,1)=s;
+disp('number of steps in greedy')
+disp(periodTotalsteps)
+% calc mean of last 30 periods
     if p>30 
     mymeanstore(p,1)=mean(mystore((p-30):p,1));
-    disp(mymeanstore(p,1))
+    %disp(mymeanstore(p,1))
     end
 
-finalState(p,1)=s;
+
 end % end of period loop
 
 %plot(1:Np,mymeanstore)
 
-save 'RTDPworkspace2_rv0dis.mat';
+save 'RTDPworkspace2_rvgreedy.mat';
 
 %exit
