@@ -1,0 +1,41 @@
+# use "gcc" to compile source files.
+CC = clang
+# the linker is also "gcc". It might be something else with other compilers.
+LD = clang
+# Compiler flags go here.
+#CFLAGS = -I/home/fraser/R/lib64/R/include -I/home/fraser/include -Wall -pedantic -O3 -fPIC 
+
+CFLAGS = -Wall -pedantic -O3 -fopenmp 
+
+# Linker flags go here. Currently there aren't any, but if we'll switch to
+#LDFLAGS = -shared  -L/home/fraser/lib -lgsl -lgslcblas 
+
+LDFLAGS = 
+
+# use this command to erase files.
+RM = /bin/rm -f
+# list of generated object files.
+OBJS =  utility.o cycles.o buildcachematrix.o searchhill.o node_binomial.o node_gaussian.o node_poisson.o node_binomial_rv_inner.o fitabn_marginals.o mostprobable.o mobius.o node_binomial_rv.o node_binomial_marginals_rv.o fit_single_node.o node_gaussian_rv.o node_gaussian_rv_inner.o node_gaussian_marginals_rv.o node_poisson_rv.o node_poisson_rv_inner.o node_poisson_marginals_rv.o
+
+# program executable file name.
+PROG = a.out
+
+# top-level rule, to compile everything.
+all: $(PROG)
+
+# rule to link the program - NEW NOTE: $(LDFLAGS) must come last with gcc 4.4 onwards
+$(PROG): $(OBJS)
+	$(LD) $(OBJS) -o $(PROG) $(LDFLAGS)
+
+envDAG.o: envDAG.cpp envDAG.hpp
+	$(CC) $(CFLAGS) -c envDAG.cpp
+
+main.o: main.cpp 
+	$(CC) $(CFLAGS) -c main.cpp
+
+
+
+# rule for cleaning re-compilable files.
+clean:
+	$(RM) $(PROG) $(OBJS)
+
