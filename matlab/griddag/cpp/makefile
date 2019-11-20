@@ -10,7 +10,7 @@ CFLAGS = -std=c++17 -Wall -pedantic -O3
 # Linker flags go here. Currently there aren't any, but if we'll switch to
 #LDFLAGS = -shared  -L/home/fraser/lib -lgsl -lgslcblas 
 
-LDFLAGS = 
+LDFLAGS = -larmadillo
 
 # use this command to erase files.
 RM = /bin/rm -f
