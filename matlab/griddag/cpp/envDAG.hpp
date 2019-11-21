@@ -21,7 +21,10 @@ private:
     arma::umat nu; // prior precision for each node 
     arma::mat mu0; // prior mu0 for each node 
     arma::mat b; // this is the regression coefs for each node by each node
-    
+    arma::mat sigmainv; //
+
+    arma::mat priorPrec(const arma::umat nu, const arma::mat b); // Compute T = precision matrix in Wishart prior.
+                                                              // equation 5 and 6 in Geiger and Heckerman
 
 
 };

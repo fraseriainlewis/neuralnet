@@ -11,7 +11,7 @@ int main()
 
 std::cout << "Hello World!" << std::endl;
 
-envDAG env1(datafile, 31.0,29.0);
+envDAG env1(datafile, 6,6);
 
   auto myArea = env1.getAlpha_w();
   std::cout<<env1.getAlpha_w()<<std::endl;
