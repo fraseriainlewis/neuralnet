@@ -6,34 +6,20 @@ int main()
 {
   
   // example of testing for success
- std::string datafile = "n4m1000.csv";  
+ std::string datafile = "n4m1000.csv";// "test3.csv"; 
 
 
 std::cout << "Hello World!" << std::endl;
 
-envDAG env1(datafile, 6,6);
+envDAG env1(datafile, 30,30);
 
-  auto myArea = env1.getAlpha_w();
+ /* auto myArea = env1.getAlpha_w();
   std::cout<<env1.getAlpha_w()<<std::endl;
   std::cout<<myArea<<std::endl;
+*/
 
-envDAG env2(datafile, 31.0);
-
-  auto myArea2 = env2.getAlpha_w();
-  std::cout<<env2.getAlpha_w()<<std::endl;
-  std::cout<<myArea2<<std::endl;  
-
-  env1.PrintData();
-
-//D.save("test.txt",arma::arma_ascii);
-
-
-arma::mat A = arma::randu<arma::mat>(2,2);
-arma::mat B = arma::randu<arma::mat>(2,2);
-
-arma::mat K = arma::kron(A,B);
-
-arma::cout<<K;
+ // env1.PrintData();
+  env1.fitDAG();
 
 
   return 0;

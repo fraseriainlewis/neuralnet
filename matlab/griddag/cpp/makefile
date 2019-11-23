@@ -5,12 +5,12 @@ LD = clang++
 # Compiler flags go here.
 #CFLAGS = -I/home/fraser/R/lib64/R/include -I/home/fraser/include -Wall -pedantic -O3 -fPIC 
 
-CFLAGS = -std=c++17 -Wall -pedantic -O3 
+CFLAGS = -std=c++17 -Wall -pedantic -O3 -fopenmp
 
 # Linker flags go here. Currently there aren't any, but if we'll switch to
 #LDFLAGS = -shared  -L/home/fraser/lib -lgsl -lgslcblas 
 
-LDFLAGS = -larmadillo
+LDFLAGS = -larmadillo -lgsl
 
 # use this command to erase files.
 RM = /bin/rm -f
