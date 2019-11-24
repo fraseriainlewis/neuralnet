@@ -28,12 +28,17 @@ private:
     arma::mat b; // this is the regression coefs for each node by each node
     arma::mat T,R; //
     arma::umat dag0; // empty dag created in constructor
+    arma::uvec isactive, isactive_scratch,incomingedges;
+    arma::umat graph;//used as scratch in cycle
 
    void setT(void); // Compute T = precision matrix in Wishart prior.
    void setR(void);
    double pDln(const unsigned int l, const arma::uvec YY);
    double gammalnmult(const double l, const double xhalf);
-
+   bool hasCycle();
+   void get_numincomingedges();
+   /*bool cycle(unsigned int *dag, unsigned int *graph,unsigned int *isactive, unsigned int *isactive_scratch,unsigned int *incomingedges);
+*/
    
 
 

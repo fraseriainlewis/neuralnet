@@ -49,14 +49,19 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
     /** create and set empy dag **/
     dag0 = arma::zeros<arma::umat>(n,n);
  
+    isactive=arma::zeros<arma::uvec>(n);
+    isactive_scratch=arma::zeros<arma::uvec>(n);
+    incomingedges=arma::zeros<arma::uvec>(n);
+    graph=arma::zeros<arma::umat>(n,n);
+
     /*dag0(1-1,2-1)=1;dag0(1-1,3-1)=1;
     dag0(2-1,3-1)=1;dag0(2-1,4-1)=1;
     dag0(3-1,4-1)=1;
 */
 
-    dag0(1-1,2-1)=1; dag0(1-1,3-1)=1; dag0(1-1,4-1)=1;
+    /*dag0(1-1,2-1)=1; dag0(1-1,3-1)=1; dag0(1-1,4-1)=1;
     dag0(2-1,3-1)=1;
-    dag0(3-1,4-1)=1;
+    dag0(3-1,4-1)=1;*/
 
 }
 
@@ -127,18 +132,23 @@ void envDAG::setR(void){
 
 void envDAG::fitDAG(const arma::umat dag){
 
-arma::cout<<"this is fitdag"<<arma::endl<<" dag="<<dag<<arma::endl<<"lnscore="<<lnscore<<arma::endl;
+dag0=dag;//copy
+if(!envDAG::hasCycle()){
+	std::cout<<"no cycle :-)"<<std::endl;
+	envDAG::fitDAG();
+	} else {std::cout<<"has cycle!!!"<<std::endl;}
+
+
 
 
 }
 
 void envDAG::fitDAG(void){
 
-
 arma::uword nrow=dag0.n_rows; // n is dimension
 double totLogScore=0.0;    
 unsigned int i,j;
-arma::umat nodei;
+arma::umat nodei;//move this to private member? to allowpreallocation
 arma::uvec par_idx,YY;
 arma::uword npars=0;
 arma::uword l=0;
@@ -148,7 +158,7 @@ for(i=0;i<nrow;i++){
     // process node i
     nodei=dag0.row(i);
     //arma::cout<<"nodei="<<nodei<<arma::endl;
-    par_idx=find(nodei);//% indexes of parents of node i
+    par_idx=arma::find(nodei);//% indexes of parents of node i
     npars=par_idx.n_elem;
     //std::cout<<"num pars="<<npars<<std::endl;
     if(npars==0){ 
@@ -187,7 +197,8 @@ for(i=0;i<nrow;i++){
 
 lnscore = totLogScore;
 
-arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<dag0<<arma::endl<<"lnscore=" << std::setprecision(4) << std::scientific<<lnscore<<arma::endl;
+arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(4) << std::scientific<<lnscore<<arma::endl;
+//arma::cout<<arma::endl<<"lnscore=" << lnscore<<arma::endl;
 
 }
 
@@ -196,17 +207,28 @@ double envDAG::pDln(const unsigned int l, const arma::uvec YY)
  double term1,term2,term3,topGamma,botGamma,topdet,botdet;
 
  term1 = (l/2.0)*log(alpha_m/(N+alpha_m));
- //std::cout<<"pdln="<<(l/2.0)*log(alpha_m/(N+alpha_m))<<"alpha_m="<<alpha_m<<std::endl;
+ std::cout<<"pdln="<<(l/2.0)*log(alpha_m/(N+alpha_m))<<"alpha_m="<<alpha_m<<std::endl;
  
  topGamma=gammalnmult(l,(N+alpha_w-n+l)/2.0);
  botGamma=gammalnmult(l,(alpha_w-n+l)/2.0);
 
  term2 = topGamma-botGamma-(l*N/2)*log(M_PI);
 
+double val;
+double sign;
+log_det(val, sign, T(YY,YY)); 
 
-topdet = ((alpha_w-n+l)/2.0)*log(det(T(YY,YY)));
-botdet = ((N+alpha_w-n+l)/2.0)*log(det(R(YY,YY)));
+//topdet = ((alpha_w-n+l)/2.0)*log(det(T(YY,YY)));
+if(sign<0){std::cout<<"WARNING NEGATIVE TOPDET!!"<<std::endl;}
+topdet = ((alpha_w-n+l)/2.0)*val;
+
+log_det(val, sign, R(YY,YY)); 
+if(sign<0){std::cout<<"WARNING NEGATIVE BOTDET!!"<<std::endl;}
+botdet = ((N+alpha_w-n+l)/2.0)*val;
+//botdet = ((N+alpha_w-n+l)/2.0)*log(det(R(YY,YY)));
 term3 = topdet-botdet; 
+
+std::cout<<std::endl<<"term1="<<term1<<" term2="<<term2<<" term3="<<term3<<" topdet="<<det(T(YY,YY))<<" botdet="<<botdet<<std::endl;
 
 	return(term1+term2+term3);// the complete DAG score term
 }
@@ -227,5 +249,74 @@ double envDAG::gammalnmult(const double l, const double xhalf){
   return(myfactor+prod1);
 
 }
+
+
+/** *************************************************************************************************/
+/** v.small function but helps clarity in hascycle() */
+/** *************************************************************************************************/
+void envDAG::get_numincomingedges()
+{ /** count up how many parents each child has **/
+unsigned int i;
+
+arma::umat nodei;//move this to private member? to allowpreallocation
+arma::uvec par_idx;
+
+//arma::cout<<"graph="<<i<<arma::endl<<graph<<arma::endl;
+
+for(i=0;i<n;i++){/** for each child node */
+//std::cout<<"node="<<i<<std::endl;
+    nodei=graph.row(i);// get all possible parents vector
+  //  arma::cout<<"nodei="<<arma::endl<<nodei<<arma::endl;
+    par_idx=find(nodei);// find how many are actually parents - non zero entries
+    incomingedges(i)=par_idx.n_elem;// number of parents
+    //arma::cout<<"here=i "<<i<<arma::endl<<incomingedges<<" elem="<<par_idx.n_elem<<arma::endl;
+	}
+
+//arma::cout<<"incoming="<<arma::endl<<incomingedges<<arma::endl;
+
+}
+
+/* The computational routine for checking for cycles */
+bool envDAG::hasCycle()
+{
+    unsigned int i,j, nodesexamined,success;
+    isactive.ones();//reset to all 1
+    //arma::cout<<"isactive FIRST"<<arma::endl<<isactive<<arma::endl;
+    graph=dag0;// copy the current network definition into graph[][]
+    
+   /** calc number of incoming edges for each child  and put into incomingedges**/
+   envDAG::get_numincomingedges();
+   /** find a node with no incoming edges - see lecture11.pdf in ../articles folder **/
+nodesexamined=0;
+success=1;
+while(success){
+        success=0;
+	for(i=0;i<n;i++){
+    //arma::cout<<"node i"<<i<<arma::endl;
+        	  if(isactive(i) && !incomingedges(i)){/** if not yet examined and no incoming edges */
+                	isactive(i)=0; /** set this child to inactive*/
+                	//arma::cout<<"isactive="<<i<<arma::endl<<isactive<<arma::endl;
+                        /** remove all OUTGOING links from node i, e.g. wherever i is a parent */
+                	for(j=0;j<n;j++){graph(j,i)=0;}
+                    //std::cout<<std::endl<<"update graph"<<std::endl;
+                	envDAG::get_numincomingedges();
+           	        success=1; nodesexamined++;}
+           	        //std::cout<<"nodesexamined="<<nodesexamined<<std::endl;  
+			}
+           }
+        
+
+      if(nodesexamined==n){return(false);/*mexPrintf("no cycle");*//*return(0);*//** no cycle */                               
+      } else {/*Rprintf("=>%d %d\n",nodesexamined, numnodes);*/
+              return(true);
+              /*mexPrintf("yes cycle");*/} /** found a cycle */
+ 
+  
+
+    
+    
+}
+
+
 
 
