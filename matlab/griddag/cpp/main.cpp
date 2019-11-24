@@ -6,12 +6,12 @@ int main()
 {
   
   // example of testing for success
- std::string datafile = "n4m1000.csv";// "test3.csv"; 
+ std::string datafile = "n50m1000.csv";// "test3.csv"; 
 unsigned int i;
 
 std::cout << "Hello World!" << std::endl;
 
-envDAG env1(datafile, 30,30);
+envDAG env1(datafile, 100,100);
 
  /* auto myArea = env1.getAlpha_w();
   std::cout<<env1.getAlpha_w()<<std::endl;
@@ -31,12 +31,12 @@ dag0[42,1:20]=1;
 
 #endif
 
-arma::umat daga = arma::zeros<arma::umat>(4,4);
+arma::umat daga = arma::zeros<arma::umat>(50,50);
 
-daga(1-1,2-1)=1;daga(1-1,3-1)=1;
+/*daga(1-1,2-1)=1;daga(1-1,3-1)=1;
 daga(2-1,3-1)=1;daga(2-1,4-1)=1;
 daga(3-1,4-1)=1;
-
+*/
 
 /*daga(0,0)=0;daga(0,1)=1;daga(0,2)=1;daga(0,3)=1;
 daga(1,0)=0;daga(1,1)=0;daga(1,2)=0;daga(1,3)=0;
