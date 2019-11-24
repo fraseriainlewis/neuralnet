@@ -40,10 +40,10 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
     // % Compute T = precision matrix in Wishart prior.
     // %%%%%%% equation 5 and 6 in Geiger and Heckerman
     envDAG::setT();
-    arma::cout<<"T=\n"<<T<<arma::endl;
+    //arma::cout<<"T=\n"<<T<<arma::endl;
 
     envDAG::setR();
-    arma::cout<<"R=\n"<<R<<arma::endl;
+    //arma::cout<<"R=\n"<<R<<arma::endl;
     
 
     /** create and set empy dag **/
@@ -136,7 +136,9 @@ dag0=dag;//copy
 if(!envDAG::hasCycle()){
 	std::cout<<"no cycle :-)"<<std::endl;
 	envDAG::fitDAG();
-	} else {std::cout<<"has cycle!!!"<<std::endl;}
+	} else {arma::cout<<"has cycle!!!"<<arma::endl<<dag0<<arma::endl;
+            //exit(1);
+            }
 
 
 
@@ -162,18 +164,18 @@ for(i=0;i<nrow;i++){
     npars=par_idx.n_elem;
     //std::cout<<"num pars="<<npars<<std::endl;
     if(npars==0){ 
-      std::cout<<"no parents"<<std::endl;
+      //std::cout<<"no parents"<<std::endl;
       // we are done as p(d) = singleX/1.0
       l=npars+1;//l=dimension of d - note here npars=0 always, just so same line can be used below
       YY.set_size(l);
       YY(0)=i;
       //totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
-      std::cout<<"nodescore for node="<<i<<pDln(l,YY)<<"l="<<l<<"YY="<<YY<<std::endl;
+      //std::cout<<"nodescore for node="<<i<<pDln(l,YY)<<"l="<<l<<"YY="<<YY<<std::endl;
 
       totLogScore = totLogScore + pDln(l,YY);
 
      } else { // we have parents
-     	std::cout<<"parents"<<std::endl;
+     	//std::cout<<"parents"<<std::endl;
 
              l=npars+1;//l=dimension of d - note here npars=0 always, just so same line can be used below
              // we want to do matlab equivalent YY=[par_idx i], where par_idx is a vector - 
@@ -197,7 +199,7 @@ for(i=0;i<nrow;i++){
 
 lnscore = totLogScore;
 
-arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(4) << std::scientific<<lnscore<<arma::endl;
+arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<arma::endl;
 //arma::cout<<arma::endl<<"lnscore=" << lnscore<<arma::endl;
 
 }
@@ -207,7 +209,7 @@ double envDAG::pDln(const unsigned int l, const arma::uvec YY)
  double term1,term2,term3,topGamma,botGamma,topdet,botdet;
 
  term1 = (l/2.0)*log(alpha_m/(N+alpha_m));
- std::cout<<"pdln="<<(l/2.0)*log(alpha_m/(N+alpha_m))<<"alpha_m="<<alpha_m<<std::endl;
+ //std::cout<<"pdln="<<(l/2.0)*log(alpha_m/(N+alpha_m))<<"alpha_m="<<alpha_m<<std::endl;
  
  topGamma=gammalnmult(l,(N+alpha_w-n+l)/2.0);
  botGamma=gammalnmult(l,(alpha_w-n+l)/2.0);
@@ -228,7 +230,7 @@ botdet = ((N+alpha_w-n+l)/2.0)*val;
 //botdet = ((N+alpha_w-n+l)/2.0)*log(det(R(YY,YY)));
 term3 = topdet-botdet; 
 
-std::cout<<std::endl<<"term1="<<term1<<" term2="<<term2<<" term3="<<term3<<" topdet="<<det(T(YY,YY))<<" botdet="<<botdet<<std::endl;
+//std::cout<<std::endl<<"term1="<<term1<<" term2="<<term2<<" term3="<<term3<<" topdet="<<det(T(YY,YY))<<" botdet="<<botdet<<std::endl;
 
 	return(term1+term2+term3);// the complete DAG score term
 }

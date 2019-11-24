@@ -6,58 +6,85 @@ int main()
 {
   
   // example of testing for success
- std::string datafile = "n50m1000.csv";// "test3.csv"; 
+ std::string datafile = "n10m1000a.csv";// "test3.csv"; 
 unsigned int i;
 
-std::cout << "Hello World!" << std::endl;
+envDAG env1(datafile);// assumes priors=30|30, and empty dag alpha_w, alpha_m
+env1.fitDAG();
 
-envDAG env1(datafile, 100,100);
-
- /* auto myArea = env1.getAlpha_w();
-  std::cout<<env1.getAlpha_w()<<std::endl;
-  std::cout<<myArea<<std::endl;
-*/
-
- // env1.PrintData();
- // env1.fitDAG();
 #ifdef A
-dag0<-matrix(data=rep(0,n*n),ncol=n);
-dag0[1,1:4]=c(0,1,1,1)
-dag0[2,1:4]=c(0,0,0,0)
-dag0[3,1:4]=c(0,1,0,0)
-dag0[4,1:4]=c(0,0,1,0)
-dag0[20,42]=1;
-dag0[42,1:20]=1;
-
+       [,0] [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9]
+ [0,]    0    1    1    0    0    0    0    0    0     0
+ [1,]    0    0    1    1    0    0    0    0    0     0
+ [2,]    0    0    0    1    0    0    0    0    0     0
+ [3,]    0    0    0    0    0    0    0    0    0     0
+ [4,]    1    0    0    0    0    0    1    0    0     0
+ [5,]    0    0    0    0    0    0    0    1    0     0
+ [6,]    0    0    0    0    0    0    0    1    0     0
+ [7,]    1    0    0    0    0    0    0    0    0     0
+ [8,]    0    0    0    0    0    0    0    0    0     1
+ [9,]    0    0    0    0    1    1    0    0    0     0
 #endif
 
-arma::umat daga = arma::zeros<arma::umat>(50,50);
+arma::umat daga = { 
+    	{0,    1,    1,    0,    0,    0,    0,    0,    0,     0},
+    	{0,    0,    1,    1,    0,    0,    0,    0,    0,     0},
+     	{0,    0,    0,    1,    0,    0,    0,    0,    0,     0},
+     	{0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+     	{1,    0,    0,    0,    0,    0,    1,    0,    0,     0},
+    	{0,    0,    0,    0,    0,    0,    0,    1,    0,     0},
+    	{0,    0,    0,    0,    0,    0,    0,    1,    0,     0},
+     	{1,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+    	{0,    0,    0,    0,    0,    0,    0,    0,    0,     1},
+     	{0,    0,    0,    0,    1,    1,    0,    0,    0,     0}
+           };
 
-/*daga(1-1,2-1)=1;daga(1-1,3-1)=1;
-daga(2-1,3-1)=1;daga(2-1,4-1)=1;
-daga(3-1,4-1)=1;
-*/
+env1.fitDAG(daga);
 
-/*daga(0,0)=0;daga(0,1)=1;daga(0,2)=1;daga(0,3)=1;
-daga(1,0)=0;daga(1,1)=0;daga(1,2)=0;daga(1,3)=0;
-daga(2,0)=0;daga(2,1)=1;daga(2,2)=0;daga(2,3)=0;
-daga(3,0)=0;daga(3,1)=0;daga(3,2)=1;daga(3,3)=0;
-*/   
-//daga(19,41)=1;
-//for(i=0;i<20;i++){daga(41,i)=1;}
+// add cycle to check it croaks
+daga(1,8)=1;
+env1.fitDAG(daga);
 
-//arma::cout<<"daga="<<arma::endl<<daga<<arma::endl;
 
-  env1.fitDAG(daga);
+std::string datafile2 = "n10m1000b.csv";// "test3.csv"; 
 
-/*arma::mat A(5,5,arma::fill::randu);
+envDAG env2(datafile2,25,25);// assumes priors=25,25, and empty dag alpha_w, alpha_m
+env2.fitDAG();
 
-double val;
-double sign;
+#ifdef A
+[,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+ [1,]    0    1    1    0    0    0    0    0    0     0
+ [2,]    0    0    1    1    0    0    0    0    0     0
+ [3,]    0    0    0    1    0    0    0    0    0     0
+ [4,]    0    0    0    0    0    0    0    0    0     0
+ [5,]    1    0    0    0    0    0    1    0    0     0
+ [6,]    0    0    1    0    0    0    0    0    0     0
+ [7,]    0    0    1    0    0    0    0    0    0     0
+ [8,]    1    0    0    0    0    0    0    0    0     0
+ [9,]    0    0    0    1    0    0    0    0    0     0
+[10,]    0    1    0    0    0    0    0    0    0     0
+#endif 
 
-log_det(val, sign, A);
-arma::cout<<"val="<<val<<" sign="<<sign<<" logdet="<<det(A)<<arma::endl<<A;
-*/
+arma::umat dagb = { 
+    	{0,    1,    1,    0,    0,    0,    0,    0,    0,     0},
+    	{0,    0,    1,    1,    0,    0,    0,    0,    0,     0},
+     	{0,    0,    0,    1,    0,    0,    0,    0,    0,     0},
+     	{0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+     	{1,    0,    0,    0,    0,    0,    1,    0,    0,     0},
+    	{0,    0,    1,    0,    0,    0,    0,    0,    0,     0},
+    	{0,    0,    1,    0,    0,    0,    0,    0,    0,     0},
+     	{1,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+    	{0,    0,    0,    1,    0,    0,    0,    0,    0,     0},
+     	{0,    1,    0,    0,    0,    0,    0,    0,    0,     0}
+           };
+
+env2.fitDAG(dagb);
+ 
+// add cycle to check it croaks
+dagb(3,9)=1;
+env2.fitDAG(dagb);
+
+
 
 
 
