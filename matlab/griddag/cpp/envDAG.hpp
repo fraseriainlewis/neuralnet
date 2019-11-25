@@ -7,18 +7,18 @@ class envDAG {
     public:
     
     envDAG(const std::string datafile, const double alpha_w = 30, const double alpha_m = 30);
-   
-    double getAlpha_w(void) const; // the const keyword after the parameter list tells the compiler that this method won't modify the actual object
     
-    void PrintData(void) const;
+    //void PrintData(void) const;// the const keyword after the parameter list tells the compiler that this method won't modify the actual object
 
-    void fitDAG(const arma::umat dag);
+    //void fitDAG(const arma::umat dag);
 
     void fitDAG(void);
+    void resetDAG(const arma::umat dag);
+    bool hasCycle(const arma::umat dag);
 
 private:
     double alpha_w, alpha_m;
-    double lnscore = -std::numeric_limits<double>::max();
+    double lnscore = -std::numeric_limits<double>::max();//most negative number
     std::string datafile;
     arma::mat rwdata;
     arma::uword n;// variables
@@ -35,10 +35,8 @@ private:
    void setR(void);
    double pDln(const unsigned int l, const arma::uvec YY);
    double gammalnmult(const double l, const double xhalf);
-   bool hasCycle();
    void get_numincomingedges();
-   /*bool cycle(unsigned int *dag, unsigned int *graph,unsigned int *isactive, unsigned int *isactive_scratch,unsigned int *incomingedges);
-*/
+   
    
 
 

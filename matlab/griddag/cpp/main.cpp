@@ -7,7 +7,7 @@ int main()
   
   // example of testing for success
  std::string datafile = "n10m1000a.csv";// "test3.csv"; 
-unsigned int i;
+
 
 envDAG env1(datafile);// assumes priors=30|30, and empty dag alpha_w, alpha_m
 env1.fitDAG();
@@ -39,12 +39,16 @@ arma::umat daga = {
      	{0,    0,    0,    0,    1,    1,    0,    0,    0,     0}
            };
 
-env1.fitDAG(daga);
+env1.resetDAG(daga);
+if(env1.hasCycle(daga)){std::cout<<"CYCLE!!"<<std::endl;
+} else {env1.fitDAG();}
+
 
 // add cycle to check it croaks
 daga(1,8)=1;
-env1.fitDAG(daga);
-
+env1.resetDAG(daga);
+if(env1.hasCycle(daga)){std::cout<<"CYCLE!!"<<std::endl;
+} else {env1.fitDAG();}
 
 std::string datafile2 = "n10m1000b.csv";// "test3.csv"; 
 
@@ -78,11 +82,17 @@ arma::umat dagb = {
      	{0,    1,    0,    0,    0,    0,    0,    0,    0,     0}
            };
 
-env2.fitDAG(dagb);
+env2.resetDAG(dagb);
+if(env2.hasCycle(dagb)){std::cout<<"CYCLE!!"<<std::endl;
+} else {env2.fitDAG();}
+
  
 // add cycle to check it croaks
 dagb(3,9)=1;
-env2.fitDAG(dagb);
+env2.resetDAG(dagb);
+if(env2.hasCycle(dagb)){std::cout<<"CYCLE!!"<<std::endl;
+} else {env2.fitDAG();}
+
 
 
 
