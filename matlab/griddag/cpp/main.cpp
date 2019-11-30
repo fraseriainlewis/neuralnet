@@ -48,18 +48,19 @@ arma::umat daga = {
      	{0,    0,    0,    0,    1,    1,    0,    0,    0,     0}
            };
 
-arma::ivec posa = {9,9};// (x,y)
+arma::ivec posa = {2,1};// (x,y)
 
 env1.resetDAG(daga,posa);
-env1.step(3);// left
-env1.step(6);// right 
+env1.step(0);// no move add arc at 2,1
+
+/* env1.step(6);// right 
 env1.step(6);// right 
 env1.step(9);// up
 env1.step(6);// right 
 env1.step(6);// right
 env1.step(13);// down
 env1.step(13);// down
-
+*/
 /*if(env1.hasCycle(daga)){std::cout<<"CYCLE!!"<<std::endl;
 } else {env1.fitDAG();}
 

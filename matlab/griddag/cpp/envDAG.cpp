@@ -103,13 +103,13 @@ void envDAG::step(const unsigned int actidx){
 
 //arma::cout<<"current position (x,y) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
 // now update position on board - dag
-int pos_act=actions(actidx,0);// where do we move to
+int pos_act=actions(actidx,0);// position_action - where do we move to
 //std::cout<<"pos action passed="<<pos_act<<std::endl;
 
-int x=pos0(0);// (row,col) x coord 
-int y=pos0(1);// (row,col) y coord
+int r=pos0(0);// (row,col) row coord 
+int c=pos0(1);// (row,col) col coord
 
- dag_tmp=dag0;// keep a copy
+ dag_cp=dag0;// a copy - in case we need to revert back because move introduces a cycle
 
  //note origin is top left corner 0,0, so 1,2 is one row along and two rows down
  switch(pos_act) {
@@ -118,26 +118,26 @@ int y=pos0(1);// (row,col) y coord
             }
     case 1: { // left spatial move
             std::cout<<"left"<<std::endl; 
-    	    if(x==0){// at left edge so can't move any further left so do not update
-    	      } else {x--; }//decrement x coord 
+    	    if(c==0){// at left edge so can't move any further left so do not update
+    	      } else {c--; }//decrement x coord 
             break;
             }    
     case 2: { // right spatial move
             std::cout<<"right"<<std::endl;  
-    	    if(x==(n-1)){// at right edge so can't move any further right so do not update
-    	      } else {x++; }//increment x coord 
+    	    if(c==(n-1)){// at right edge so can't move any further right so do not update
+    	      } else {c++; }//increment x coord 
             break;
             }  
     case 3: { // up spatial move 
     	    std::cout<<"up"<<std::endl; 
-    	    if(y==0){// at top edge so can't move any further up so do not update
-    	      } else {y--; }//increment y coord 
+    	    if(r==0){// at top edge so can't move any further up so do not update
+    	      } else {r--; }//increment y coord 
             break;
             } 
     case 4: { // down spatial move 
     	    std::cout<<"down"<<std::endl; 
-    	    if(y==(n-1)){// at bottom edge so can't move any further down so do not update
-    	      } else {y++; }//increment y coord 
+    	    if(r==(n-1)){// at bottom edge so can't move any further down so do not update
+    	      } else {r++; }//increment y coord 
             break;
             } 
 
@@ -147,19 +147,40 @@ int y=pos0(1);// (row,col) y coord
              exit(1);
    } //end of switch
 
- if(x>=n || x<0 || y>=n || y<0){//boundary check 
+ if(r>=n || r<0 || c>=n || c<0){//boundary check 
                                std::cout<<"Boundary error - we have moved off the board!!"<<std::endl;
                                exit(-1);}
 
  //do updates of position
- pos0(0)=x;
- pos0(1)=y;
+ pos0(0)=r;
+ pos0(1)=c;
+
+ //
  
  
-int arc_act=actions(actidx,1);// do we add/nothing/remove arc 
+int arc_act=actions(actidx,1);// act action do we add/nothing/remove arc 
 
+	switch(arc_act){
+		case 0:{ // no arc change so do nothing
+            break;
+            }
+        case 1:{ // add an arc change at the current position from the first part of action above
+            dag0(r,c)=1; // at row r and col c 
+            break;
+            }
+        case -1:{ // remove an arc change at the current position from the first part of action above
+            dag0(r,c)=0; // at row r and col c 
+            break;
+        default: 
+             // should never get here!
+             std::cout << "switch arc_act ERROR!\n";
+             exit(1);       }
 
-arma::cout<<"new position (x,y) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
+	} 
+
+arma::cout<<"new position (r,c) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
+arma::cout<<"new dag="<<arma::endl<<dag0<<arma::endl;
+
 }
 
 

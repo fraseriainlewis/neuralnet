@@ -30,7 +30,7 @@ private:
     arma::mat b; // this is the regression coefs for each node by each node
     arma::mat T,R; //
     arma::umat dag0; // empty dag created in constructor
-    arma::umat dag_tmp;//copy of dag0
+    arma::umat dag_cp;//copy of dag0
     arma::ivec pos0 = arma::zeros<arma::ivec>(2);// allocate memory here as dimension is fixed - this is x,y coordination on DAG board
     arma::imat actions = arma::zeros<arma::imat>(15,2);// 15 actions - rows, each with 2 parts - cols
     arma::uvec isactive, isactive_scratch,incomingedges;
