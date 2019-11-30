@@ -56,11 +56,33 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
     envDAG::setR();// sets matrix R
     
     /********************/
-    /** 3. setup initial DAG and DAG related graph helpers
+    /** 3. setup initial DAG and DAG related graph helpers */
     
     /** create and set empy dag **/
     dag0 = arma::zeros<arma::umat>(n,n);// dag0 is always the current DAG 
+
     /** to specify a custom dag for testing could do it here, e.g. dag0(2,3)=1; etc **/ 
+    /** initialize position on board - here 0,0 top left corner */
+    arma::cout<<"pos="<<arma::endl<<envDAG::pos0<<arma::endl;
+
+    // set up actions 
+    #ifdef AA
+    actionLookup={            [0 1],[0 0],[0 -1],... % no spatial move 
+                              [1 1],[1 0],[1 -1],...             % left
+                              [2 1],[2 0],[2 -1],...             % right
+                              [3 1],[3 0],[3 -1],...             % up
+                              [4 1],[4 0],[4 -1]};
+    #endif
+    
+    /** actions are a matrix, each row is an action and the cols are the components of the action */
+    actions={ {0,1},{0,0},{0,-1}, // no spatial move, add,do nothing,remove arc
+              {1,1},{1,0},{1,-1}, // left
+              {2,1},{2,0},{2,-1}, // right
+              {3,1},{3,0},{3,-1}, // up
+              {4,1},{4,0},{4,-1}  // down
+             };
+
+    //arma::cout<<"actions="<<actions<<arma::endl;
 
     /** these below are setting up storage to help with cycle checking - fixed size to allocate once **/
     isactive=arma::zeros<arma::uvec>(n);
@@ -70,6 +92,76 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
 
 
 } //end of constructor
+
+
+/*****************************************************/
+/** METHODS: take a step **/
+/*****************************************************/
+void envDAG::step(const unsigned int actidx){
+ 
+//arma::cout<<"action passed is="<<actions.row(actidx)<<arma::endl;
+
+//arma::cout<<"current position (x,y) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
+// now update position on board - dag
+int pos_act=actions(actidx,0);// where do we move to
+//std::cout<<"pos action passed="<<pos_act<<std::endl;
+
+int x=pos0(0);// (row,col) x coord 
+int y=pos0(1);// (row,col) y coord
+
+ dag_tmp=dag0;// keep a copy
+
+ //note origin is top left corner 0,0, so 1,2 is one row along and two rows down
+ switch(pos_act) {
+    case 0: { // no spatial move do nothing
+            break;
+            }
+    case 1: { // left spatial move
+            std::cout<<"left"<<std::endl; 
+    	    if(x==0){// at left edge so can't move any further left so do not update
+    	      } else {x--; }//decrement x coord 
+            break;
+            }    
+    case 2: { // right spatial move
+            std::cout<<"right"<<std::endl;  
+    	    if(x==(n-1)){// at right edge so can't move any further right so do not update
+    	      } else {x++; }//increment x coord 
+            break;
+            }  
+    case 3: { // up spatial move 
+    	    std::cout<<"up"<<std::endl; 
+    	    if(y==0){// at top edge so can't move any further up so do not update
+    	      } else {y--; }//increment y coord 
+            break;
+            } 
+    case 4: { // down spatial move 
+    	    std::cout<<"down"<<std::endl; 
+    	    if(y==(n-1)){// at bottom edge so can't move any further down so do not update
+    	      } else {y++; }//increment y coord 
+            break;
+            } 
+
+    default: 
+             // should never get here!
+             std::cout << "switch pos_act ERROR!\n";
+             exit(1);
+   } //end of switch
+
+ if(x>=n || x<0 || y>=n || y<0){//boundary check 
+                               std::cout<<"Boundary error - we have moved off the board!!"<<std::endl;
+                               exit(-1);}
+
+ //do updates of position
+ pos0(0)=x;
+ pos0(1)=y;
+ 
+ 
+int arc_act=actions(actidx,1);// do we add/nothing/remove arc 
+
+
+arma::cout<<"new position (x,y) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
+}
+
 
 /*****************************************************/
 /** METHODS: preparation - computation of constants **/
@@ -178,11 +270,15 @@ while(success){
     
 }
 
+/*****************************************************/
+/*****************************************************/
 
-void envDAG::resetDAG(const arma::umat dag)
-{ // set current network definition
+void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
+{ // set network definition and board locationb
 
-	dag0=dag;// not checks yet - needed?
+	dag0=dag;// no checks yet - needed?
+    pos0=pos;// no checks
+    arma::cout<<"Reset position to="<<arma::endl<<pos0<<arma::endl<<"Reset DAG to="<<arma::endl<<dag0<<arma::endl;
 
 }
 
@@ -258,6 +354,7 @@ for(i=0;i<nrow;i++){
 lnscore = totLogScore;
 
 arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<arma::endl;
+
 //arma::cout<<arma::endl<<"lnscore=" << lnscore<<arma::endl;
 
 }
