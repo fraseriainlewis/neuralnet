@@ -110,10 +110,12 @@ int r=pos0(0);// (row,col) row coord
 int c=pos0(1);// (row,col) col coord
 
  dag_cp=dag0;// a copy - in case we need to revert back because move introduces a cycle
+ pos_cp=pos0;// a copy - in case we need to revert back because move introduces a cycle
 
  //note origin is top left corner 0,0, so 1,2 is one row along and two rows down
  switch(pos_act) {
     case 0: { // no spatial move do nothing
+    	    std::cout<<"no spatial move"<<std::endl; 
             break;
             }
     case 1: { // left spatial move
@@ -154,21 +156,22 @@ int c=pos0(1);// (row,col) col coord
  //do updates of position
  pos0(0)=r;
  pos0(1)=c;
-
- //
  
  
 int arc_act=actions(actidx,1);// act action do we add/nothing/remove arc 
 
 	switch(arc_act){
 		case 0:{ // no arc change so do nothing
+			std::cout<<"no arc move"<<std::endl; 
             break;
             }
         case 1:{ // add an arc change at the current position from the first part of action above
+            std::cout<<"add arc"<<std::endl;
             dag0(r,c)=1; // at row r and col c 
             break;
             }
         case -1:{ // remove an arc change at the current position from the first part of action above
+            std::cout<<"remove arc"<<std::endl;
             dag0(r,c)=0; // at row r and col c 
             break;
         default: 
@@ -180,6 +183,24 @@ int arc_act=actions(actidx,1);// act action do we add/nothing/remove arc
 
 arma::cout<<"new position (r,c) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
 arma::cout<<"new dag="<<arma::endl<<dag0<<arma::endl;
+
+
+/** now get the reward for the action - the network score **/
+if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;
+               //lnscore=-std::numeric_limits<double>::max();//most negative number
+               // revert to initial states
+               dag0=dag_cp;
+               pos0=pos_cp;
+               invalidAction=true;
+               
+} else {
+	std::cout<<"No CYCLE"<<std::endl;
+	fitDAG();//compute reward - lnscore
+    invalidAction=false;
+    }
+
+
+	std::cout<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<std::endl;
 
 }
 
@@ -254,13 +275,13 @@ void envDAG::setR(void){
 /*****************************************************/
 
 /* The computational routine for checking for cycles */
-bool envDAG::hasCycle(const arma::umat dag)
+bool envDAG::hasCycle()
 {   
 
     unsigned int i,j, nodesexamined,success;
     isactive.ones();//reset to all 1
     //arma::cout<<"isactive FIRST"<<arma::endl<<isactive<<arma::endl;
-    graph=dag;// copy the current network definition into graph[][]
+    graph=dag0;// copy the current network definition into graph[][]
     
    /** calc number of incoming edges for each child  and put into incomingedges**/
    envDAG::get_numincomingedges();
@@ -299,6 +320,8 @@ void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
 
 	dag0=dag;// no checks yet - needed?
     pos0=pos;// no checks
+    lnscore=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
+
     arma::cout<<"Reset position to="<<arma::endl<<pos0<<arma::endl<<"Reset DAG to="<<arma::endl<<dag0<<arma::endl;
 
 }

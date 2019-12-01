@@ -15,7 +15,7 @@ class envDAG {
    
     void resetDAG(const arma::umat dag, const arma::ivec pos);
     void step(const unsigned int actidx);// action index in actions matrix
-    bool hasCycle(const arma::umat dag);
+    bool hasCycle();
     void fitDAG(void);
 
 private:
@@ -32,9 +32,11 @@ private:
     arma::umat dag0; // empty dag created in constructor
     arma::umat dag_cp;//copy of dag0
     arma::ivec pos0 = arma::zeros<arma::ivec>(2);// allocate memory here as dimension is fixed - this is x,y coordination on DAG board
+    arma::ivec pos_cp;// copy of pos0
     arma::imat actions = arma::zeros<arma::imat>(15,2);// 15 actions - rows, each with 2 parts - cols
     arma::uvec isactive, isactive_scratch,incomingedges;
     arma::umat graph;//used as scratch in cycle
+    bool invalidAction=false;//if this is true then the action introduced a cycle 
 
    void setT(void); // Compute T = precision matrix in Wishart prior.
    void setR(void);

@@ -52,6 +52,12 @@ arma::ivec posa = {2,1};// (x,y)
 
 env1.resetDAG(daga,posa);
 env1.step(0);// no move add arc at 2,1
+env1.step(3);// left move and add arc at 2,0
+env1.step(7);// right move only 2,1
+env1.step(7);// right move only 2,2
+env1.step(7);// right move only 2,3
+env1.step(0);// add arc at 2,3
+env1.step(2);// remove arc at 2,3
 
 /* env1.step(6);// right 
 env1.step(6);// right 
@@ -103,15 +109,15 @@ arma::umat dagb = {
      	{0,    1,    0,    0,    0,    0,    0,    0,    0,     0}
            };
 
-/*arma::uvec posb = {9,2};
+arma::ivec posb = {9,2};
 
-env2.resetDAG(dagb,posb);
-if(env2.hasCycle(dagb)){std::cout<<"CYCLE!!"<<std::endl;
-} else {env2.fitDAG();}
+env1.resetDAG(dagb,posb);
+if(env1.hasCycle()){std::cout<<"CYCLE!!"<<std::endl;
+} else {env1.fitDAG();}
 
  
 // add cycle to check it croaks
-dagb(3,9)=1;
+/*dagb(3,9)=1;
 env2.resetDAG(dagb,posb);
 if(env2.hasCycle(dagb)){std::cout<<"CYCLE!!"<<std::endl;
 } else {env2.fitDAG();}
