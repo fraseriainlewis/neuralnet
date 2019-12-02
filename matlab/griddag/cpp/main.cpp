@@ -19,6 +19,7 @@ int main()
 envDAG env1(datafile);// assumes priors=30|30, and empty dag alpha_w, alpha_m
 
 
+
 //env1.fitDAG();
 
 #ifdef A
@@ -96,6 +97,7 @@ env2.fitDAG();
 [10,]    0    1    0    0    0    0    0    0    0     0
 #endif 
 
+/*
 arma::umat dagb = { 
     	{0,    1,    1,    0,    0,    0,    0,    0,    0,     0},
     	{0,    0,    1,    1,    0,    0,    0,    0,    0,     0},
@@ -108,13 +110,13 @@ arma::umat dagb = {
     	{0,    0,    0,    1,    0,    0,    0,    0,    0,     0},
      	{0,    1,    0,    0,    0,    0,    0,    0,    0,     0}
            };
-
-arma::ivec posb = {9,2};
+*/
+/*arma::ivec posb = {9,2};
 
 env1.resetDAG(dagb,posb);
 if(env1.hasCycle()){std::cout<<"CYCLE!!"<<std::endl;
 } else {env1.fitDAG();}
-
+*/
  
 // add cycle to check it croaks
 /*dagb(3,9)=1;

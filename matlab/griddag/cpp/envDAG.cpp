@@ -63,7 +63,16 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
 
     /** to specify a custom dag for testing could do it here, e.g. dag0(2,3)=1; etc **/ 
     /** initialize position on board - here 0,0 top left corner */
-    arma::cout<<"pos="<<arma::endl<<envDAG::pos0<<arma::endl;
+    // this is done pos0=(0,0) in envDAG.hpp as fixed length regarless of DAG n
+
+    //arma::cout<<"pos="<<arma::endl<<envDAG::pos0<<arma::endl;
+
+    /** set up unique ID for state - dag and position **/
+    s<<dag0<<pos0;
+    dagkey=s.str();
+    s.str(""); //clear out
+
+    arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
 
     // set up actions 
     #ifdef AA
@@ -186,21 +195,32 @@ arma::cout<<"new dag="<<arma::endl<<dag0<<arma::endl;
 
 
 /** now get the reward for the action - the network score **/
-if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;
+if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;//this checks for cycle in dag0
                //lnscore=-std::numeric_limits<double>::max();//most negative number
-               // revert to initial states
+               
+               invalidAction=true;
+               // revert to state prior to step() as action was invalid
                dag0=dag_cp;
                pos0=pos_cp;
-               invalidAction=true;
+               // dagstate was not updated yet so no need to revert, reward similar
+               arma::cout<<arma::endl<<"back to dagstate="<<arma::endl<<dagkey<<arma::endl;
                
 } else {
 	std::cout<<"No CYCLE"<<std::endl;
-	fitDAG();//compute reward - lnscore
+	  
     invalidAction=false;
+    //have already updated dag0 and pos0 for action
+    reward=fitDAG();//compute reward - set lnscore
+    //create new dagkey and update
+    s<<dag0<<pos0;
+    dagkey=s.str();
+    s.str(""); //always clear out afterwards
+    //arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
+    //std::cout<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<std::endl;
     }
 
-
-	std::cout<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<std::endl;
+// variables which are updated after step() are [dagstate, dag0, pos0, invalidAction, reward]
+	
 
 }
 
@@ -317,12 +337,19 @@ while(success){
 
 void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
 { // set network definition and board locationb
+  // note this does NOT fit the DAG, as a state machine and so want to take action which maxmimises future reward/chance of being in terminal state
+  // the lnscore of the current DAG does not inform this, since says conditional on current state look forward 
 
-	dag0=dag;// no checks yet - needed?
-    pos0=pos;// no checks
-    lnscore=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
+	dag0=dag;// set dag0 no checks yet - needed?
+  pos0=pos;// set pos0 - no checks
+  s<<dag0<<pos0; // set dagstate unique key
+  dagkey=s.str();
+  s.str(""); //clear out
+  //set default score
+  lnscore=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
 
-    arma::cout<<"Reset position to="<<arma::endl<<pos0<<arma::endl<<"Reset DAG to="<<arma::endl<<dag0<<arma::endl;
+  arma::cout<<"Reset state to="<<arma::endl<<dagkey<<arma::endl;
+       
 
 }
 
@@ -342,7 +369,7 @@ void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
 }
 #endif
 /*****************************************************/
-void envDAG::fitDAG(void){
+double envDAG::fitDAG(void){
 // compute network score using current member dag0 
 
 arma::uword nrow=dag0.n_rows; // n is dimension
@@ -390,14 +417,15 @@ for(i=0;i<nrow;i++){
          
          }
 
-
 } // end of for over nodes 
 
 
 
-lnscore = totLogScore;
+//lnscore = totLogScore;
 
-arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<arma::endl;
+return(totLogScore);
+
+//arma::cout<<"this is fitdag"<<arma::endl<<" dag0="<<arma::endl<<dag0<<arma::endl<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<arma::endl;
 
 //arma::cout<<arma::endl<<"lnscore=" << lnscore<<arma::endl;
 

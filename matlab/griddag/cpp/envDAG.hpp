@@ -1,3 +1,4 @@
+#include <sstream>
 #include <iostream>
 #include <armadillo>
 
@@ -16,11 +17,12 @@ class envDAG {
     void resetDAG(const arma::umat dag, const arma::ivec pos);
     void step(const unsigned int actidx);// action index in actions matrix
     bool hasCycle();
-    void fitDAG(void);
+    double fitDAG(void);
 
 private:
     double alpha_w, alpha_m;
-    double lnscore = -std::numeric_limits<double>::max();//most negative number
+    //double lnscore = -std::numeric_limits<double>::max();//most negative number
+    double reward;
     std::string datafile;
     arma::mat rwdata;
     arma::uword n;// variables
@@ -37,6 +39,9 @@ private:
     arma::uvec isactive, isactive_scratch,incomingedges;
     arma::umat graph;//used as scratch in cycle
     bool invalidAction=false;//if this is true then the action introduced a cycle 
+
+    std::ostringstream s;
+    std::string dagkey;// unique string key for storing in a hash, dagkey->lnscore
 
    void setT(void); // Compute T = precision matrix in Wishart prior.
    void setR(void);
