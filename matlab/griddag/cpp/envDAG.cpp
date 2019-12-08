@@ -12,7 +12,7 @@ designed to be the environment driven by an agent in RL learning
 
 #define DEBUG
 
-envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _alpha_m): alpha_w(_alpha_w), alpha_m(_alpha_m) { 
+envDAG::envDAG(const std::string datafile, const double _terminalTarget, const double _alpha_w, const double _alpha_m): terminalTarget(_terminalTarget), alpha_w(_alpha_w), alpha_m(_alpha_m) { 
     /** constructor
     @datafile = string of the filename which has the data against which each DAG is fitted. All columns are used, and in order provided
     @alpha_w > n-1 hyperparameter for the Wishart part of Normal-Wishart, n = dimension of DAG
@@ -70,9 +70,9 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
     /** set up unique ID for state - dag and position **/
     s<<dag0<<pos0;
     dagkey=s.str();
-    s.str(""); //clear out
+    s.str(""); //always clear out
 
-    arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
+    //arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
 
     // set up actions 
     #ifdef AA
@@ -109,7 +109,7 @@ envDAG::envDAG(const std::string datafile, const double _alpha_w, const double _
 void envDAG::step(const unsigned int actidx){
  
 //arma::cout<<"action passed is="<<actions.row(actidx)<<arma::endl;
-
+IsDone=false;
 //arma::cout<<"current position (x,y) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
 // now update position on board - dag
 int pos_act=actions(actidx,0);// position_action - where do we move to
@@ -124,29 +124,29 @@ int c=pos0(1);// (row,col) col coord
  //note origin is top left corner 0,0, so 1,2 is one row along and two rows down
  switch(pos_act) {
     case 0: { // no spatial move do nothing
-    	    std::cout<<"no spatial move"<<std::endl; 
+    	    //std::cout<<"no spatial move"<<std::endl; 
             break;
             }
     case 1: { // left spatial move
-            std::cout<<"left"<<std::endl; 
+            //std::cout<<"left"<<std::endl; 
     	    if(c==0){// at left edge so can't move any further left so do not update
     	      } else {c--; }//decrement x coord 
             break;
             }    
     case 2: { // right spatial move
-            std::cout<<"right"<<std::endl;  
+            //std::cout<<"right"<<std::endl;  
     	    if(c==(n-1)){// at right edge so can't move any further right so do not update
     	      } else {c++; }//increment x coord 
             break;
             }  
     case 3: { // up spatial move 
-    	    std::cout<<"up"<<std::endl; 
+    	    //std::cout<<"up"<<std::endl; 
     	    if(r==0){// at top edge so can't move any further up so do not update
     	      } else {r--; }//increment y coord 
             break;
             } 
     case 4: { // down spatial move 
-    	    std::cout<<"down"<<std::endl; 
+    	    //std::cout<<"down"<<std::endl; 
     	    if(r==(n-1)){// at bottom edge so can't move any further down so do not update
     	      } else {r++; }//increment y coord 
             break;
@@ -171,16 +171,16 @@ int arc_act=actions(actidx,1);// act action do we add/nothing/remove arc
 
 	switch(arc_act){
 		case 0:{ // no arc change so do nothing
-			std::cout<<"no arc move"<<std::endl; 
+			//std::cout<<"no arc move"<<std::endl; 
             break;
             }
         case 1:{ // add an arc change at the current position from the first part of action above
-            std::cout<<"add arc"<<std::endl;
+            //std::cout<<"add arc"<<std::endl;
             dag0(r,c)=1; // at row r and col c 
             break;
             }
         case -1:{ // remove an arc change at the current position from the first part of action above
-            std::cout<<"remove arc"<<std::endl;
+            //std::cout<<"remove arc"<<std::endl;
             dag0(r,c)=0; // at row r and col c 
             break;
         default: 
@@ -190,12 +190,12 @@ int arc_act=actions(actidx,1);// act action do we add/nothing/remove arc
 
 	} 
 
-arma::cout<<"new position (r,c) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
-arma::cout<<"new dag="<<arma::endl<<dag0<<arma::endl;
+//arma::cout<<"new position (r,c) is=("<<pos0(0)<<","<<pos0(1)<<")"<<arma::endl;
+//arma::cout<<"new dag="<<arma::endl<<dag0<<arma::endl;
 
 
 /** now get the reward for the action - the network score **/
-if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;//this checks for cycle in dag0
+if(hasCycle()){//std::cout<<"CYCLE!! - reversing action"<<std::endl;//this checks for cycle in dag0
                //lnscore=-std::numeric_limits<double>::max();//most negative number
                
                invalidAction=true;
@@ -203,10 +203,10 @@ if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;//this checks 
                dag0=dag_cp;
                pos0=pos_cp;
                // dagstate was not updated yet so no need to revert, reward similar
-               arma::cout<<arma::endl<<"back to dagstate="<<arma::endl<<dagkey<<arma::endl;
+               //arma::cout<<arma::endl<<"back to dagstate="<<arma::endl<<dagkey<<arma::endl;
                
 } else {
-	std::cout<<"No CYCLE"<<std::endl;
+	//std::cout<<"No CYCLE"<<std::endl;
 	  
     invalidAction=false;
     //have already updated dag0 and pos0 for action
@@ -215,6 +215,12 @@ if(hasCycle()){std::cout<<"CYCLE!! - reversing action"<<std::endl;//this checks 
     s<<dag0<<pos0;
     dagkey=s.str();
     s.str(""); //always clear out afterwards
+
+    if(reward>=terminalTarget){
+      // have reached success to stop period
+      IsDone = true;
+    }
+
     //arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
     //std::cout<<"lnscore=" << std::setprecision(6) << std::scientific<<lnscore<<std::endl;
     }
@@ -346,12 +352,34 @@ void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
   dagkey=s.str();
   s.str(""); //clear out
   //set default score
-  lnscore=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
+  reward=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
+ 
+  IsDone=false;
 
-  arma::cout<<"Reset state to="<<arma::endl<<dagkey<<arma::endl;
+  //arma::cout<<"Reset state to="<<arma::endl<<dagkey<<arma::endl;
        
 
 }
+
+
+/*****************************************************/
+/*****************************************************/
+
+double envDAG::getValue(std::string mykey)
+{
+ if(ValueMap.find(mykey)==ValueMap.end()){// no key found - state is not in value store so return zero
+   //std::cout<<"returning 0"<<std::endl;
+   return(0.0);
+ } else {
+         return(ValueMap[mykey]);// else return current value for this state
+
+        }
+
+}
+
+/*****************************************************/
+/*****************************************************/
+
 
 
 #ifdef old 

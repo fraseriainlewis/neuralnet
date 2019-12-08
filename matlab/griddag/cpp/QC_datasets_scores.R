@@ -55,6 +55,37 @@ print(DAGscore(n,myScore, t(dag1)))
 
 print(dag1)
 
+
+####
+library(bnlearn);
+a<-hc(x=as.data.frame(thedata),score="bge",iss.mu=30,iss.w=30,restart=0,perturb=0)
+
+# [V1][V4][V5][V6][V9][V2|V1:V4][V3|V1:V4][V7|V5][V10|V9][V8|V5:V6:V7] 
+dag2=dag0;
+dag2[2,c(1,4)]<-1
+dag2[3,c(1,4)]<-1
+dag2[7,c(5)]<-1
+dag2[8,c(5,6,7)]<-1
+dag2[10,c(9)]<-1
+#dag2[9,c(10)]<-1
+print(DAGscore(n,myScore, t(dag2)))
+#[1] -16396.77
+
+library(bnlearn);
+a<-hc(x=as.data.frame(thedata),score="bge",iss.mu=30,iss.w=30,restart=10000,perturb=10)
+
+# [V1][V4][V5][V6][V9][V2|V1:V4][V3|V1:V4][V7|V5][V10|V9][V8|V5:V6:V7] 
+dag2=dag0;
+dag2[2,c(1,4)]<-1
+dag2[3,c(1,4)]<-1
+dag2[7,c(5)]<-1
+dag2[8,c(5,6,7)]<-1
+dag2[10,c(8)]<-1
+dag2[9,c(10)]<-1
+print(DAGscore(n,myScore, t(dag2)))
+#[1] -16397.56
+
+
 # check for cycles
 library(abn)
 thedata2 <- thedata; colnames(thedata2)<-paste("v",1:10,sep="");
