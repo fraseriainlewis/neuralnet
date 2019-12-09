@@ -1,9 +1,13 @@
-%run dag_setup.m;
+run dag_setup.m;
 
-dag0=zeros(4,4);     
+dag0=zeros(4,4);  
+fitDAG(dag0,N,alpha_m,alpha_w,T,R)
+
 dag0(1,2:3)=1;
 dag0(2,3:4)=1;
 dag0(3,4)=1;
+
+%hasCycle=cycle(uint32(dag0),tmpDAG,tmpVec1,tmpVec2,tmpVec3)
 
 fitDAG(dag0,N,alpha_m,alpha_w,T,R)
 disp("should be -6616.118")

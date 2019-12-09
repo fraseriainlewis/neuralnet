@@ -9,7 +9,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#define Bb
+#define Aa
 
 template<typename K, typename V>
 void print_map(std::unordered_map<K,V> const &m)
@@ -36,7 +36,7 @@ std::string curDagKey;
 
 */
 // set file with observed data
-std::string datafile = "n10m1000a.csv";// "test3.csv"; 
+std::string datafile = "n4m1000.csv";// "test3.csv"; 
 
 // set up random number generator - for breaking ties and random starts
 long unsigned int seed=1000;
@@ -53,7 +53,7 @@ unsigned int greedyA;
 // reads in data and computes necessary constants for reward (ln network score) which are independent of DAG structure so can be pre-computed
 // based on observed data and prior. Default prior is alpha_w,alpha_m = 30|30. This also sets the dag, dag0 to empty dag and the position on the
 // gridworld is 0,0 top left cornder and creates a unique key for this state.
-envDAG env1(datafile, -1000.0);
+envDAG env1(datafile, -6470.0);
 
 
 std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;
@@ -116,12 +116,21 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-for(period=0;period<1000;period++){
+unsigned int numPeriods=1000;
 
-env1.resetDAG(dagnull,posnull);// reset start of period to null model
+arma::uvec stepcount(numPeriods);
+
+for(period=0;period<numPeriods;period++){
+std::cout<<"PERIOD="<<period<<std::endl;
+curDAG=dagnull;
+curPos=posnull;
+
+env1.resetDAG(curDAG,curPos);// reset start of period to null model
+//std::cout<<"initial reward="<<env1.fitDAG()<<"->"<<env1.reward<<"->"<<env1.IsDone<<std::endl;
+curDagKey=env1.dagkey;// copy current dagkey
 
 steps=1;
-while(!env1.IsDone && steps<=1000)
+while(!env1.IsDone && steps<=250)
 {
 
 // loop through each actions and take best
@@ -172,9 +181,13 @@ curDagKey=env1.dagkey;// copy current dagkey
 
 steps++;
 } // end of episode loop/while
+stepcount(period)=steps-1.0;
+
 
 } // end of period loop
+arma::cout<<"stepcounts"<<arma::endl<<stepcount<<arma::endl;
 
+#ifdef Aa
 arma::cout<<"final state="<<arma::endl<<env1.dagkey<<arma::endl;
 std::cout<<"final reward="<<env1.fitDAG()<<std::endl;
 
@@ -183,8 +196,11 @@ arma::cout<<"best DAG visited="<<bestdag<<arma::endl;
 
 //print_map(env1.ValueMap);
 std::cout<<"number of states stored="<<env1.ValueMap.size()<<std::endl;
+#endif
 
-/*std::ostringstream s;
+
+/*
+std::ostringstream s;
 for (auto const& pair: env1.ValueMap) {
         s << pair.first << "," << pair.second << std::endl;
     }

@@ -11,8 +11,13 @@ for i=1:nrow
       %disp("no parents")
       % we are done as p(d) = singleX/1.0
       YY=[i];
-      [tmp,l] = size(YY); % l=dimension of d
+      [tmp,l] = size(YY); % l=dimension of d 
+      %disp('l=')
+      %disp(l)
+      %disp('nodescore')
+      %disp(pDln(N,n,l,alpha_m,alpha_w,T,R,YY))
       totLogScore=totLogScore+pDln(N,n,l,alpha_m,alpha_w,T,R,YY);
+
     else 
       %disp("have parents")
       % if we have parents then we need to compute A/B, A = parents U node, B = parents

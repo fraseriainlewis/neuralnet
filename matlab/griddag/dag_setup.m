@@ -29,6 +29,35 @@ priorType=1;
 
 % raw data
 thedata = readmatrix(filename,'Delimiter',','); % the data
+
+% check with heckerman
+if false 
+	thedata=[
+-0.78 -1.55  0.11;
+ 0.18 -3.04 -2.35;
+ 1.87  1.04  0.48;
+-0.42  0.27 -0.68;
+ 1.23  1.52  0.31;
+ 0.51 -0.22 -0.6;
+ 0.44 -0.18  0.13;
+ 0.57 -1.82 -2.76;
+ 0.64  0.47  0.74;
+ 1.05  0.15  0.2;
+ 0.43  2.13  0.63;
+ 0.16 -0.94 -1.96;
+ 1.64  1.25  1.03;
+-0.52 -2.18 -2.31;
+-0.37 -1.30 -0.7;
+ 1.35  0.87  0.23;
+ 1.44 -0.83 -1.61;
+-0.55 -1.33 -1.67;
+ 0.79 -0.62 -2.00;
+ 0.53 -0.93 -2.92]
+
+end
+
+
+
 [nrow,ncol]=size(thedata); % get number of obs N, and number of variables n
 N=nrow;
 n=ncol;

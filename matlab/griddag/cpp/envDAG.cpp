@@ -217,8 +217,13 @@ if(hasCycle()){//std::cout<<"CYCLE!! - reversing action"<<std::endl;//this check
     s.str(""); //always clear out afterwards
 
     if(reward>=terminalTarget){
+
       // have reached success to stop period
+      //std::cout<<"stopping "<<reward<<" "<<terminalTarget<<std::endl;
+      reward=0;
       IsDone = true;
+    } else {
+             IsDone = false;
     }
 
     //arma::cout<<arma::endl<<"dagstate="<<arma::endl<<dagkey<<arma::endl;
