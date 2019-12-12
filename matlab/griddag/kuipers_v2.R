@@ -35,6 +35,15 @@ DAGscore(n,myScore, t(dag0))
 # -6.616118110322452e+03
 
 
+dag0<-matrix(data=rep(0,n*n),ncol=n);
+
+dag0[1,2:4]<-1
+dag0[2,c(3)]<-1
+dag0[3,c(4)]<-1
+
+DAGscore(n,myScore, t(dag0))
+## [1] -6560.843
+
 library(readr);
 write_csv(as.data.frame(thedata),"n4m1000.csv", col_names = FALSE);
 
@@ -86,7 +95,7 @@ write_csv(as.data.frame(thedata),"n5m1000.csv", col_names = FALSE);
 if(FALSE){
   ####### NETWORK WITH 6 NODES-------
   set.seed(100);
-  n<-6
+  n<-50
   Sigma <- matrix(rep(0,n*n),ncol=n);
   for(i in 1:n){Sigma[i,i]<-2;}
   
@@ -106,11 +115,18 @@ if(FALSE){
   
   thedata<-mvrnorm(n = 1000, mu=Means,Sigma=Sigma)
   
-  myScore<-scoreparameters(n,"bge",thedata,bgepar = list(aw=30,am=30))
+  myScore<-scoreparameters(n,"bge",thedata,bgepar = list(aw=100,am=100))
   
   dag0<-matrix(data=rep(0,n*n),ncol=n);
   
   DAGscore(n,myScore, t(dag0))
+  
+  setwd("/Users/fraser/myrepos/neuralnet/matlab/griddag/cpp");
+  library(readr);
+  write_csv(as.data.frame(thedata),"n50m1000.csv", col_names = FALSE);
+  
+  
+  
   dag0[1,c(2:3)]<-1
   dag0[2,c(3:5)]<-1
   dag0[3,c(4)]<-1
