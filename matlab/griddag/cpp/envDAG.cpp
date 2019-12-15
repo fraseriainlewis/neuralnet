@@ -9,6 +9,8 @@ designed to be the environment driven by an agent in RL learning
 #include <iomanip>
 #include <armadillo>
 #include <gsl/gsl_math.h>
+#include <random>
+#include <algorithm>
 
 #define DEBUG
 
@@ -346,26 +348,111 @@ while(success){
 /*****************************************************/
 /*****************************************************/
 
-void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos)
-{ // set network definition and board locationb
+void envDAG::resetDAG(const arma::umat dag, const arma::ivec pos, std::mt19937& rvengine, bool rv) {
+ // set network definition and board locationb
   // note this does NOT fit the DAG, as a state machine and so want to take action which maxmimises future reward/chance of being in terminal state
   // the lnscore of the current DAG does not inform this, since says conditional on current state look forward 
 
-	dag0=dag;// set dag0 no checks yet - needed?
-  pos0=pos;// set pos0 - no checks
-  s<<dag0<<pos0; // set dagstate unique key
-  dagkey=s.str();
-  s.str(""); //clear out
+  IsDone=false;
   //set default score
   reward=-std::numeric_limits<double>::max();//most negative number - to avoid mismatching score with current dag
- 
-  IsDone=false;
-
+  
+  
+  if(!rv){// do not reset with random DAG
+    dag0=dag;// set dag0 no checks yet - needed?
+    pos0=pos;// set pos0 - no checks
+   } else { // rv = true so generate a random DAG
+          // dagrng();// updates dag0
+           dagrng(rvengine);// sets dag0
+           posrng(rvengine);// sets pos0
+          }
+    
+    s<<dag0<<pos0; // set dagstate unique key
+    dagkey=s.str();
+    s.str(""); //clear out
+  
   //arma::cout<<"Reset state to="<<arma::endl<<dagkey<<arma::endl;
        
 
 }
 
+/*****************************************************/
+/*****************************************************/
+void envDAG::dagrng(std::mt19937& rvengine){
+ //std::cout<<"calling dagrng"<<std::endl;
+
+#ifdef matlab
+ // generate random DAG of dimension n
+ //1. generate random permutation of 1...n
+ //e.g. 2 1 3 5 4
+ //2. then randomly choose parents for each child node following the order
+
+ m=zeros(n,n);
+ ord=randperm(n); // e.g. 2 3 1 4
+
+ for i=2:n
+  // start i=2 since i=1 has no parents by construction
+  child=ord(i);% child node id e.g. 3
+  potPars=ord(1:(i-1)); // parent nodes (e.g. before 3 in sequence e.g. 2 )
+  // choose each parent in potParts with 0.5 prob
+  paridx=find(rand(1,i-1)>0.5); // this gives 0 1 0 0 1 etc., 1= make parent, 0 = not
+                                      // then chooses the id which are =1
+  actPars=potPars(paridx);  // this is the ids which are chosen to be parents of child id (child)
+  m(child,actPars)=1; // update dag - add to row child the cols which are parents
+
+end
+
+#endif 
+
+ // create empty dag which we will fill
+ arma::umat m= arma::zeros<arma::umat>(n,n);
+ // create a shuffle of the node ordering, e.g. 0 2 3 1
+ std::vector<unsigned int> orda(n);
+ unsigned int i;
+ for (i=0; i<n; i++) orda[i]=i; 
+ std::shuffle(orda.begin(), orda.end(), rvengine);
+ 
+ // copy into armadillo format for each ranges
+ arma::uvec ord = arma::conv_to< arma::uvec >::from(orda);
+ //arma::cout<<"random order="<<ord<<arma::endl;
+ std::uniform_real_distribution<double> distr(0.0, 1.0);// for U(0,1) sampling
+ arma::uvec potPars,actPars,child;
+ arma::vec I;
+ arma::uvec paridx;
+ 
+ // we now have a random ordering (indexes are zero-based) 
+ for(i=1;i<n;i++){ // start at 1 not 0 because the first node in the order has no parents by construction
+    child=ord(i);// current child node
+    potPars=ord.head(i);// grab all earlier nodes - e.g. i=1 grab first member, note 0-based to ord(i) is second member so this works.
+    I.set_size(i);// create vector to hold U(0,1)
+    I.imbue( [&]() { return distr(rvengine); } ); // fill vector with U(0,1) as way to randomly choose parents
+    paridx = find(I > 0.5);// so we get a vector of 0 1 0 1 etc where 1 = parent
+    
+    if(paridx.n_elem==0){ //no parents so skip to next iteration of loop 
+       // std::cout<<"skipping"<<std::endl;
+        continue;}
+    // to get here must have 1+ parents
+    actPars=potPars(paridx);  // this is the ids which are chosen to be parents of child id (child)
+    //arma::cout<<"U(0,1)="<<I<<" potPars"<<potPars<<" actPars="<<actPars<<arma::endl;
+    m(child,actPars)=arma::ones<arma::umat>(1,actPars.n_elem); 
+    //arma::cout<<"m="<<m<<arma::endl;
+ }
+
+   dag0=m;// copy into main DAG object 
+   //arma::cout<<arma::endl<<"starting DAG="<<dag0<<arma::endl;
+
+}  
+
+void envDAG::posrng(std::mt19937& rvengine){
+  //std::cout<<"calling posrng"<<std::endl;
+  // generate a random choice of position, x, and y, where these are in range 0,..,n-1
+  std::uniform_int_distribution<unsigned int> idistr(0, n-1);
+  //std::cout<<"random ints="<<idistr(rvengine)<<" "<<idistr(rvengine)<<std::endl;
+  pos0(0)=idistr(rvengine);
+  pos0(1)=idistr(rvengine);
+  //arma::cout<<"pos0="<<pos0<<arma::endl;
+
+} 
 
 /*****************************************************/
 /*****************************************************/

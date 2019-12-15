@@ -1,13 +1,12 @@
 #include "envDAG.hpp"
 #include <armadillo>
 #include <iostream>
+#include <iomanip>
 #include <random>
 #include <string>
 #include <unordered_map>
- 
+#include <ios>
 
-#include <iostream>
-#include <unordered_map>
 
 #define Aa
 
@@ -20,10 +19,12 @@ void print_map(std::unordered_map<K,V> const &m)
 }
 
 
-
 int main()
 {
   
+std::ios oldState(nullptr);
+oldState.copyfmt(std::cout);
+
 unsigned int i;
 double best_value;
 arma::umat curDAG;
@@ -36,11 +37,11 @@ std::string curDagKey;
 
 */
 // set file with observed data
-std::string datafile = "n10m1000a.csv";// "test3.csv"; 
+std::string datafile = "n20m1000.csv";// "test3.csv"; 
 
 // set up random number generator - for breaking ties and random starts
-long unsigned int seed=1000;
-std::mt19937 engine(seed);  // Mersenne twister random number engine
+long unsigned int seed=100000; // good as get = -16396.9
+std::mt19937 rvengine(seed);  // Mersenne twister random number engine
 std::uniform_real_distribution<double> distr(0.0, 1.0);//call using distr(engine) to get U(0,1) variate
 
 //std::cout<<"random U(0,1)="<<distr(engine)<<" and another "<<distr(engine)<<std::endl;
@@ -53,10 +54,9 @@ unsigned int greedyA;
 // reads in data and computes necessary constants for reward (ln network score) which are independent of DAG structure so can be pre-computed
 // based on observed data and prior. Default prior is alpha_w,alpha_m = 30|30. This also sets the dag, dag0 to empty dag and the position on the
 // gridworld is 0,0 top left cornder and creates a unique key for this state.
-envDAG env1(datafile, -16600.0);
+envDAG env1(datafile, 0);//-6470.0);
 
-
-std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;
+std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;//exit(1);
 
 #ifdef A
         0        0        1        1        0        0        0        0        0        0
@@ -87,7 +87,7 @@ arma::umat daga = {
 
 arma::ivec posa = {0,0};// (x,y)
 
-env1.resetDAG(daga,posa);
+env1.resetDAG(daga,posa,rvengine);
 std::cout<<"my reward="<<env1.fitDAG()<<std::endl;
 arma::cout<<env1.dag0<<arma::endl;
 exit(1);
@@ -116,7 +116,7 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-unsigned int numPeriods=250000;
+unsigned int numPeriods=1000;
 
 arma::uvec stepcount(numPeriods);
 
@@ -125,21 +125,24 @@ std::cout<<"PERIOD="<<period<<" ";
 curDAG=dagnull;
 curPos=posnull;
 
-env1.resetDAG(curDAG,curPos);// reset start of period to null model
+env1.resetDAG(curDAG,curPos,rvengine,false);// reset start of period to null model
+//if(env1.hasCycle()){std::cout<<"ERROR - random dag has a cycle!"<<std::endl; exit(1);}
 //std::cout<<"initial reward="<<env1.fitDAG()<<"->"<<env1.reward<<"->"<<env1.IsDone<<std::endl;
+//std::cout<<"new pos0="<<env1.pos0(0)<<" "<<env1.pos0(1)<<std::endl;
 curDagKey=env1.dagkey;// copy current dagkey
 //std::cout<<"start score="<<env1.fitDAG()<<std::endl;
 
 
 steps=1;
-while(!env1.IsDone && steps<=500)
+while(!env1.IsDone && steps<=250)
 {
+//if(steps%10000==0){std::cout<<"step="<<steps<<std::endl;}
 
 // loop through each actions and take best
 best_value=-std::numeric_limits<double>::max();//worst possible reward
 
 for(i=0;i<15;i++){
-  env1.resetDAG(curDAG,curPos);//reset back to current state including dagkey
+  env1.resetDAG(curDAG,curPos,rvengine);//reset back to current state including dagkey
   env1.step(i);// take action i 
 
   if(env1.invalidAction){continue;} // got a bad action, e.g. cycle created so skip to next iteration
@@ -157,7 +160,7 @@ for(i=0;i<15;i++){
               greedyA = i; // store best action
 
          } else {
-                  if(curQ==best_value && distr(engine)>0.5){// action is same as current best action so a tie, break randomly if U(0,1)>0.5
+                  if(curQ==best_value && distr(rvengine)>0.5){// action is same as current best action so a tie, break randomly if U(0,1)>0.5
                       best_value = curQ;
                       //if (env1.ValueMap.find(curDagKey) != env1.ValueMap.end()){std::cout<<"UPDATING EXISTING VALUE!"<<std::endl;} 
                       env1.ValueMap[curDagKey] = curQ; // update value function for just this CURRENT state
@@ -169,10 +172,16 @@ for(i=0;i<15;i++){
 }
 
 //std::cout<<"best action="<<greedyA<<std::endl<<" reward="<<env1.reward<<std::endl;
-env1.resetDAG(curDAG,curPos);// resets IsDone to false
+env1.resetDAG(curDAG,curPos,rvengine);// resets IsDone to false
 env1.step(greedyA);// take best action i and update current state to this - this might set IsDone to true and terminate episode
 
-if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;}
+if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;
+  std::cout.precision(5);
+  
+                            std::cout<<"best DAG score="<<std::scientific<<bestscore<<std::endl;
+  std::cout.copyfmt(oldState);//restore formats
+
+                          }
 
 //std::cout<<"current reward="<<env1.fitDAG()<<std::endl;
 // now copy the current state and repeat action search
@@ -184,7 +193,9 @@ curDagKey=env1.dagkey;// copy current dagkey
 steps++;
 } // end of episode loop/while
 stepcount(period)=steps-1.0;
-arma::cout<<"   steps="<<steps-1.0<<arma::endl;
+arma::cout<<"\t\tsteps="<<steps-1.0<<" "<<std::endl;
+
+//std::cout<<"\tmean="<<sum(stepcount.head(period+1))/(period+1.0)<<std::endl;
 
 } // end of period loop
 //arma::cout<<"stepcounts"<<arma::endl<<stepcount<<arma::endl;
@@ -201,19 +212,19 @@ std::cout<<"number of states stored="<<env1.ValueMap.size()<<std::endl;
 #endif
 
 
-/*
-std::ostringstream s;
+
+/*std::ostringstream s;
 for (auto const& pair: env1.ValueMap) {
         s << pair.first << "," << pair.second << std::endl;
     }
-
-std::cout<<std::endl<<s.str();
-
+*/
+//std::cout<<std::endl<<s.str();
+/*
     std::ofstream out("output.txt");
     out << s.str();
     out.close();
-*/
 
+*/
 
 
   return 0;

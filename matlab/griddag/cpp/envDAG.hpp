@@ -3,6 +3,7 @@
 #include <armadillo>
 #include <string>
 #include <unordered_map>
+#include <random>
 
 class envDAG {
     
@@ -16,7 +17,7 @@ class envDAG {
     //void fitDAG(const arma::umat dag);
     double getValue(std::string);
    
-    void resetDAG(const arma::umat dag, const arma::ivec pos);
+    void resetDAG(const arma::umat dag, const arma::ivec pos, std::mt19937& rvengine, bool rv = false);
     void step(const unsigned int actidx);// action index in actions matrix
     bool hasCycle();
     double fitDAG(void);
@@ -28,9 +29,10 @@ class envDAG {
     double reward;
     std::unordered_map<std::string, double> ValueMap;
     bool IsDone = false; // set to true if we find a score >= terminalTarget
- arma::uword n;// variables
+    arma::uword n;// num variables - dimension of DAGs
+
 private:
-    double terminalTarget, alpha_w, alpha_m ;
+    double terminalTarget, alpha_w, alpha_m;
     //double lnscore = -std::numeric_limits<double>::max();//most negative number
     
     std::string datafile;
@@ -57,7 +59,8 @@ private:
    double pDln(const unsigned int l, const arma::uvec YY);
    double gammalnmult(const double l, const double xhalf);
    void get_numincomingedges();
-   
+   void dagrng(std::mt19937& rvengine);
+   void posrng(std::mt19937& rvengine);
    
 
 
