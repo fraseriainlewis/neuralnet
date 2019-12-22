@@ -12,7 +12,7 @@ designed to be the environment driven by an agent in RL learning
 #include <random>
 #include <algorithm>
 
-#define DEBUG
+#define Customprior2
 
 envDAG::envDAG(const std::string datafile, const double _terminalTarget, const double _alpha_w, const double _alpha_m): terminalTarget(_terminalTarget), alpha_w(_alpha_w), alpha_m(_alpha_m) { 
     /** constructor
@@ -45,10 +45,37 @@ envDAG::envDAG(const std::string datafile, const double _terminalTarget, const d
     mu0(0,0) = 0.1;
     mu0(0,1) = -0.3;
     mu0(0,2) = 0.2;
-  
     b(0,2)=1;
-    b(1,2)=1;              
+    b(1,2)=1;   
     #endif
+
+    #ifdef Customprior1
+    b(0,1)=1;// node 1 (start at node 0)
+    b(1,2)=1;// node 2
+    b(2,3)=1;// node 3...
+    b(3,4)=1;
+    b(4,5)=1;
+    b(5,6)=1;
+    b(6,7)=1;
+    b(7,8)=1;
+    b(8,9)=1;// node 9 
+
+    #endif
+
+
+    #ifdef Customprior2
+    b(1-1,2-1)=1;// node 2  using -1 everywhere as copy from matlab but here is 0-based indexing
+    b(1-1,4-1)=1; //node 4...
+    b(3-1,6-1)=1;b(4-1,6-1)=1;
+    b(6-1,7-1)=1;
+    b(4-1,10-1)=1;b(6-1,10-1)=1;b(7-1,10-1)=1;// node 10
+    b(11-1,13-1)=1;b(12-1,13-1)=1;
+    b(2-1,15-1)=1;
+    b(10-1,18-1)=1;
+    b(11-1,20-1)=1;b(19-1,20-1)=1;
+
+    #endif
+
 
     // Compute T = prior precision matrix in Wishart prior.
     // See function defn for explanation 
@@ -271,6 +298,8 @@ void envDAG::setT(void){
  
  sigmainv=w2;// prior precision matrix for Wishart
 
+// arma::cout<<"prior covar check="<<arma::endl<<inv(sigmainv)<<arma::endl;
+
  //We need precision matrix T which defines the prior Wishart distribution. 
  //Basic method: Equation 20 in 2002 defines the covariance of X as a function of (T^prime)^-1 we know the cov of X, it's just inv(sigmainv) from Equation 5. 
  //so we have the left hand side of Equation 20. Now equation 19 gives us an expression for T^prime = RHS, and so (T^prime)^-1 is just the inverse of the RHS of equation 19
@@ -278,6 +307,8 @@ void envDAG::setT(void){
  //re-arranging gives T = inv(sigmainv)/sigmaFactor as below. Lots of faff but easy enough.   
  double sigmaFactor = (alpha_m+1)/(alpha_m*(alpha_w-n-1));
  T =inv(sigmainv)/sigmaFactor; // this matches the T0 matrix values given in 1994 Heckerman - so works ok
+
+// arma::cout<<arma::endl<<"T0="<<T<<arma::endl;;
 
 }
 

@@ -9,6 +9,7 @@
 
 
 #define Aa
+#define Bb
 
 template<typename K, typename V>
 void print_map(std::unordered_map<K,V> const &m)
@@ -37,7 +38,7 @@ std::string curDagKey;
 
 */
 // set file with observed data
-std::string datafile = "n20m1000.csv";// "test3.csv"; 
+std::string datafile = "n20m10000a.csv";// "test3.csv"; //n20m10000a.csv  n10Chainm10000.csv
 
 // set up random number generator - for breaking ties and random starts
 long unsigned int seed=100000; // good as get = -16396.9
@@ -58,6 +59,9 @@ envDAG env1(datafile, 0);//-6470.0);
 
 std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;//exit(1);
 
+
+//exit(1);
+
 #ifdef A
         0        0        1        1        0        0        0        0        0        0
         1        0        0        1        0        0        0        0        0        0
@@ -72,23 +76,52 @@ std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;//exit(1);
 
 #endif
 #ifdef B
+
+
+/** chain DAG 
 arma::umat daga = { 
-      {0,    0,    1,    1,    0,    0,    0,    0,    0,     0},
-      {1,    0,    0,    1,    0,    0,    0,    0,    0,     0},
+      {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+      {1,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+      {0,    1,    0,    0,    0,    0,    0,    0,    0,     0},
+      {0,    0,    1,    0,    0,    0,    0,    0,    0,     0},
       {0,    0,    0,    1,    0,    0,    0,    0,    0,     0},
-      {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
-      {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
+      {0,    0,    0,    0,    1,    0,    0,    0,    0,     0},
+      {0,    0,    0,    0,    0,    1,    0,    0,    0,     0},
+      {0,    0,    0,    0,    0,    0,    1,    0,    0,     0},
       {0,    0,    0,    0,    0,    0,    0,    1,    0,     0},
-      {1,    0,    0,    0,    1,    1,    0,    1,    0,     0},
-      {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
-      {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
-      {1,    0,    0,    0,    0,    0,    0,    0,    1,     0}
+      {0,    0,    0,    0,    0,    0,    0,    0,    1,     0}
            };
+*/
+// [a1][a2|a1][a3][a4|a1][a5][a6|a4:a3][a7|a6][a8][a9][a10|a4:a6:a7][a11][a12][a13|a11:a12][a14][a15|a2][a16][a17][a18|a10][a19][a20|a11:a19]
+// my reward - fixed known DAG =-283208 - with customprior1
+arma::umat daga = { 
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0}
+
+};
 
 arma::ivec posa = {0,0};// (x,y)
 
 env1.resetDAG(daga,posa,rvengine);
-std::cout<<"my reward="<<env1.fitDAG()<<std::endl;
+std::cout<<"my reward - fixed known DAG ="<<env1.fitDAG()<<std::endl;
 arma::cout<<env1.dag0<<arma::endl;
 exit(1);
 #endif
@@ -116,7 +149,7 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-unsigned int numPeriods=1000;
+unsigned int numPeriods=5000;
 
 arma::uvec stepcount(numPeriods);
 
@@ -205,7 +238,7 @@ arma::cout<<"final state="<<arma::endl<<env1.dagkey<<arma::endl;
 std::cout<<"final reward="<<env1.fitDAG()<<std::endl;
 
 std::cout<<"best score visited="<<bestscore<<std::endl;
-arma::cout<<"best DAG visited="<<bestdag<<arma::endl;
+arma::cout<<"best DAG visited="<<arma::endl<<bestdag<<arma::endl;
 
 //print_map(env1.ValueMap);
 std::cout<<"number of states stored="<<env1.ValueMap.size()<<std::endl;
