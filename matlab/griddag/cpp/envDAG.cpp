@@ -12,7 +12,7 @@ designed to be the environment driven by an agent in RL learning
 #include <random>
 #include <algorithm>
 
-#define Customprior2
+#define Customprior3
 
 envDAG::envDAG(const std::string datafile, const double _terminalTarget, const double _alpha_w, const double _alpha_m): terminalTarget(_terminalTarget), alpha_w(_alpha_w), alpha_m(_alpha_m) { 
     /** constructor
@@ -76,6 +76,16 @@ envDAG::envDAG(const std::string datafile, const double _terminalTarget, const d
 
     #endif
 
+		#ifdef Customprior3
+		b(3-1,20-1)=1;b(16-1,20-1)=1;// node 20...
+		b(14-1,19-1)=1;b(17-1,19-1)=1;// node 19...
+		b(13-1,16-1)=1;// node 16...
+		b(5-1,13-1)=1;b(6-1,13-1)=1;// node 13
+		b(6-1,12-1)=1;
+		b(9-1,11-1)=1;
+		b(4-1,5-1)=1;
+		b(2-1,3-1)=1;
+		#endif
 
     // Compute T = prior precision matrix in Wishart prior.
     // See function defn for explanation 

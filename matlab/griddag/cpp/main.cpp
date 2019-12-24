@@ -9,7 +9,7 @@
 
 
 #define Aa
-#define Bb
+#define globalcheck31 // needs Customprior1 set
 
 template<typename K, typename V>
 void print_map(std::unordered_map<K,V> const &m)
@@ -38,10 +38,10 @@ std::string curDagKey;
 
 */
 // set file with observed data
-std::string datafile = "n20m10000a.csv";// "test3.csv"; //n20m10000a.csv  n10Chainm10000.csv
+std::string datafile = "n20m10000b.csv";// "test3.csv"; //n20m10000a.csv  n10Chainm10000.csv
 
 // set up random number generator - for breaking ties and random starts
-long unsigned int seed=100000; // good as get = -16396.9
+long unsigned int seed=100001; // 100001 is good for N20 option a, 100000 good as get = -16396.9
 std::mt19937 rvengine(seed);  // Mersenne twister random number engine
 std::uniform_real_distribution<double> distr(0.0, 1.0);//call using distr(engine) to get U(0,1) variate
 
@@ -59,26 +59,12 @@ envDAG env1(datafile, 0);//-6470.0);
 
 std::cout<<"initial reward="<<env1.fitDAG()<<std::endl;//exit(1);
 
+#ifdef globalcheck1
 
-//exit(1);
-
-#ifdef A
-        0        0        1        1        0        0        0        0        0        0
-        1        0        0        1        0        0        0        0        0        0
-        0        0        0        1        0        0        0        0        0        0
-        0        0        0        0        0        0        0        0        0        0
-        0        0        0        0        0        0        0        0        0        0
-        0        0        0        0        0        0        0        1        0        0
-        1        0        0        0        1        1        0        1        0        0
-        0        0        0        0        0        0        0        0        0        0
-        0        0        0        0        0        0        0        0        0        0
-        1        0        0        0        0        0        0        0        1        0
-
-#endif
-#ifdef B
-
-
-/** chain DAG 
+/** chain DAG **/
+ // [a1][a2|a1][a3|a2][a4|a3][a5|a4][a6|a5][a7|a6][a8|a7][a9|a8][a10|a9]
+ // my reward - fixed known DAG = -141885 with customprior1
+ 
 arma::umat daga = { 
       {0,    0,    0,    0,    0,    0,    0,    0,    0,     0},
       {1,    0,    0,    0,    0,    0,    0,    0,    0,     0},
@@ -91,9 +77,19 @@ arma::umat daga = {
       {0,    0,    0,    0,    0,    0,    0,    1,    0,     0},
       {0,    0,    0,    0,    0,    0,    0,    0,    1,     0}
            };
-*/
+
+arma::ivec posa = {0,0};// (x,y)
+
+env1.resetDAG(daga,posa,rvengine);
+std::cout<<"my reward - check DAG1 ="<<env1.fitDAG()<<std::endl;
+arma::cout<<env1.dag0<<arma::endl;
+exit(1);
+
+#endif 
+
+#ifdef globalcheck2
 // [a1][a2|a1][a3][a4|a1][a5][a6|a4:a3][a7|a6][a8][a9][a10|a4:a6:a7][a11][a12][a13|a11:a12][a14][a15|a2][a16][a17][a18|a10][a19][a20|a11:a19]
-// my reward - fixed known DAG =-283208 - with customprior1
+// my reward - fixed known DAG =-283207 - with customprior2
 arma::umat daga = { 
       {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -115,13 +111,48 @@ arma::umat daga = {
       {0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0},
       {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
       {0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0}
-
 };
 
 arma::ivec posa = {0,0};// (x,y)
 
 env1.resetDAG(daga,posa,rvengine);
-std::cout<<"my reward - fixed known DAG ="<<env1.fitDAG()<<std::endl;
+std::cout<<"my reward - check DAG2 ="<<env1.fitDAG()<<std::endl;
+arma::cout<<env1.dag0<<arma::endl;
+exit(1);
+
+#endif 
+ 
+#ifdef globalcheck3 
+// [a1][a2][a3|a2][a4][a5|a4][a6][a7][a8][a9][a10][a11|a9][a12|a6][a13|a5:a6][a14][a15][a16|a13][a17]
+//  [a18][a19|a14:a17][a20|a3:a16]
+// my reward - fixed known DAG =-283197 - with customprior3
+arma::umat daga = { 
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      {0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0},
+      {0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0}
+};
+
+arma::ivec posa = {0,0};// (x,y)
+
+env1.resetDAG(daga,posa,rvengine);
+std::cout<<"my reward - check DAG3 ="<<env1.fitDAG()<<std::endl;
 arma::cout<<env1.dag0<<arma::endl;
 exit(1);
 #endif
@@ -149,9 +180,10 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-unsigned int numPeriods=5000;
+unsigned int numPeriods=30000;
 
 arma::uvec stepcount(numPeriods);
+bool timetostop=false;// extra hack to stop early
 
 for(period=0;period<numPeriods;period++){
 std::cout<<"PERIOD="<<period<<" ";
@@ -167,7 +199,7 @@ curDagKey=env1.dagkey;// copy current dagkey
 
 
 steps=1;
-while(!env1.IsDone && steps<=250)
+while(!env1.IsDone && steps<=400 && !timetostop)
 {
 //if(steps%10000==0){std::cout<<"step="<<steps<<std::endl;}
 
@@ -213,7 +245,13 @@ if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;
   
                             std::cout<<"best DAG score="<<std::scientific<<bestscore<<std::endl;
   std::cout.copyfmt(oldState);//restore formats
-
+ 
+ /* if(bestscore> -283209){std::cout<<"reached best scores so stop!"<<std::endl;
+	                timetostop=true;
+ } */
+  if(bestscore> -283197-1){std::cout<<"reached best score so stop!"<<std::endl;
+	                timetostop=true;
+			}
                           }
 
 //std::cout<<"current reward="<<env1.fitDAG()<<std::endl;
@@ -229,7 +267,8 @@ stepcount(period)=steps-1.0;
 arma::cout<<"\t\tsteps="<<steps-1.0<<" "<<std::endl;
 
 //std::cout<<"\tmean="<<sum(stepcount.head(period+1))/(period+1.0)<<std::endl;
-
+if(timetostop){std::cout<<"breaking early out of period loop"<<std::endl;
+	       break;}
 } // end of period loop
 //arma::cout<<"stepcounts"<<arma::endl<<stepcount<<arma::endl;
 
