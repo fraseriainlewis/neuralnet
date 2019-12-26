@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <ios>
-
+#include <sstream>
 
 #define Aa
 #define globalcheck31 // needs Customprior1 set
@@ -27,10 +27,12 @@ std::ios oldState(nullptr);
 oldState.copyfmt(std::cout);
 
 unsigned int i;
-double best_value;
+double best_value,best_score_period;
 arma::umat curDAG;
 arma::ivec curPos;
 std::string curDagKey;
+std::string str;          // The string
+std::stringstream temp;  // 'temp' as in temporary
 /* basic operations are: 
    1. setup env - pre-compute as much as possible
    2. reset env to given state - this is a dag and position on board
@@ -180,15 +182,19 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-unsigned int numPeriods=30000;
+unsigned int numPeriods=100;
 
 arma::uvec stepcount(numPeriods);
 bool timetostop=false;// extra hack to stop early
+
+//arma::mat bestscores=arma::zeros<arma::mat>(numPeriods);
 
 for(period=0;period<numPeriods;period++){
 std::cout<<"PERIOD="<<period<<" ";
 curDAG=dagnull;
 curPos=posnull;
+
+best_score_period=-std::numeric_limits<double>::max();//worst possible score - reset in each period
 
 env1.resetDAG(curDAG,curPos,rvengine,false);// reset start of period to null model
 //if(env1.hasCycle()){std::cout<<"ERROR - random dag has a cycle!"<<std::endl; exit(1);}
@@ -241,6 +247,9 @@ env1.resetDAG(curDAG,curPos,rvengine);// resets IsDone to false
 env1.step(greedyA);// take best action i and update current state to this - this might set IsDone to true and terminate episode
 
 if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;
+  //std::stringstream().swap(temp);//clear
+   temp <<period<<","<<bestscore<<std::endl; 
+        
   std::cout.precision(5);
   
                             std::cout<<"best DAG score="<<std::scientific<<bestscore<<std::endl;
@@ -254,6 +263,9 @@ if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;
 			}
                           }
 
+ if(env1.fitDAG()>best_score_period){best_score_period=env1.fitDAG();} // store the best score found during this period
+
+
 //std::cout<<"current reward="<<env1.fitDAG()<<std::endl;
 // now copy the current state and repeat action search
 curDAG=env1.dag0; // copy - this is not efficient - fix later as no need to recreate memory
@@ -266,11 +278,20 @@ steps++;
 stepcount(period)=steps-1.0;
 arma::cout<<"\t\tsteps="<<steps-1.0<<" "<<std::endl;
 
+//periodscore_vec(period)=best_score_period;//save best score found in period into vector
+
 //std::cout<<"\tmean="<<sum(stepcount.head(period+1))/(period+1.0)<<std::endl;
 if(timetostop){std::cout<<"breaking early out of period loop"<<std::endl;
 	       break;}
+
 } // end of period loop
 //arma::cout<<"stepcounts"<<arma::endl<<stepcount<<arma::endl;
+str = temp.str();
+std::ofstream out("output.txt");
+    out << str;
+    out.close();
+
+//periodscore_vec.save("bestscoreperiods.csv", arma::csv_ascii); 
 
 #ifdef Aa
 arma::cout<<"final state="<<arma::endl<<env1.dagkey<<arma::endl;
