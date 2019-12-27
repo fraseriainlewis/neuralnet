@@ -12,7 +12,7 @@ designed to be the environment driven by an agent in RL learning
 #include <random>
 #include <algorithm>
 
-#define Customprior3
+#define Customprior2
 
 envDAG::envDAG(const std::string datafile, const double _terminalTarget, const double _alpha_w, const double _alpha_m): terminalTarget(_terminalTarget), alpha_w(_alpha_w), alpha_m(_alpha_m) { 
     /** constructor

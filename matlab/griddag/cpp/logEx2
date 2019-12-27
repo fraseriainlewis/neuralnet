@@ -1,0 +1,146 @@
+initial reward=-355204
+First State=
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0        0
+        0
+        0
+
+PERIOD=0 best DAG score=-3.51763e+05
+best DAG score=-3.49655e+05
+best DAG score=-3.48208e+05
+best DAG score=-3.46799e+05
+best DAG score=-3.43425e+05
+best DAG score=-3.35350e+05
+best DAG score=-3.25382e+05
+best DAG score=-3.22194e+05
+best DAG score=-3.21864e+05
+best DAG score=-3.21772e+05
+best DAG score=-3.21768e+05
+best DAG score=-3.12788e+05
+best DAG score=-3.10404e+05
+best DAG score=-3.08353e+05
+best DAG score=-3.04933e+05
+best DAG score=-3.04340e+05
+best DAG score=-3.04044e+05
+best DAG score=-3.02898e+05
+best DAG score=-3.02895e+05
+best DAG score=-3.02891e+05
+best DAG score=-3.02727e+05
+best DAG score=-2.99264e+05
+best DAG score=-2.98817e+05
+best DAG score=-2.97409e+05
+best DAG score=-2.91949e+05
+best DAG score=-2.91853e+05
+best DAG score=-2.91853e+05
+best DAG score=-2.91849e+05
+		steps=400 
+PERIOD=1 		steps=400 
+PERIOD=2 		steps=400 
+PERIOD=3 		steps=400 
+PERIOD=4 		steps=400 
+PERIOD=5 		steps=400 
+PERIOD=6 best DAG score=-2.91778e+05
+		steps=400 
+PERIOD=7 		steps=400 
+PERIOD=8 best DAG score=-2.91760e+05
+		steps=400 
+PERIOD=9 		steps=400 
+PERIOD=10 		steps=400 
+PERIOD=11 		steps=400 
+PERIOD=12 best DAG score=-2.91547e+05
+best DAG score=-2.91255e+05
+best DAG score=-2.91046e+05
+best DAG score=-2.91042e+05
+best DAG score=-2.89588e+05
+		steps=400 
+PERIOD=13 best DAG score=-2.88727e+05
+		steps=400 
+PERIOD=14 		steps=400 
+PERIOD=15 best DAG score=-2.86654e+05
+		steps=400 
+PERIOD=16 		steps=400 
+PERIOD=17 		steps=400 
+PERIOD=18 		steps=400 
+PERIOD=19 best DAG score=-2.86252e+05
+best DAG score=-2.86248e+05
+best DAG score=-2.86244e+05
+best DAG score=-2.86242e+05
+		steps=400 
+PERIOD=20 		steps=400 
+PERIOD=21 best DAG score=-2.86090e+05
+best DAG score=-2.86087e+05
+		steps=400 
+PERIOD=22 		steps=400 
+PERIOD=23 		steps=400 
+PERIOD=24 		steps=400 
+PERIOD=25 		steps=400 
+PERIOD=26 		steps=400 
+PERIOD=27 		steps=400 
+PERIOD=28 		steps=400 
+PERIOD=29 		steps=400 
+PERIOD=30 		steps=400 
+PERIOD=31 		steps=400 
+PERIOD=32 		steps=400 
+PERIOD=33 		steps=400 
+PERIOD=34 		steps=400 
+PERIOD=35 		steps=400 
+PERIOD=36 		steps=400 
+PERIOD=37 		steps=400 
+PERIOD=38 		steps=400 
+PERIOD=39 		steps=400 
+PERIOD=40 		steps=400 
+PERIOD=41 		steps=400 
+PERIOD=42 		steps=400 
+PERIOD=43 		steps=400 
+PERIOD=44 		steps=400 
+PERIOD=45 		steps=400 
+PERIOD=46 		steps=400 
+PERIOD=47 		steps=400 
+PERIOD=48 best DAG score=-2.85222e+05
+best DAG score=-2.85218e+05
+best DAG score=-2.85215e+05
+		steps=400 
+PERIOD=49 		steps=400 
+PERIOD=50 		steps=400 
+PERIOD=51 		steps=400 
+PERIOD=52 		steps=400 
+PERIOD=53 		steps=400 
+PERIOD=54 		steps=400 
+PERIOD=55 		steps=400 
+PERIOD=56 		steps=400 
+PERIOD=57 		steps=400 
+PERIOD=58 		steps=400 
+PERIOD=59 		steps=400 
+PERIOD=60 		steps=400 
+PERIOD=61 		steps=400 
+PERIOD=62 		steps=400 
+PERIOD=63 		steps=400 
+PERIOD=64 		steps=400 
+PERIOD=65 		steps=400 
+PERIOD=66 		steps=400 
+PERIOD=67 		steps=400 
+PERIOD=68 		steps=400 
+PERIOD=69 		steps=400 
+PERIOD=70 		steps=400 
+PERIOD=71 		steps=400 
+PERIOD=72 		steps=400 
+PERIOD=73 		steps=400 
+PERIOD=74 		steps=400 

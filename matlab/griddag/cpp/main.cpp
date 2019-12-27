@@ -9,7 +9,7 @@
 #include <sstream>
 
 #define Aa
-#define globalcheck31 // needs Customprior1 set
+#define globalcheck21 // needs sCustomprior1 set
 
 template<typename K, typename V>
 void print_map(std::unordered_map<K,V> const &m)
@@ -40,7 +40,7 @@ std::stringstream temp;  // 'temp' as in temporary
 
 */
 // set file with observed data
-std::string datafile = "n20m10000b.csv";// "test3.csv"; //n20m10000a.csv  n10Chainm10000.csv
+std::string datafile = "n20m10000a.csv";// "test3.csv"; //n20m10000a.csv  n10Chainm10000.csv
 
 // set up random number generator - for breaking ties and random starts
 long unsigned int seed=100001; // 100001 is good for N20 option a, 100000 good as get = -16396.9
@@ -49,7 +49,7 @@ std::uniform_real_distribution<double> distr(0.0, 1.0);//call using distr(engine
 
 //std::cout<<"random U(0,1)="<<distr(engine)<<" and another "<<distr(engine)<<std::endl;
 
-double discount = 0.9;// discounting for value function
+double discount = 0.9;// 0.9 discounting for value function
 double curQ;
 unsigned int greedyA;
 
@@ -182,7 +182,7 @@ unsigned int period;
 arma::umat dagnull=arma::zeros<arma::umat>(env1.n,env1.n);
 arma::ivec posnull = {0,0};// (x,y)
 
-unsigned int numPeriods=100;
+unsigned int numPeriods=20000;
 
 arma::uvec stepcount(numPeriods);
 bool timetostop=false;// extra hack to stop early
@@ -258,7 +258,7 @@ if(env1.fitDAG()>bestscore){bestscore=env1.fitDAG();bestdag=env1.dag0;
  /* if(bestscore> -283209){std::cout<<"reached best scores so stop!"<<std::endl;
 	                timetostop=true;
  } */
-  if(bestscore> -283197-1){std::cout<<"reached best score so stop!"<<std::endl;
+  if(bestscore> -283207-1){std::cout<<"reached best score so stop!"<<std::endl;
 	                timetostop=true;
 			}
                           }

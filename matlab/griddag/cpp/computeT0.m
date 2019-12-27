@@ -2,7 +2,7 @@
 clear all;
 %cd '/Users/fraser/myrepos/neuralnet/matlab/griddag/cpp'
 %cd '/home/lewisfa/myrepos/neuralnet/matlab/griddag/cpp'
-cd '/files/myrepos/neuralnet/matlab/griddag/cpp'
+%cd '/files/myrepos/neuralnet/matlab/griddag/cpp'
 % imaginary sample sizes
 alpha_w = 30;
 alpha_m = 30;
@@ -105,15 +105,19 @@ T
 
 % - EXAMPLE 3 ----------------------------------------------------------
 
-n=20;
+n=30;
 if (alpha_w< n)
   disp("----------- error!!! alpha_w is too small -------------")
 end;
 % prior variance - equal 1 for simplicity
 nu  = ones(1,n);
+nu(1,20)=100;
+nu(1,19)=10;
+nu(1,3)=50;
 % prior unconditional means - equal 0 for simplicity
 mu0 = zeros(1,n);
 
+%mu0(1,10:25)=1.5;
 %% reg coefs - format is b(1,1)=0 by construction, as first node in order. b(1,2) is first coef (1) for second node (2), can only have one parent
 %%                                                  b(1,3), b(2,3) are first and second coefs for third node, can only have two parents etc
 b=zeros(n,n);
@@ -127,15 +131,16 @@ b(6,12)=1;
 b(9,11)=1;
 b(4,5)=1;
 b(2,3)=1;
-
-
+b(25,30)=1;
+b(1,30)=1;
+b(13,30)=1;
 % get the precision matrix for the MVN which is equivalent to Graph, invert to get covariance matrix
 sigmainv=priorPrec(nu,b);
 
 %writematrix(inv(sigmainv),'covarN20b.csv');
 %writematrix(mu0,'meansN20b.csv');
-csvwrite('covarN20b.csv',inv(sigmainv))
-csvwrite('meansN20b.csv',mu0)
+csvwrite('covarN30b.csv',inv(sigmainv))
+csvwrite('meansN30b.csv',mu0)
 
 
 % Compute T = precision matrix in Wishart prior.
