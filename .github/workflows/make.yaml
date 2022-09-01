@@ -1,0 +1,35 @@
+on:
+  push:
+  pull_request:
+
+name: make
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install libmlpack-dev
+        run: sudo apt-get install libmlpack-dev
+
+      - name: Install libensmallen-dev
+        run: sudo apt-get install libensmallen-dev
+
+      - name: Compile example 1
+        run: g++ linReg_ex1.cpp -o linReg_ex1 -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp -Wall
+
+      - name: Run example 1
+        run: ./linReg_ex1
+
+      - name: Compile example 2
+        run: g++ ffn_ex2_bin.cpp -o ffn_ex2_bin -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp -Wall
+
+      - name: Run example 2
+        run: ./ffn_ex2_bin
+
+      - name: Compile example 3
+        run: g++ ffn_ex3_cv_bin.cpp -o ffn_ex3_cv_bin -std=c++11 -lboost_serialization -larmadillo -lmlpack -fopenmp -Wall
+
+      - name: Run example 3
+        run: ./ffn_ex3_cv_bin
